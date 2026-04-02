@@ -1,8 +1,8 @@
 # 🤖 Persona Builder
 
-> Build an AI Persona (`skill.md`) for Vibe-Coding using a 6-dimension deep personality analysis framework.
+> Create an AI Persona (`skill.md`) for Vibe-Coding using a 6-dimension deep personality analysis framework.
 
-**🌐 Live:** [persona.autobahnn.bot](https://persona.autobahnn.bot)
+**🌐 Live:** [persona.autobahn.bot](https://persona.autobahn.bot)
 
 ---
 
@@ -10,139 +10,98 @@
 
 | Feature | Description |
 |---------|-------------|
-| **Multi-language** | Full TH 🇹🇭, EN 🇬🇧, DE 🇩🇪 support across UI, wizard, and AI output |
-| **6-Dimension Analysis** | Worldview, Perception, Agency, Taste, Persuasion, Guardrails |
-| **Clone Mode** | Reverse-engineer *your own* personality into an AI persona |
-| **Agent Mode** | Design a purpose-built AI Agent from scratch |
-| **Writing Samples** | Paste real text from Facebook, LinkedIn, etc. for style matching |
-| **Cloudflare AI** | Powered by Llama 3.1 8B Instruct (free-tier), with automatic fallback |
-| **Before vs After** | Instant comparison showing how a generic sentence transforms with the persona |
-| **Download & Copy** | Export the generated `skill.md` with one click |
+| **Multi-language** | Full support for Thai 🇹🇭, English 🇬🇧, and German 🇩🇪 across the UI and AI output. |
+| **6-Dimension Analysis** | Worldview, Perception, Agency, Taste, Persuasion, and Guardrails logic. |
+| **Clone Mode** | Reverse-engineer your own voice/personality into an AI ruleset. |
+| **Agent Mode** | Design an expert AI Agent with specific strategic boundaries from scratch. |
+| **Writing Samples** | Calibrate the AI's tone using real text snippets from social media or blogs. |
+| **Cloudflare AI** | High-performance generation powered by **Llama 3.1 8B Instruct** via Cloudflare Workers AI. |
+| **GitHub Actions** | Automated CI/CD for deployments to Cloudflare Pages and versioned releases. |
+| **skill.md Export** | Instant download or copy of the generated ruleset for use in Vibe-Coding tools. |
 
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | React 19 + Vite 6 |
-| Styling | Tailwind CSS v4 (via `@tailwindcss/vite`) |
-| Icons | Lucide React |
-| Localization | Custom lightweight dictionary-based i18n (`src/lib/i18n.js`) |
-| AI Model | Cloudflare Workers AI — `@cf/meta/llama-3.1-8b-instruct` (fallback: `llama-3-8b-instruct`) |
-| Hosting | Cloudflare Pages |
-| API Proxy | Cloudflare Pages Functions (`functions/api/generate.js`) |
-| Persistence | `localStorage` for language preference |
+| **Framework** | React 19 + Vite 6 |
+| **Styling** | Tailwind CSS v4 |
+| **Icons** | Lucide React |
+| **AI Generation** | Cloudflare Workers AI (`@cf/meta/llama-3.1-8b-instruct`) |
+| **Serverless** | Cloudflare Pages Functions (API Proxy) |
+| **CI/CD** | GitHub Actions |
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### Local Development
 
-- Node.js 18+
-- npm (or pnpm)
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/bejranonda/PersonaBuilder.git
+    cd PersonaBuilder
+    ```
 
-### Install & Run (Client Only)
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-```bash
-npm install
-npm run dev          # Vite dev server at http://localhost:5173
-```
+3.  **Set up environment variables**:
+    Create a `.dev.vars` file for local proxy testing:
+    ```bash
+    CLOUDFLARE_ACCOUNT_ID=your_account_id
+    CLOUDFLARE_API_TOKEN=your_api_token
+    ```
 
-> ⚠️ AI generation requires the Cloudflare Functions proxy. Use `pages:dev` for the full experience.
-
-### Run with Cloudflare Functions Proxy
-
-```bash
-# 1. Create .dev.vars with your credentials
-#    CLOUDFLARE_API_TOKEN=cfut_...
-#    CLOUDFLARE_ACCOUNT_ID=69...
-
-# 2. Start with wrangler
-npm run pages:dev
-```
+4.  **Run the application**:
+    - **Frontend Only**: `npm run dev` (Vite dev server)
+    - **Full Stack (Recommended)**: `npm run pages:dev` (Wrangler proxy dev)
 
 ### Production Build
 
 ```bash
-npm run build        # Output → dist/
-npm run preview      # Preview locally
+npm run build
+npm run preview
 ```
 
-## ☁️ Deployment (Cloudflare Pages)
+## ☁️ Deployment (CI/CD)
 
-### 1. Connect Repository
+The project includes pre-configured **GitHub Actions** for seamless deployment:
 
-Link this GitHub repo to Cloudflare Pages:
-- **Build command:** `npm run build`
-- **Output directory:** `dist`
-- **Node version:** 18+
+### 1. Cloudflare Pages Deployment
+Pushing to the `master` branch triggers `.github/workflows/deploy.yml`. It builds the app and deploys it to Cloudflare Pages automatically.
 
-### 2. Set Environment Variables
+**Required Secrets:**
+- `CLOUDFLARE_API_TOKEN`: API token with "Cloudflare Pages Edit" permission.
+- `CLOUDFLARE_ACCOUNT_ID`: Your Cloudflare account ID.
 
-In Cloudflare Pages → Settings → Environment Variables:
+### 2. Automatic Releases
+Pushing a tag (e.g., `git push origin v1.0.1`) triggers `.github/workflows/release.yml`, which creates a new GitHub Release with automated notes.
 
-| Variable | Value | Required |
-|----------|-------|----------|
-| `CLOUDFLARE_API_TOKEN` | Your Cloudflare API token | ✅ |
-| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID | ✅ |
-
-### 3. Custom Domain
-
-Configure `persona.autobahnn.bot` in Cloudflare Pages → Custom Domains.
-
-## 📐 Architecture
-
-```
-persona-builder/
-├── index.html                  # Vite HTML entry point
-├── package.json                # Dependencies & scripts
-├── vite.config.js              # Vite + Tailwind + React plugins
-│
-├── src/
-│   ├── main.jsx                # React DOM root
-│   ├── index.css               # Tailwind imports + custom animations
-│   ├── App.jsx                 # Main app — wizard UI, language toggle, result view
-│   ├── data/
-│   │   └── questionFlow.js     # 6-dimension question trees (TH/EN/DE) + PLATFORMS
-│   └── lib/
-│       ├── api.js              # Retry-capable fetch client for /api/generate
-│       └── i18n.js             # DICTIONARY object (TH/EN/DE UI strings)
-│
-├── functions/
-│   └── api/
-│       └── generate.js         # Cloudflare Pages Function — proxies Workers AI
-│
-├── knowledge/
-│   ├── approach_and_method.md  # Design rationale & framework explanation
-│   ├── guideline.md            # Developer guide for extending the app
-│   └── known-issues.md         # Tracked bugs & workarounds
-│
-└── .gitignore                  # Excludes .env, .dev.vars, research/, dist/
-```
-
-## 🔄 How It Works
+## 📐 Architecture & Logic
 
 ```mermaid
 flowchart LR
-    A[User picks Clone/Agent] --> B[6 Questions Wizard]
-    B --> C[Writing Samples]
-    C --> D[Build Prompt]
-    D --> E[POST /api/generate]
-    E --> F[Cloudflare Workers AI<br/>Llama 3.1 8B]
-    F --> G[Parse Response]
-    G --> H[skill.md + Before vs After]
+    User([User]) --> UI[React Frontend]
+    UI --> Wiz[6-Dim Wizard]
+    Wiz --> Proxy[CF Pages Function]
+    Proxy --> AI[Cloudflare Workers AI<br/>Llama 3.1 8B]
+    AI --> Res[skill.md Generator]
+    Res --> UI
 ```
 
-1. **Step 1** — Choose Clone (mimic yourself) or Agent (design from scratch)
-2. **Step 2** — Answer one question per dimension (6 total, branching tree)
-3. **Step 3** — Paste writing samples for style calibration (optional but recommended)
-4. **Step 4** — AI generates `skill.md` + a Before vs After comparison example
+- **Frontend**: A state-driven React app that manages the multi-step branching questionnaire.
+- **API Proxy**: A Cloudflare Pages Function (`/api/generate`) that securely handles authentication with the Cloudflare API.
+- **6 Dimensions**: A proprietary framework that defines an AI's behavior across Worldview, Perception, Agency, Taste, Persuasion, and Guardrails.
 
 ## 📚 Documentation
 
-| Document | Path | Purpose |
-|----------|------|---------|
-| Approach & Method | `knowledge/approach_and_method.md` | Why 6 dimensions, why Cloudflare AI, why custom i18n |
-| Developer Guide | `knowledge/guideline.md` | How to add languages, modify prompts, deploy |
-| Known Issues | `knowledge/known-issues.md` | Tracked bugs, workarounds, model limitations |
+Detailed documentation is available in the `knowledge/` directory:
+
+| Document | Purpose |
+|----------|---------|
+| [**Approach & Method**](knowledge/approach_and_method.md) | Deep dive into the 6-dimension framework and design philosophy. |
+| [**Developer Guideline**](knowledge/guideline.md) | Technical guide for extending languages, prompts, and local dev. |
+| [**Known Issues**](knowledge/known-issues.md) | Tracked limitations, model quirks, and planned improvements. |
 
 ## 📄 License
 

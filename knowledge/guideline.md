@@ -1,85 +1,59 @@
-# Developer Guidelines
+# Developer Guideline
 
 ## Project Overview
 
-PersonaBuilder is a React 19 + Vite 6 application deployed on Cloudflare Pages. It generates AI persona rulesets (`skill.md`) using a 6-dimension psychological framework, powered by Cloudflare Workers AI (Llama 3.1 8B).
+PersonaBuilder is a **React 19 + Vite 6** application deployed on **Cloudflare Pages**. It utilizes **Cloudflare Pages Functions** as a proxy to reach **Cloudflare Workers AI (Llama 3.1 8B)**.
 
 ---
 
-## Adding a New Language
+## Local Development Flow
 
-The app uses a custom dictionary-based i18n system (no external libraries). Three files need changes:
+### 1. Requirements
+- Node.js 18+
+- GitHub Account (for CI/CD)
+- Cloudflare Account (for AI & hosting)
 
-### 1. `src/lib/i18n.js` — UI Strings
-Add a new object key (e.g. `fr`) to the `DICTIONARY` export with all required string keys. Copy any existing language block as a template. **Do not use raw HTML in any string values** — render JSX elements directly in `App.jsx` instead.
-
-### 2. `src/data/questionFlow.js` — Question Tree
-Every call to the helper `t(th, en, de)` must gain a fourth parameter. Update the helper signature to `t(th, en, de, fr)` and return `{ th, en, de, fr }`.
-
-### 3. `src/App.jsx` — Constants & Switcher
-Update these three constants at the top of the file:
-```js
-const LANG_FLAGS = { en: '🇬🇧', th: '🇹🇭', de: '🇩🇪', fr: '🇫🇷' };
-const LANG_NAMES = { en: 'English', th: 'Thai', de: 'German', fr: 'French' };
-const LANG_ORDER = ['en', 'th', 'de', 'fr'];
-```
-The `handleLanguageSwitch` function cycles through `LANG_ORDER` automatically — no further changes needed.
-
-### 4. `functions/api/generate.js` — AI Language Mapping
-Add the new language to `LANG_MAP`:
-```js
-const LANG_MAP = { en: 'English', th: 'Thai', de: 'German', fr: 'French' };
-```
-This ensures the AI receives `"French"` instead of `"fr"` in the system prompt.
-
----
-
-## Modifying AI Prompts
-
-The system instruction lives in `functions/api/generate.js` as `SYSTEM_INSTRUCTION`.
-
-**Critical rules:**
-- The LLM must output the `skill.md` ruleset **first**, followed by a `### Before vs After Example` section.
-- If you change the section header text, you **must** also update the `splitKeywords` array in `App.jsx` (`handleGenerate` function) so the client-side parser can separate the two sections.
-- `max_tokens` is set to `2048` for both primary and fallback model calls. Increase if personas are being truncated.
-
----
-
-## Persistence
-
-| Key | Storage | Purpose |
-|-----|---------|---------|
-| `pb-lang` | `localStorage` | Remembers the user's language preference across sessions |
-
----
-
-## Local Development
-
-### Client-only (no AI)
+### 2. Environment Setup
+Create a `.dev.vars` file in the root directory:
 ```bash
-npm run dev
+CLOUDFLARE_API_TOKEN=your_token
+CLOUDFLARE_ACCOUNT_ID=your_id
 ```
 
-### Full stack with Cloudflare Functions
-```bash
-# Create .dev.vars:
-#   CLOUDFLARE_API_TOKEN=cfut_...
-#   CLOUDFLARE_ACCOUNT_ID=69...
-npm run pages:dev
-```
-
-### Production build
-```bash
-npm run build          # → dist/
-npm run preview        # local preview
-npm run pages:deploy   # deploy to Cloudflare Pages
-```
+### 3. Running the App
+- `npm run dev`: Starts the Vite development server (port 5173).
+- `npm run pages:dev`: Starts the full-stack environment using Wrangler (recommended).
 
 ---
 
-## Deployment Checklist
+## CI/CD Workflow
 
-1. Set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in Cloudflare Pages → Settings → Environment Variables
-2. Build command: `npm run build`
-3. Output directory: `dist`
-4. Custom domain: `persona.autobahnn.bot` via Cloudflare Pages → Custom Domains
+The project uses GitHub Actions for automated deployment and releasing.
+
+- **Deploy**: Every push to `master` builds and deploys to Cloudflare Pages.
+- **Release**: Pushing a tag starting with `v` (e.g., `v1.0.0`) creates a GitHub Release.
+
+**Required Repo Secrets**:
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+---
+
+## Modifying the AI Engine
+
+### The Proxy Function
+The core AI logic is in `functions/api/generate.js`. 
+- **Model**: Defaulting to `@cf/meta/llama-3.1-8b-instruct`.
+- **System Prompt**: Defines how the traits are synthesized into the `skill.md` format.
+
+### Extending Languages
+1.  Update `src/data/questionFlow.js` helper `t()` and all question definitions.
+2.  Add the language to `LANG_MAP` in `functions/api/generate.js`.
+3.  Add UI translations to `src/lib/i18n.js`.
+
+---
+
+## Code Conventions
+- Use functional React components with hooks.
+- Prefer Tailwind utility classes for styling.
+- Keep business logic (question trees, i18n) separate from UI components.
