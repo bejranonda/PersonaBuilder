@@ -633,7 +633,7 @@ export default function App() {
       {/* Footer */}
       <footer className="border-t border-slate-800 bg-slate-900/60 py-6 mt-auto">
         <div className="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-          <span>Persona Builder &mdash; Powered by Cloudflare Workers AI</span>
+          <span>Persona Builder v{__APP_VERSION__} &mdash; Inspired by Warroom's philosophy</span>
           <span>6-Dimension Deep Analysis Framework</span>
         </div>
       </footer>
