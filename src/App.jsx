@@ -140,7 +140,7 @@ export default function App() {
         .join('\n');
 
       const prompt = [
-        'Create a skill.md file based on the following profile type: ' + personaType,
+        'Create a persona.md file based on the following profile type: ' + personaType,
         '',
         'Traits and conceptual logic selected by user:',
         questionDataStr,
@@ -154,7 +154,7 @@ export default function App() {
 
       let result = await generateContentWithRetry(prompt, LANG_NAMES[lang] || 'English');
 
-      // Heuristic parser for separating "Before vs After" from skill.md
+      // Heuristic parser for separating "Before vs After" from persona.md
       const lowerResult = result.toLowerCase();
       let splitIndex = result.length;
       
@@ -203,7 +203,7 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'skill.md';
+    a.download = 'persona.md';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -305,7 +305,7 @@ export default function App() {
             <div className="text-center space-y-4 mb-12">
               <h2 className="text-4xl font-bold text-white tracking-tight">{t.typeSelectionTitle}</h2>
               <p className="text-slate-400 text-lg">
-                {t.typeSelectionSubText} <code className="bg-slate-800 px-2 py-1 rounded-md text-sm text-indigo-300">skill.md</code>
+                {t.typeSelectionSubText} <code className="bg-slate-800 px-2 py-1 rounded-md text-sm text-indigo-300">persona.md</code>
               </p>
             </div>
 
@@ -601,7 +601,7 @@ export default function App() {
                         <div className="w-3 h-3 rounded-full bg-green-500/80" />
                       </div>
                       <span className="ml-4 text-sm font-mono text-slate-400 flex items-center gap-2">
-                        <FileText className="w-4 h-4" /> skill.md
+                        <FileText className="w-4 h-4" /> persona.md
                       </span>
                     </div>
                     <div className="p-6 sm:p-8 overflow-auto flex-1 max-h-[500px] custom-scrollbar">
@@ -626,6 +626,24 @@ export default function App() {
                           <p className="text-slate-300 text-sm leading-relaxed italic opacity-80">
                             &ldquo;We are launching our new project next week. We hope you like it. Please feel free to give us feedback.&rdquo;
                           </p>
+                        </div>
+
+                        <div className="flex justify-center text-slate-600">
+                          <ArrowRight className="w-6 h-6 rotate-90 lg:rotate-0" />
+                        </div>
+
+                        <div className="bg-purple-950/20 border border-purple-500/20 rounded-2xl p-5 relative overflow-hidden">
+                          <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
+                          <h4 className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2">
+                            {lang === 'th' ? 'คุณลักษณะ Persona ที่ใช้' : lang === 'de' ? 'Angewandte Persona-Attribute' : 'Applied Persona Attributes'}
+                          </h4>
+                          <ul className="text-slate-300 text-sm leading-relaxed list-disc pl-4 space-y-1">
+                            {Object.values(answers).map((ans, idx) => (
+                              <li key={idx} className="opacity-90">
+                                {ans[lang] || ans.en || ans}
+                              </li>
+                            ))}
+                          </ul>
                         </div>
 
                         <div className="flex justify-center text-slate-600">
