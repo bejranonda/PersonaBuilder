@@ -2,14 +2,23 @@ const MODEL = '@cf/meta/llama-3.1-8b-instruct'; // Can fallback to llama-3-8b-in
 
 const LANG_MAP = { en: 'English', th: 'Thai', de: 'German' };
 
-const SYSTEM_INSTRUCTION = `You are an elite AI Persona Design expert and Behavioral Psychologist. Your task is to extract traits from a 6-dimension deep dive to create a perfect 'skill.md' for Vibe-Coding.
+const SYSTEM_INSTRUCTION = `You are an elite AI Persona Design expert and Behavioral Psychologist. Your task is to create a premium "persona.md" ruleset from a 6-dimension deep personality analysis.
 
 Rules:
-1. Always format output in precise Markdown. Do not wrap the whole response in a markdown block, just output the content directly but structure it beautifully.
-2. The prompt instructions must be explicit so other AIs can follow exactly.
-3. You must generate TWO sections.
-   - Section 1: The 'skill.md' ruleset.
-   - Section 2: An explicit example demonstrating the persona, labeled "### Before vs After Example" (or appropriately localized based on the language requested). Provide a highly generic text snippet, then translate it using the persona exactly.`;
+1. Always format output in precise Markdown. Do not wrap the whole response in a markdown code block. Output the content directly with beautiful structure.
+2. The persona instructions must be explicit so other AIs can follow them exactly.
+3. You must generate EXACTLY THREE sections:
+
+   Section 1 — **Persona Summary**: A professional summary of the persona's traits, strengths, and communication style.
+
+   Section 2 — **System Prompt**: A complete, ready-to-use system prompt (in English for best AI performance) that can be pasted into any LLM to activate this persona. Use the "Act as [Role]" format.
+
+   Section 3 — **### Before vs After Example**: Rewrite the test phrase provided by the user, showing:
+   - **Original Text (Before)**: the original phrase
+   - **Persona Applied (After)**: the phrase rewritten through this persona's voice
+
+4. CRITICAL: Do NOT reference or create a "skill.md" file. The output IS a persona.md file.
+5. Do NOT wrap the entire output in triple backticks.`;
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -44,7 +53,7 @@ export async function onRequestPost(context) {
     }
 
     const langName = LANG_MAP[language] || language;
-    const sysInst = SYSTEM_INSTRUCTION + `\n\nCRITICAL: You must generate the output entirely in ${langName} language.`;
+    const sysInst = SYSTEM_INSTRUCTION + `\n\nCRITICAL: You must generate the output entirely in ${langName} language. Never mention or generate "skill.md".`;
 
     const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${MODEL}`;
 
@@ -59,7 +68,7 @@ export async function onRequestPost(context) {
           { role: 'system', content: sysInst },
           { role: 'user', content: prompt }
         ],
-        max_tokens: 2048
+        max_tokens: 4096
       }),
     });
 
@@ -76,7 +85,7 @@ export async function onRequestPost(context) {
               { role: 'system', content: sysInst },
               { role: 'user', content: prompt }
             ],
-            max_tokens: 2048
+            max_tokens: 4096
           }),
         });
         if (fbResponse.ok) {

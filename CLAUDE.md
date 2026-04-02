@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 ## Project Overview
-PersonaBuilder is a specialized tool for generating AI Personas (`skill.md`) using a deep 6-dimension behavioral framework. It is built as a highly interactive React application deployed on Cloudflare Pages.
+PersonaBuilder is a specialized tool for generating AI Personas (`persona.md`) using a deep 6-dimension behavioral framework. It is built as a highly interactive React application deployed on Cloudflare Pages.
 
 ## Tech Stack
 - **Frontend**: React 19, Vite 6, Lucide Icons
@@ -20,10 +20,11 @@ PersonaBuilder is a specialized tool for generating AI Personas (`skill.md`) usi
 - `npm run pages:deploy`: Manual deployment to Cloudflare Pages (requires auth).
 
 ## Architectural Conventions
-- **Questionnaire**: Logic is stored in `src/data/questionFlow.js` using a branching tree structure.
-- **API**: Centralized in `src/lib/api.js`, always calling the local `/api/generate` endpoint.
+- **Questionnaire**: Logic is stored in `src/data/questionFlow.js` using a branching tree structure. Data relies on `dimension`, `question`, `label`, and `tag` attributes for rich UI rendering.
+- **API**: Centralized in `src/lib/api.js`, calling the local `/api/generate` endpoint.
 - **i18n**: Custom dictionary-based system in `src/lib/i18n.js`.
 - **Persona Structure**: Focused on Worldview, Perception, Agency, Taste, Persuasion, and Guardrails.
+- **Output Format**: Enforces a strict 3-section format: Persona Summary, System Prompt, and Before vs After Example.
 
 ## Code Style
 - Functional components with hooks.

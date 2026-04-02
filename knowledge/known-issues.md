@@ -18,14 +18,20 @@
 
 ## Roadmap
 
-### Phase 1: Stability (Current)
+### Phase 1: Stability (v1.0 - Completed)
 - [x] Refactor to React 19 + Cloudflare Pages.
 - [x] Secure API proxy implementation.
 - [x] Multi-language support (TH, EN, DE).
 
-### Phase 2: Enhanced Vision
+### Phase 2: Natural Language UX (v2.0 - Completed)
+- [x] Refactored questionnaire to use regular human phrasing.
+- [x] Separated technical `tags` from textual `labels`.
+- [x] Implemented Custom Dropdown Language selector.
+- [x] Enforced strict 3-section AI output format (`persona.md` without skill.md contamination).
+
+### Phase 3: Enhanced Vision
 - [ ] Integration with higher parameter models (Llama 3.1 70B) for better Thai/German reasoning.
-- [ ] Support for direct `skill.md` file uploads to "edit" existing personas.
+- [ ] Support for direct `persona.md` file uploads to "edit" existing personas.
 - [ ] Built-in prompt playground for immediate persona testing.
 
 ### Phase 3: Ecosystem

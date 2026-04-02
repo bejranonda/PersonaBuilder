@@ -45,6 +45,16 @@ export default function App() {
   const [exampleMarkdown, setExampleMarkdown] = useState('');
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [isLangOpen, setIsLangOpen] = useState(false);
+
+  // Close language dropdown on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsLangOpen(false);
+    };
+    if (isLangOpen) document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isLangOpen]);
 
   // Persist language preference
   useEffect(() => {
@@ -53,11 +63,11 @@ export default function App() {
   }, [lang]);
 
   useEffect(() => {
-    if (step === 2 && !currentQId) {
+    if (step === 2 && personaType && !currentQId) {
       setCurrentQId(QUESTION_FLOW[personaType].start);
       setQHistory([]);
     }
-  }, [step, personaType]);
+  }, [step, personaType, currentQId]);
 
   // Count total questions for progress indicator
   const questionProgress = useMemo(() => {
@@ -120,12 +130,15 @@ export default function App() {
         const ans = answers[iterQId];
         if (!ans) break;
 
-        const ansLabel = ans[lang] || ans;
-        const qText = qObj.question[lang] || qObj.question;
-
-        pathData.push(qText + '\n-> Selected: ' + ansLabel);
+        const ansLabel = ans[lang] || ans.en;
+        const qDim = qObj.dimension[lang] || qObj.dimension.en;
+        const qText = qObj.question[lang] || qObj.question.en;
 
         const opt = qObj.options.find((o) => o.label === ans);
+        const tagLabel = opt?.tag ? (opt.tag[lang] || opt.tag.en) : '';
+
+        pathData.push(`[${qDim}] ${qText}\n-> Answer Selection: ${tagLabel ? tagLabel + ' - ' : ''}${ansLabel}`);
+
         iterQId = opt ? opt.nextId : 'END';
       }
 
@@ -135,32 +148,52 @@ export default function App() {
         .filter((s) => s.text.trim() !== '')
         .map((s, i) => {
           const sourceName = s.source === 'other' ? s.customSource : PLATFORMS.find((p) => p.id === s.source)?.name;
-          return '--- Sample ' + (i + 1) + ' (From: ' + sourceName + ') ---\n' + s.text + '\n';
+          return `--- Reference Sample ${i + 1} (Source: ${sourceName}) ---\n${s.text}\n`;
         })
         .join('\n');
 
-      const prompt = [
-        'Create a persona.md file based on the following profile type: ' + personaType,
-        '',
-        'Traits and conceptual logic selected by user:',
-        questionDataStr,
-        '',
-        '[Writing References provided by user]',
-        sampleData || 'No specific writing samples provided. Extrapolate based on the logic.',
-        '',
-        'The standard test phrase for the "Before vs After Example" is:',
-        '"We are launching our new project next week. We hope you like it. Please feel free to give us feedback."'
-      ].join('\n');
+      const prompt = `You are a professional AI Persona Engineer. Your task is to generate a premium "persona.md" file that defines an AI's personality, worldview, and behavior patterns.
+
+[INPUT CONTEXT]
+- Persona Type: ${personaType === 'clone' ? 'Personal Clone (Mimicking a specific human)' : 'Specialized AI Agent'}
+- 6-Dimension Deep Analysis Results:
+${questionDataStr}
+
+[WRITING STYLE REFERENCES]
+${sampleData || 'No specific writing samples provided. Extrapolate tone from the selection logic.'}
+
+[REQUIRED OUTPUT FORMAT]
+You MUST output the result in EXACTLY three sections. Do NOT mention "skill.md".
+
+1. **สรุปคุณลักษณะ Persona ที่ใช้**
+   A professional summary in ${LANG_NAMES[lang]} of the resulting persona's traits, strengths, and communication style.
+
+2. **Prompt ตัวอย่าง**
+   A high-quality system prompt (in English for best AI performance) that can be inserted into an LLM to activate this persona. Use the "Act as [Name/Role]" format.
+
+3. **### Before vs After Example**
+   Show a comparison using this standard test phrase:
+   "We are launching our new project next week. We hope you like it. Please feel free to give us feedback."
+   
+   Format:
+   - **Original Text (Before)**: (The phrase above)
+   - **Persona Applied (After)**: (The phrase rewritten as this persona would say it)
+
+[CRITICAL RULE]
+- Do NOT wrap the output in extra markdown code blocks if you are already inside one.
+- DO NOT generate a "skill.md" section. 
+- Ensure the "After" example strongly reflects the 6 dimensions selected.`;
 
       let result = await generateContentWithRetry(prompt, LANG_NAMES[lang] || 'English');
 
-      // Heuristic parser for separating "Before vs After" from persona.md
+      // Enhanced parser for separating "Before vs After" from persona.md
       const lowerResult = result.toLowerCase();
       let splitIndex = result.length;
       
       const splitKeywords = [
         '### before vs after example', 
         '### before vs after',
+        '### before vs',
         'before vs after',
         '### vergleich',
         '### vorher vs',
@@ -183,6 +216,7 @@ export default function App() {
         generatedExample = result.substring(splitIndex).trim();
       }
 
+      // Cleanup logic
       generatedSkill = generatedSkill.replace(/^```[a-z]*\n/i, '').replace(/\n```$/i, '');
       setGeneratedMarkdown(generatedSkill);
       setExampleMarkdown(generatedExample);
@@ -190,7 +224,7 @@ export default function App() {
     } catch (err) {
       console.error(err);
       setGeneratedMarkdown(
-        '# 🤖 Persona: Default Fallback\n\n## 🎯 Core Identity\n- AI Generation Failed\n- ' + t.aiError + '\n\n## Raw Error:\n' + err.message
+        `# 🤖 Persona: Default Fallback\n\n## 🎯 Core Identity\n- AI Generation Failed\n- ${t.aiError}\n\n## Raw Error:\n${err.message}`
       );
       setError(t.aiError);
     } finally {
@@ -215,8 +249,6 @@ export default function App() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-
 
   const handleReset = () => {
     setStep(1);
@@ -275,23 +307,50 @@ export default function App() {
               })}
             </div>
 
-            {/* Language switcher */}
-            <div className="relative flex items-center bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700 px-3 py-1.5 focus-within:ring-2 focus-within:ring-indigo-500/50">
-              <Globe className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
-              <select
-                value={lang}
-                onChange={(e) => setLang(e.target.value)}
-                className="bg-transparent text-sm font-medium text-slate-200 outline-none cursor-pointer appearance-none pr-6 w-full"
+            {/* Custom Language Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsLangOpen(!isLangOpen)}
+                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl border border-slate-700 transition-all text-sm font-medium focus:ring-2 focus:ring-indigo-500/50"
               >
-                <option value="en" className="bg-slate-800 text-slate-200">English</option>
-                <option value="th" className="bg-slate-800 text-slate-200">ภาษาไทย</option>
-                <option value="de" className="bg-slate-800 text-slate-200">Deutsch</option>
-              </select>
-              <div className="absolute right-3 pointer-events-none">
-                <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+                <Globe className="w-4 h-4 text-indigo-400" />
+                <span className="hidden sm:inline">{LANG_NAMES[lang]}</span>
+                <span className="inline sm:hidden">{LANG_FLAGS[lang]}</span>
+                <ArrowRight className={`w-3 h-3 transition-transform duration-300 ${isLangOpen ? 'rotate-90' : ''}`} />
+              </button>
+
+              {isLangOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setIsLangOpen(false)} 
+                  />
+                  <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                    <div className="p-1.5 space-y-1">
+                      {LANG_ORDER.map((l) => (
+                        <button
+                          key={l}
+                          onClick={() => {
+                            setLang(l);
+                            setIsLangOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                            lang === l 
+                              ? 'bg-indigo-500/10 text-indigo-400 font-bold' 
+                              : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-lg leading-none">{LANG_FLAGS[l]}</span>
+                            <span>{LANG_NAMES[l]}</span>
+                          </div>
+                          {lang === l && <CheckCircle2 className="w-4 h-4" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -374,7 +433,10 @@ export default function App() {
             </div>
 
             <div key={currentQId} className="flex-1 animate-in fade-in slide-in-from-right-8 duration-500">
-              <div className="mb-10 p-6 bg-slate-900/50 rounded-3xl border border-slate-800 backdrop-blur-sm shadow-xl">
+              <div className="mb-10 text-left">
+                <div className="inline-block px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-[10px] font-bold uppercase tracking-widest mb-4 border border-indigo-500/20">
+                  {QUESTION_FLOW[personaType][currentQId].dimension[lang] || QUESTION_FLOW[personaType][currentQId].dimension.en}
+                </div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-white leading-snug">
                   {QUESTION_FLOW[personaType][currentQId].question[lang] || QUESTION_FLOW[personaType][currentQId].question.en}
                 </h2>
@@ -383,6 +445,7 @@ export default function App() {
               <div className="space-y-4">
                 {QUESTION_FLOW[personaType][currentQId].options.map((option, idx) => {
                   const labelText = option.label[lang] || option.label.en;
+                  const tagText = option.tag ? (option.tag[lang] || option.tag.en) : null;
                   const isSelected = answers[currentQId] === option.label;
                   const selectedStyle = isSelected
                     ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/5'
@@ -393,13 +456,22 @@ export default function App() {
                     <button
                       key={idx}
                       onClick={() => handleAnswerSelect(option.label)}
-                      className={'w-full text-left p-6 rounded-2xl border-2 transition-all flex items-center justify-between group ' + selectedStyle}
+                      className={'w-full text-left p-6 rounded-2xl border-2 transition-all flex flex-col gap-2 group ' + selectedStyle}
                     >
-                      <span className={'text-lg font-medium ' + textStyle}>
-                        {labelText}
-                      </span>
-                      <div className={'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shrink-0 ml-4 ' + radioStyle}>
-                        {isSelected && <div className="w-3 h-3 bg-indigo-500 rounded-full" />}
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex flex-col gap-1">
+                          {tagText && (
+                            <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-indigo-400' : 'text-slate-500'}`}>
+                              {tagText}
+                            </span>
+                          )}
+                          <span className={'text-lg font-medium leading-normal ' + textStyle}>
+                            {labelText}
+                          </span>
+                        </div>
+                        <div className={'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shrink-0 ml-4 ' + radioStyle}>
+                          {isSelected && <div className="w-3 h-3 bg-indigo-500 rounded-full" />}
+                        </div>
                       </div>
                     </button>
                   );
@@ -605,9 +677,9 @@ export default function App() {
                       </span>
                     </div>
                     <div className="p-6 sm:p-8 overflow-auto flex-1 max-h-[500px] custom-scrollbar">
-                      <pre className="text-slate-300 font-mono text-sm whitespace-pre-wrap leading-relaxed">
-                        <code>{generatedMarkdown}</code>
-                      </pre>
+                      <div className="text-slate-300 text-sm leading-relaxed prose prose-invert prose-slate max-w-none prose-headings:text-white prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-strong:text-slate-200 prose-code:text-indigo-300 prose-code:bg-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800 prose-li:marker:text-slate-600">
+                        <ReactMarkdown>{generatedMarkdown}</ReactMarkdown>
+                      </div>
                     </div>
                   </div>
 
@@ -637,12 +709,18 @@ export default function App() {
                           <h4 className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2">
                             {lang === 'th' ? 'คุณลักษณะ Persona ที่ใช้' : lang === 'de' ? 'Angewandte Persona-Attribute' : 'Applied Persona Attributes'}
                           </h4>
-                          <ul className="text-slate-300 text-sm leading-relaxed list-disc pl-4 space-y-1">
-                            {Object.values(answers).map((ans, idx) => (
-                              <li key={idx} className="opacity-90">
-                                {ans[lang] || ans.en || ans}
-                              </li>
-                            ))}
+                          <ul className="text-slate-300 text-sm leading-relaxed list-disc pl-4 space-y-1.5">
+                            {Object.entries(answers).map(([qId, ans], idx) => {
+                              const qObj = QUESTION_FLOW[personaType]?.[qId];
+                              const opt = qObj?.options.find((o) => o.label === ans);
+                              const tag = opt?.tag ? (opt.tag[lang] || opt.tag.en) : null;
+                              return (
+                                <li key={idx} className="opacity-90">
+                                  {tag && <strong className="text-purple-300 mr-1">{tag}:</strong>}
+                                  {ans[lang] || ans.en || ans}
+                                </li>
+                              );
+                            })}
                           </ul>
                         </div>
 
@@ -655,7 +733,7 @@ export default function App() {
                           <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">{t.personaText}</h4>
                           <div className="text-slate-200 text-sm leading-relaxed prose prose-invert prose-indigo max-w-none prose-p:leading-relaxed prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800">
                             <ReactMarkdown>
-                              {exampleMarkdown.replace(/#.*$/gm, '').trim()}
+                              {exampleMarkdown.replace(/^#{1,3}\s*(before|vorher|ตัวอย่าง|vergleich).*$/gim, '').trim()}
                             </ReactMarkdown>
                           </div>
                         </div>
@@ -664,12 +742,18 @@ export default function App() {
                   )}
                 </div>
 
-                <div className="flex justify-center pt-8">
+                <div className="flex justify-center gap-6 pt-8">
                   <button
                     onClick={handleReset}
                     className="text-slate-500 hover:text-white transition-colors font-medium flex items-center gap-2"
                   >
                     <ArrowLeft className="w-4 h-4" /> {t.reset}
+                  </button>
+                  <button
+                    onClick={handleGenerate}
+                    className="flex items-center gap-2 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white px-5 py-2 rounded-xl font-medium transition-colors border border-slate-700"
+                  >
+                    <Sparkles className="w-4 h-4" /> {lang === 'th' ? 'สร้างใหม่อีกครั้ง' : lang === 'de' ? 'Neu generieren' : 'Regenerate'}
                   </button>
                 </div>
               </div>
@@ -679,10 +763,16 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-900/60 py-6 mt-auto">
-        <div className="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-          <span>Persona Builder v{__APP_VERSION__} &mdash; Inspired by Warroom's philosophy</span>
-          <span>6-Dimension Deep Analysis Framework</span>
+      <footer className="border-t border-slate-800 bg-slate-900/60 py-8 mt-auto">
+        <div className="max-w-4xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+          <div className="flex flex-col items-center md:items-start gap-1">
+            <span className="font-medium text-slate-400">Persona Builder v{__APP_VERSION__} &mdash; Inspired by the philosophical approach of Poramate Minsiri</span>
+            <span>6-Dimension Deep Analysis Framework</span>
+          </div>
+          <div className="flex flex-col items-center md:items-end gap-1">
+            <span className="opacity-80">Powered by Cloudflare Workers AI & Llama 3.1</span>
+            <span className="opacity-50 text-[10px]">Privacy-First: All computation happens in isolated contexts. No data is stored.</span>
+          </div>
         </div>
       </footer>
     </div>

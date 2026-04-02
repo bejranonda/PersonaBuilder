@@ -44,7 +44,7 @@ The project uses GitHub Actions for automated deployment and releasing.
 ### The Proxy Function
 The core AI logic is in `functions/api/generate.js`. 
 - **Model**: Defaulting to `@cf/meta/llama-3.1-8b-instruct`.
-- **System Prompt**: Defines how the traits are synthesized into the `skill.md` format.
+- **System Prompt**: Defines how the traits are synthesized into the `persona.md` format.
 
 ### Extending Languages
 1.  Update `src/data/questionFlow.js` helper `t()` and all question definitions.

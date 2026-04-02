@@ -1,23 +1,23 @@
-# 🤖 Persona Builder
+# 🤖 Persona Builder v2.0
 
-> Create an AI Persona (`skill.md`) for Vibe-Coding using a 6-dimension deep personality analysis framework.
+> Create a premium AI Persona (`persona.md`) for Vibe-Coding using a natural-language 6-dimension deep personality analysis framework.
 
 **🌐 Live:** [persona.autobahn.bot](https://persona.autobahn.bot)
 
 ---
 
-## ✨ Features
+## ✨ Features v2.0
 
 | Feature | Description |
 |---------|-------------|
-| **Multi-language** | Full support for Thai 🇹🇭, English 🇬🇧, and German 🇩🇪 across the UI and AI output. |
-| **6-Dimension Analysis** | Worldview, Perception, Agency, Taste, Persuasion, and Guardrails logic. |
-| **Clone Mode** | Reverse-engineer your own voice/personality into an AI ruleset. |
-| **Agent Mode** | Design an expert AI Agent with specific strategic boundaries from scratch. |
-| **Writing Samples** | Calibrate the AI's tone using real text snippets from social media or blogs. |
+| **Natural Language UX** | Rephrased questions and options to sound like real-life scenarios rather than academic theory. |
+| **Custom UI/UX** | Premium glassmorphism design with a custom language selector and improved question flow. |
+| **6-Dimension Analysis** | Deep mapping of Worldview, Perception, Agency, Taste, Persuasion, and Guardrails. |
+| **Clone Mode 2.0** | Focus on daily-life decisions and instincts to accurately mirror your human voice. |
+| **Agent Mode 2.0** | Design expert AI Agents with clearly separated technical tags and strategic boundaries. |
+| **Comparison Preview** | Built-in "Before vs After" testing to see your persona in action immediately. |
 | **Cloudflare AI** | High-performance generation powered by **Llama 3.1 8B Instruct** via Cloudflare Workers AI. |
-| **GitHub Actions** | Automated CI/CD for deployments to Cloudflare Pages and versioned releases. |
-| **skill.md Export** | Instant download or copy of the generated ruleset for use in Vibe-Coding tools. |
+| **persona.md Export** | Standardized markdown export (Summary, System Prompt, Example) ready for agentic AI. |
 
 ## 🛠️ Tech Stack
 
