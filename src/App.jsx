@@ -6,6 +6,7 @@ import {
 import { QUESTION_FLOW, PLATFORMS } from './data/questionFlow';
 import { DICTIONARY } from './lib/i18n';
 import { generateContentWithRetry } from './lib/api';
+import ReactMarkdown from 'react-markdown';
 
 const LANG_FLAGS = { en: '🇬🇧', th: '🇹🇭', de: '🇩🇪' };
 const LANG_NAMES = { en: 'English', th: 'Thai', de: 'German' };
@@ -516,14 +517,39 @@ export default function App() {
         {step === 4 && (
           <div className="space-y-8 animate-in zoom-in-95 duration-500">
             {isGenerating ? (
-              <div className="py-32 flex flex-col items-center justify-center text-center space-y-8">
+              <div className="py-12 md:py-20 flex flex-col items-center justify-center space-y-8 animate-pulse text-center">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-indigo-500 rounded-full blur-3xl opacity-20 animate-pulse" />
-                  <Loader2 className="w-20 h-20 text-indigo-400 animate-spin relative z-10" />
+                  <div className="absolute inset-0 bg-indigo-500 rounded-full blur-3xl opacity-20" />
+                  <Loader2 className="w-16 h-16 text-indigo-400 animate-spin relative z-10" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">{t.generatingTitle}</h2>
-                  <p className="text-slate-400 text-lg">{t.generatingSub}</p>
+                  <h2 className="text-2xl font-bold text-white mb-2">{t.generatingTitle}</h2>
+                  <p className="text-slate-400">{t.generatingSub}</p>
+                </div>
+                
+                {/* Shimmer Skeleton matching the result layout */}
+                <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-8 mt-12 text-left opacity-30">
+                  <div className="bg-[#0d1117] border border-slate-800 rounded-3xl overflow-hidden h-[400px] flex flex-col">
+                    <div className="bg-slate-900 px-4 py-3 border-b border-slate-800 flex gap-2">
+                       <div className="w-3 h-3 rounded-full bg-slate-700" />
+                       <div className="w-3 h-3 rounded-full bg-slate-700" />
+                       <div className="w-3 h-3 rounded-full bg-slate-700" />
+                    </div>
+                    <div className="p-8 space-y-4">
+                      <div className="h-4 bg-slate-800 rounded w-3/4"></div>
+                      <div className="h-4 bg-slate-800 rounded w-1/2"></div>
+                      <div className="h-4 bg-slate-800 rounded w-5/6"></div>
+                      <div className="h-4 bg-slate-800 rounded w-2/3 mt-8"></div>
+                      <div className="h-4 bg-slate-800 rounded w-4/5"></div>
+                      <div className="h-4 bg-slate-800 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                  <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-8 h-[400px] flex flex-col justify-start">
+                    <div className="h-6 bg-slate-800 rounded w-1/3 mb-4"></div>
+                    <div className="h-4 bg-slate-800 rounded w-2/3 mb-10"></div>
+                    <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 mb-6 h-24"></div>
+                    <div className="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-5 flex-1"></div>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -605,10 +631,10 @@ export default function App() {
                         <div className="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-5 relative overflow-hidden">
                           <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
                           <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">{t.personaText}</h4>
-                          <div className="text-slate-200 text-sm leading-relaxed font-medium">
-                            <pre className="whitespace-pre-wrap font-sans">
+                          <div className="text-slate-200 text-sm leading-relaxed prose prose-invert prose-indigo max-w-none prose-p:leading-relaxed prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800">
+                            <ReactMarkdown>
                               {exampleMarkdown.replace(/#.*$/gm, '').trim()}
-                            </pre>
+                            </ReactMarkdown>
                           </div>
                         </div>
                       </div>
