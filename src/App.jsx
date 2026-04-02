@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import {
   User, Bot, FileText, Download, Plus, Trash2, ArrowRight, ArrowLeft,
-  Loader2, CheckCircle2, Sparkles, Copy,
+  Loader2, CheckCircle2, Sparkles, Copy, Globe, AlertTriangle
 } from 'lucide-react';
 import { QUESTION_FLOW, PLATFORMS } from './data/questionFlow';
+import { DICTIONARY } from './lib/i18n';
 import { generateContentWithRetry } from './lib/api';
 
 export default function App() {
+  const [lang, setLang] = useState('en');
+  const t = DICTIONARY[lang];
+
   const [step, setStep] = useState(1);
   const [personaType, setPersonaType] = useState(null);
 
@@ -21,6 +25,7 @@ export default function App() {
   // Generation State
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedMarkdown, setGeneratedMarkdown] = useState('');
+  const [exampleMarkdown, setExampleMarkdown] = useState('');
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
 
@@ -46,11 +51,11 @@ export default function App() {
     if (!selectedLabel) return;
 
     const currentQData = QUESTION_FLOW[personaType][currentQId];
-    const selectedOption = currentQData.options.find((o) => o.label === selectedLabel);
+    const selectedOption = currentQData.options.find((o) => o.label[lang] === selectedLabel[lang] || o.label === selectedLabel);
 
-    if (selectedOption.nextId === 'END') {
+    if (selectedOption?.nextId === 'END') {
       setStep(3);
-    } else {
+    } else if (selectedOption) {
       setQHistory((prev) => [...prev, currentQId]);
       setCurrentQId(selectedOption.nextId);
     }
@@ -77,20 +82,19 @@ export default function App() {
     setStep(4);
 
     try {
-      const typeLabel = personaType === 'clone'
-        ? 'สร้าง Persona โดยจำลองจากตัวผู้ใช้งาน (Clone)'
-        : 'สร้าง AI Agent ขึ้นมาใหม่';
-
       const pathData = [];
       let iterQId = QUESTION_FLOW[personaType].start;
       while (iterQId && iterQId !== 'END') {
         const qObj = QUESTION_FLOW[personaType][iterQId];
-        const ansLabel = answers[iterQId];
-        if (!ansLabel) break;
+        const ans = answers[iterQId];
+        if (!ans) break;
 
-        pathData.push(`${qObj.question}\n-> คำตอบ: ${ansLabel}`);
+        const ansLabel = ans[lang] ? ans[lang] : ans;
+        const qText = qObj.question[lang] ? qObj.question[lang] : qObj.question;
 
-        const opt = qObj.options.find((o) => o.label === ansLabel);
+        pathData.push(`${qText}\n-> Selected: ${ansLabel}`);
+
+        const opt = qObj.options.find((o) => o.label[lang] === ansLabel || o.label === ansLabel);
         iterQId = opt ? opt.nextId : 'END';
       }
 
@@ -100,41 +104,64 @@ export default function App() {
         .filter((s) => s.text.trim() !== '')
         .map((s, i) => {
           const sourceName = s.source === 'other' ? s.customSource : PLATFORMS.find((p) => p.id === s.source)?.name;
-          return `--- ตัวอย่างที่ ${i + 1} (จาก: ${sourceName}) ---\n${s.text}\n`;
+          return `--- Sample ${i + 1} (From: ${sourceName}) ---\n${s.text}\n`;
         })
         .join('\n');
 
       const prompt = `
-        โปรดสร้างเนื้อหาไฟล์ skill.md โดยอ้างอิงจากข้อมูลต่อไปนี้
-        
-        ประเภท: ${typeLabel}
-        
-        คุณลักษณะที่ต้องการถูกสกัดมาตามกรอบคิดเชิงลึก 6 มิติ (โปรดใช้ข้อมูลนี้เป็นแกนหลักในการสร้างกฎ):
+        Create a skill.md file based on the following profile type: ${personaType}
+
+        Traits and conceptual logic selected by user:
         ${questionDataStr}
+
+        [Writing References provided by user]
+        ${sampleData || 'No specific writing samples provided. Extrapolate based on the logic.'}
         
-        [ตัวอย่างการเขียน/การสื่อสารที่นำมาเป็น Reference]
-        ${sampleData || 'ไม่มีตัวอย่างข้อความ (ให้ใช้สไตล์ตามคุณลักษณะที่เลือกใน 6 มิติข้างต้น)'}
-        
-        โปรดวิเคราะห์ข้อมูลทั้งหมดและสร้าง Prompt Instructions (skill.md) ที่ประกอบด้วยหัวข้อต่อไปนี้อย่างครบถ้วน:
-        - # 🤖 Persona: [ตั้งชื่อบทบาทให้เหมาะสม]
-        - ## 🌍 Worldview & Perception (โลกทัศน์และมุมมองในการประมวลผลข้อมูล)
-        - ## 🧠 Agency & Decision Making (ระดับความมีอิสระและวิธีการคิด/ตัดสินใจ)
-        - ## 🎨 Taste & Style (รสนิยมและรูปแบบผลงานที่ผลิตออกไป)
-        - ## 🗣️ Persuasion & Communication (กลยุทธ์การสื่อสารเพื่อโน้มน้าวใจ)
-        - ## 🛡️ Guardrails & Capabilities (ขอบเขตจำกัดและข้อห้ามเด็ดขาด)
-        - ## 📝 Writing Style Examples (วิเคราะห์โครงสร้างภาษาจากตัวอย่างที่ให้มา - ถ้ามี)
+        The standard test phrase for the "Before vs After Example" is:
+        "We are launching our new project next week. We hope you like it. Please feel free to give us feedback."
       `;
 
-      let result = await generateContentWithRetry(prompt);
+      let result = await generateContentWithRetry(prompt, lang);
 
-      result = result.replace(/^```markdown\n/i, '').replace(/\n```$/i, '');
-      setGeneratedMarkdown(result);
+      // Simple heuristic parser for separating "Before vs After" from skill.md
+      // We look for phrases like "Before vs After", "Vorher vs", "Before vs." depending on language, or standard markdown splits.
+      const lowerResult = result.toLowerCase();
+      let splitIndex = result.length;
+      
+      const splitKeywords = [
+        "### before vs after example", 
+        "### before vs out", 
+        "before vs after",
+        "### vergleich",
+        "### ตัวอย่าง",
+        "## before vs",
+      ];
+      
+      for (const keyword of splitKeywords) {
+        const idx = lowerResult.lastIndexOf(keyword);
+        if (idx !== -1 && idx < splitIndex) {
+          splitIndex = idx;
+        }
+      }
+
+      let generatedSkill = result;
+      let generatedExample = "";
+
+      if (splitIndex < result.length && splitIndex > 100) {
+        generatedSkill = result.substring(0, splitIndex).trim();
+        generatedExample = result.substring(splitIndex).trim();
+      }
+
+      generatedSkill = generatedSkill.replace(/^```[a-z]*\n/i, '').replace(/\n```$/i, '');
+      setGeneratedMarkdown(generatedSkill);
+      setExampleMarkdown(generatedExample);
+
     } catch (err) {
       console.error(err);
       setGeneratedMarkdown(
-        `# 🤖 Persona: ${personaType === 'clone' ? 'Digital Clone' : 'Custom AI Agent'}\n\n## 🎯 Core Identity\n- AI Profile Generation Failed\n- กรุณาตั้งค่า API Key เพื่อการทำงานที่สมบูรณ์`
+        `# 🤖 Persona: Default Fallback\n\n## 🎯 Core Identity\n- AI Generation Failed\n- ${t.aiError}\n\n## Raw Error:\n${err.message}`
       );
-      setError('ไม่สามารถเชื่อมต่อกับ AI ได้ ระบบได้สร้างโครงสร้างพื้นฐานให้คุณแทน');
+      setError(t.aiError);
     } finally {
       setIsGenerating(false);
     }
@@ -158,6 +185,10 @@ export default function App() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleLanguageSwitch = () => {
+    setLang(prev => prev === 'en' ? 'th' : prev === 'th' ? 'de' : 'en');
+  };
+
   const handleReset = () => {
     setStep(1);
     setPersonaType(null);
@@ -165,6 +196,8 @@ export default function App() {
     setQHistory([]);
     setAnswers({});
     setSamples([{ id: Date.now(), text: '', source: 'facebook', customSource: '' }]);
+    setGeneratedMarkdown('');
+    setExampleMarkdown('');
   };
 
   return (
@@ -177,66 +210,76 @@ export default function App() {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent hidden sm:block">
-              Vibe-Coding Persona Builder
+              {t.appTitle}
             </h1>
           </div>
-          <div className="flex items-center gap-2">
-            {[1, 2, 3, 4].map((s) => (
-              <div key={s} className="flex items-center">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-                    step === s
-                      ? 'bg-indigo-500 text-white ring-4 ring-indigo-500/20'
-                      : step > s
-                        ? 'bg-slate-700 text-slate-300'
-                        : 'bg-slate-800 text-slate-500'
-                  }`}
-                >
-                  {step > s ? <CheckCircle2 className="w-4 h-4" /> : s}
-                </div>
-                {s < 4 && (
-                  <div
-                    className={`w-4 sm:w-8 h-1 mx-1 rounded-full transition-all duration-300 ${step > s ? 'bg-slate-700' : 'bg-slate-800'}`}
-                  />
-                )}
-              </div>
-            ))}
+          
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              {[1, 2, 3, 4].map((s) => {
+                const stepLabels = [t.step1, t.step2, t.step3, t.step4];
+                return (
+                  <div key={s} className="flex items-center" title={stepLabels[s-1]}>
+                    <div
+                      className={\`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 \${
+                        step === s
+                          ? 'bg-indigo-500 text-white ring-4 ring-indigo-500/20'
+                          : step > s
+                            ? 'bg-slate-700 text-slate-300'
+                            : 'bg-slate-800 text-slate-500'
+                      }\`}
+                    >
+                      {step > s ? <CheckCircle2 className="w-4 h-4" /> : s}
+                    </div>
+                    {s < 4 && (
+                      <div
+                        className={\`w-4 sm:w-8 h-1 mx-1 rounded-full transition-all duration-300 \${step > s ? 'bg-slate-700' : 'bg-slate-800'}\`}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <button 
+              onClick={handleLanguageSwitch}
+              className="flex items-center justify-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700 font-medium text-sm"
+            >
+              <Globe className="w-4 h-4" />
+              {lang.toUpperCase()}
+            </button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-3xl mx-auto px-6 py-12">
+      <main className="max-w-4xl mx-auto px-6 py-12">
         {/* Step 1: Type Selection */}
         {step === 1 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-4 mb-12">
-              <h2 className="text-4xl font-bold text-white tracking-tight">คุณต้องการสร้าง Persona แบบไหน?</h2>
-              <p className="text-slate-400 text-lg">
-                เลือกลักษณะของ <code className="bg-slate-800 px-2 py-1 rounded-md text-sm text-indigo-300">skill.md</code> ที่ใช้โมเดลวิเคราะห์เชิงลึกแบบ 6 มิติ
-              </p>
+              <h2 className="text-4xl font-bold text-white tracking-tight">{t.typeSelectionTitle}</h2>
+              <p className="text-slate-400 text-lg" dangerouslySetInnerHTML={{ __html: t.typeSelectionSub }} />
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <button
                 onClick={() => handleTypeSelect('clone')}
-                className={`relative overflow-hidden group p-8 rounded-3xl border-2 transition-all text-left ${
+                className={\`relative overflow-hidden group p-8 rounded-3xl border-2 transition-all text-left \${
                   personaType === 'clone'
                     ? 'border-indigo-500 bg-indigo-500/10 shadow-xl shadow-indigo-500/10'
-                    : 'border-slate-800 bg-slate-900 hover:border-slate-700 hover:bg-slate-800'
-                }`}
+                    : 'border-slate-800 bg-slate-900 border-opacity-50 hover:border-slate-700 hover:bg-slate-800'
+                }\`}
               >
                 <div
-                  className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-colors ${
+                  className={\`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-colors \${
                     personaType === 'clone' ? 'bg-indigo-500 text-white' : 'bg-slate-800 text-indigo-400 group-hover:bg-slate-700'
-                  }`}
+                  }\`}
                 >
                   <User className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">Clone ตัวฉันเอง</h3>
-                <p className="text-slate-400 leading-relaxed text-sm">
-                  ถอดรหัสโลกทัศน์ รสนิยม และการตัดสินใจของคุณ เพื่อสร้าง AI ที่คิดและสื่อสารเสมือนเป็นตัวคุณเอง
-                </p>
+                <h3 className="text-2xl font-bold text-white mb-3">{t.cloneTitle}</h3>
+                <p className="text-slate-400 leading-relaxed text-sm">{t.cloneDesc}</p>
                 {personaType === 'clone' && (
                   <div className="absolute top-6 right-6 text-indigo-500 animate-in zoom-in duration-300">
                     <CheckCircle2 className="w-8 h-8" />
@@ -246,23 +289,21 @@ export default function App() {
 
               <button
                 onClick={() => handleTypeSelect('agent')}
-                className={`relative overflow-hidden group p-8 rounded-3xl border-2 transition-all text-left ${
+                className={\`relative overflow-hidden group p-8 rounded-3xl border-2 transition-all text-left \${
                   personaType === 'agent'
                     ? 'border-cyan-500 bg-cyan-500/10 shadow-xl shadow-cyan-500/10'
-                    : 'border-slate-800 bg-slate-900 hover:border-slate-700 hover:bg-slate-800'
-                }`}
+                    : 'border-slate-800 bg-slate-900 border-opacity-50 hover:border-slate-700 hover:bg-slate-800'
+                }\`}
               >
                 <div
-                  className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-colors ${
+                  className={\`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-colors \${
                     personaType === 'agent' ? 'bg-cyan-500 text-white' : 'bg-slate-800 text-cyan-400 group-hover:bg-slate-700'
-                  }`}
+                  }\`}
                 >
                   <Bot className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">สร้าง AI Agent</h3>
-                <p className="text-slate-400 leading-relaxed text-sm">
-                  ออกแบบตัวตน ระบบการทำงาน และขอบเขตเชิงกลยุทธ์ เพื่อให้ได้ Agent ที่เชี่ยวชาญเฉพาะทาง
-                </p>
+                <h3 className="text-2xl font-bold text-white mb-3">{t.agentTitle}</h3>
+                <p className="text-slate-400 leading-relaxed text-sm">{t.agentDesc}</p>
                 {personaType === 'agent' && (
                   <div className="absolute top-6 right-6 text-cyan-500 animate-in zoom-in duration-300">
                     <CheckCircle2 className="w-8 h-8" />
@@ -277,7 +318,7 @@ export default function App() {
                 disabled={!personaType}
                 className="flex items-center gap-2 bg-white text-slate-900 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white hover:scale-105 active:scale-95"
               >
-                เริ่มสร้าง Persona <ArrowRight className="w-5 h-5" />
+                {t.startButton} <ArrowRight className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -291,38 +332,39 @@ export default function App() {
                 onClick={handlePrevQuestion}
                 className="hover:text-white transition-colors flex items-center gap-1 bg-slate-800/50 px-3 py-1.5 rounded-lg"
               >
-                <ArrowLeft className="w-4 h-4" /> ย้อนกลับ
+                <ArrowLeft className="w-4 h-4" /> {t.backButton}
               </button>
               <div className="flex-1 h-px bg-slate-800" />
             </div>
 
             <div key={currentQId} className="flex-1 animate-in fade-in slide-in-from-right-8 duration-500">
-              <div className="mb-10">
+              <div className="mb-10 p-6 bg-slate-900/50 rounded-3xl border border-slate-800 backdrop-blur-sm shadow-xl">
                 <h2 className="text-2xl sm:text-3xl font-bold text-white leading-snug">
-                  {QUESTION_FLOW[personaType][currentQId].question}
+                  {QUESTION_FLOW[personaType][currentQId].question[lang] || QUESTION_FLOW[personaType][currentQId].question.en}
                 </h2>
               </div>
 
               <div className="space-y-4">
                 {QUESTION_FLOW[personaType][currentQId].options.map((option, idx) => {
-                  const isSelected = answers[currentQId] === option.label;
+                  const labelText = option.label[lang] || option.label.en;
+                  const isSelected = answers[currentQId]?.[lang] === labelText || answers[currentQId] === option.label;
                   return (
                     <button
                       key={idx}
                       onClick={() => handleAnswerSelect(option.label)}
-                      className={`w-full text-left p-6 rounded-2xl border-2 transition-all flex items-center justify-between group ${
+                      className={\`w-full text-left p-6 rounded-2xl border-2 transition-all flex items-center justify-between group \${
                         isSelected
                           ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/5'
                           : 'border-slate-800 bg-slate-900/50 hover:border-slate-600 hover:bg-slate-800'
-                      }`}
+                      }\`}
                     >
-                      <span className={`text-lg font-medium ${isSelected ? 'text-indigo-300' : 'text-slate-300 group-hover:text-white'}`}>
-                        {option.label}
+                      <span className={\`text-lg font-medium \${isSelected ? 'text-indigo-300' : 'text-slate-300 group-hover:text-white'}\`}>
+                        {labelText}
                       </span>
                       <div
-                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shrink-0 ml-4 ${
+                        className={\`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shrink-0 ml-4 \${
                           isSelected ? 'border-indigo-500' : 'border-slate-700'
-                        }`}
+                        }\`}
                       >
                         {isSelected && <div className="w-3 h-3 bg-indigo-500 rounded-full" />}
                       </div>
@@ -338,7 +380,7 @@ export default function App() {
                 disabled={!answers[currentQId]}
                 className="flex items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shadow-lg shadow-indigo-500/20"
               >
-                ถัดไป <ArrowRight className="w-5 h-5" />
+                {t.nextButton} <ArrowRight className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -348,10 +390,10 @@ export default function App() {
         {step === 3 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-500 max-w-2xl mx-auto">
             <div className="space-y-3 text-center mb-10">
-              <h2 className="text-3xl font-bold text-white">ตัวอย่างการเขียน (References)</h2>
+              <h2 className="text-3xl font-bold text-white">{t.samplesTitle}</h2>
               <p className="text-slate-400">
-                เพื่อให้ AI เลียนแบบสไตล์และรสนิยม (Taste) ได้สมจริง โปรดแนบตัวอย่างข้อความ
-                <span className="text-indigo-400 block mt-1">(ไม่บังคับ แต่จะทำให้ skill.md แม่นยำขึ้นมาก)</span>
+                {t.samplesSub1}
+                <span className="text-indigo-400 block mt-1">{t.samplesSub2}</span>
               </p>
             </div>
 
@@ -365,14 +407,14 @@ export default function App() {
                     <button
                       onClick={() => removeSample(sample.id)}
                       className="absolute top-6 right-6 text-slate-500 hover:text-red-400 transition-colors p-2 bg-slate-950 rounded-full"
-                      title="ลบตัวอย่างนี้"
+                      title="Remove"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   )}
 
                   <div className="mb-6">
-                    <label className="block text-sm font-bold text-slate-400 mb-3">แหล่งที่มาของข้อความนี้</label>
+                    <label className="block text-sm font-bold text-slate-400 mb-3">{t.sourceLabel}</label>
                     <div className="flex flex-wrap gap-2">
                       {PLATFORMS.map((platform) => {
                         const Icon = platform.icon;
@@ -381,11 +423,11 @@ export default function App() {
                           <button
                             key={platform.id}
                             onClick={() => updateSample(sample.id, 'source', platform.id)}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                            className={\`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all \${
                               isSelected
                                 ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/20'
                                 : 'bg-slate-950 text-slate-400 hover:bg-slate-800'
-                            }`}
+                            }\`}
                           >
                             <Icon className="w-4 h-4" /> {platform.name}
                           </button>
@@ -398,7 +440,7 @@ export default function App() {
                     <div className="mb-6 animate-in fade-in zoom-in duration-300">
                       <input
                         type="text"
-                        placeholder="ระบุแหล่งที่มา (เช่น อีเมล, Slack, บทความวิชาการ)"
+                        placeholder={t.customSourcePlaceholder}
                         value={sample.customSource}
                         onChange={(e) => updateSample(sample.id, 'customSource', e.target.value)}
                         className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
@@ -408,7 +450,7 @@ export default function App() {
 
                   <div>
                     <textarea
-                      placeholder="วางข้อความตัวอย่างที่นี่..."
+                      placeholder={t.textPlaceholder}
                       value={sample.text}
                       onChange={(e) => updateSample(sample.id, 'text', e.target.value)}
                       rows={6}
@@ -423,7 +465,7 @@ export default function App() {
               onClick={addSample}
               className="flex items-center justify-center w-full gap-2 border-2 border-dashed border-slate-700 text-slate-400 hover:text-indigo-400 hover:border-indigo-500 hover:bg-indigo-500/10 py-5 rounded-3xl transition-all font-bold text-lg mt-6"
             >
-              <Plus className="w-6 h-6" /> เพิ่มตัวอย่างข้อความ
+              <Plus className="w-6 h-6" /> {t.addSample}
             </button>
 
             <div className="flex justify-between pt-10">
@@ -431,13 +473,13 @@ export default function App() {
                 onClick={() => setStep(2)}
                 className="flex items-center gap-2 text-slate-400 hover:text-white px-6 py-4 rounded-2xl font-medium transition-colors"
               >
-                <ArrowLeft className="w-5 h-5" /> ย้อนกลับ
+                <ArrowLeft className="w-5 h-5" /> {t.backButton}
               </button>
               <button
                 onClick={handleGenerate}
                 className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-cyan-500 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:opacity-90 transition-opacity shadow-lg shadow-indigo-500/25 hover:scale-105 active:scale-95"
               >
-                <Sparkles className="w-5 h-5" /> สร้าง skill.md เลย
+                <Sparkles className="w-5 h-5" /> {t.generateButton}
               </button>
             </div>
           </div>
@@ -453,19 +495,18 @@ export default function App() {
                   <Loader2 className="w-20 h-20 text-indigo-400 animate-spin relative z-10" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">กำลังสังเคราะห์ข้อมูล 6 มิติ...</h2>
-                  <p className="text-slate-400 text-lg">กำลังร้อยเรียง โลกทัศน์ มุมมอง และรสนิยม ลงใน skill.md</p>
+                  <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">{t.generatingTitle}</h2>
+                  <p className="text-slate-400 text-lg">{t.generatingSub}</p>
                 </div>
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-slate-900/50 p-6 sm:p-8 rounded-3xl border border-slate-800">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-slate-900/50 p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl backdrop-blur-md">
                   <div>
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-sm font-bold mb-4 border border-green-500/20">
-                      <CheckCircle2 className="w-4 h-4" /> สำเร็จแล้ว
+                      <CheckCircle2 className="w-4 h-4" /> {t.successTitle}
                     </div>
-                    <h2 className="text-3xl font-bold text-white">ไฟล์ skill.md ของคุณพร้อมใช้งาน</h2>
-                    <p className="text-slate-400 mt-2">นำกฎเชิงลึกนี้ไปใส่ใน Vibe-Coding tools ของคุณเพื่อให้ AI ทำงานได้ดั่งใจ</p>
+                    <p className="text-slate-400 mt-2">{t.successSub}</p>
                   </div>
 
                   <div className="flex flex-wrap gap-3">
@@ -474,41 +515,78 @@ export default function App() {
                       className="flex-1 md:flex-none flex justify-center items-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-xl hover:bg-slate-700 transition-colors font-bold"
                     >
                       {copied ? <CheckCircle2 className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
-                      {copied ? 'คัดลอกแล้ว' : 'คัดลอก'}
+                      {copied ? t.copied : t.copy}
                     </button>
                     <button
                       onClick={handleDownload}
                       className="flex-1 md:flex-none flex justify-center items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20 font-bold"
                     >
                       <Download className="w-5 h-5" />
-                      ดาวน์โหลด
+                      {t.download}
                     </button>
                   </div>
                 </div>
 
                 {error && (
                   <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl flex items-start gap-3">
-                    <div className="mt-0.5">⚠️</div>
+                    <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0" />
                     <p className="text-sm">{error}</p>
                   </div>
                 )}
 
-                <div className="bg-[#0d1117] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl relative">
-                  <div className="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center gap-2">
-                    <div className="flex gap-2">
-                      <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                      <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                      <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                <div className="grid lg:grid-cols-2 gap-8">
+                  {/* Generated Markdown view */}
+                  <div className="bg-[#0d1117] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl relative h-full flex flex-col">
+                    <div className="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center gap-2 shrink-0">
+                      <div className="flex gap-2">
+                        <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                        <div className="w-3 h-3 rounded-full bg-amber-500/80" />
+                        <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                      </div>
+                      <span className="ml-4 text-sm font-mono text-slate-400 flex items-center gap-2">
+                        <FileText className="w-4 h-4" /> skill.md
+                      </span>
                     </div>
-                    <span className="ml-4 text-sm font-mono text-slate-400 flex items-center gap-2">
-                      <FileText className="w-4 h-4" /> skill.md
-                    </span>
+                    <div className="p-6 sm:p-8 overflow-auto flex-1 max-h-[500px] custom-scrollbar">
+                      <pre className="text-slate-300 font-mono text-sm whitespace-pre-wrap leading-relaxed">
+                        <code>{generatedMarkdown}</code>
+                      </pre>
+                    </div>
                   </div>
-                  <div className="p-6 sm:p-8 overflow-auto max-h-[60vh] custom-scrollbar">
-                    <pre className="text-slate-300 font-mono text-sm sm:text-base whitespace-pre-wrap leading-loose">
-                      <code>{generatedMarkdown}</code>
-                    </pre>
-                  </div>
+
+                  {/* Before vs After view */}
+                  {exampleMarkdown && (
+                    <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative flex flex-col">
+                      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-cyan-400" /> {t.compareTitle}
+                      </h3>
+                      <p className="text-sm text-slate-400 mb-6">{t.compareDesc}</p>
+                      
+                      <div className="space-y-6 flex-1 overflow-auto custom-scrollbar pr-2 pb-4">
+                        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
+                          <div className="absolute top-0 left-0 w-1 h-full bg-slate-600"></div>
+                          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t.originalText}</h4>
+                          <p className="text-slate-300 text-sm leading-relaxed italic opacity-80">
+                            "We are launching our new project next week. We hope you like it. Please feel free to give us feedback."
+                          </p>
+                        </div>
+
+                        <div className="flex justify-center text-slate-600">
+                          <ArrowRight className="w-6 h-6 rotate-90 lg:rotate-0" />
+                        </div>
+
+                        <div className="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-5 relative overflow-hidden">
+                          <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
+                          <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">{t.personaText}</h4>
+                          <div className="text-slate-200 text-sm leading-relaxed font-medium">
+                            <pre className="whitespace-pre-wrap font-sans">
+                              {exampleMarkdown.replace(/#.*$/gm, '').trim()}
+                            </pre>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex justify-center pt-8">
@@ -516,7 +594,7 @@ export default function App() {
                     onClick={handleReset}
                     className="text-slate-500 hover:text-white transition-colors font-medium flex items-center gap-2"
                   >
-                    <ArrowLeft className="w-4 h-4" /> สร้าง Persona ใหม่อีกครั้ง
+                    <ArrowLeft className="w-4 h-4" /> {t.reset}
                   </button>
                 </div>
               </div>
