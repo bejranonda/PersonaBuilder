@@ -216,12 +216,7 @@ export default function App() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleLanguageSwitch = () => {
-    setLang((prev) => {
-      const idx = LANG_ORDER.indexOf(prev);
-      return LANG_ORDER[(idx + 1) % LANG_ORDER.length];
-    });
-  };
+
 
   const handleReset = () => {
     setStep(1);
@@ -281,14 +276,23 @@ export default function App() {
             </div>
 
             {/* Language switcher */}
-            <button 
-              onClick={handleLanguageSwitch}
-              className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700 font-medium text-sm"
-              title="Switch Language"
-            >
-              <span className="text-base leading-none">{LANG_FLAGS[lang]}</span>
-              <span className="hidden sm:inline">{lang.toUpperCase()}</span>
-            </button>
+            <div className="relative flex items-center bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700 px-3 py-1.5 focus-within:ring-2 focus-within:ring-indigo-500/50">
+              <Globe className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
+              <select
+                value={lang}
+                onChange={(e) => setLang(e.target.value)}
+                className="bg-transparent text-sm font-medium text-slate-200 outline-none cursor-pointer appearance-none pr-6 w-full"
+              >
+                <option value="en" className="bg-slate-800 text-slate-200">English</option>
+                <option value="th" className="bg-slate-800 text-slate-200">ภาษาไทย</option>
+                <option value="de" className="bg-slate-800 text-slate-200">Deutsch</option>
+              </select>
+              <div className="absolute right-3 pointer-events-none">
+                <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
       </header>
