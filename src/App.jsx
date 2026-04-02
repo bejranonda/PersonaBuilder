@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   User, Bot, FileText, Download, Plus, Trash2, ArrowRight, ArrowLeft,
   Loader2, CheckCircle2, Sparkles, Copy, Globe, AlertTriangle
@@ -7,8 +7,24 @@ import { QUESTION_FLOW, PLATFORMS } from './data/questionFlow';
 import { DICTIONARY } from './lib/i18n';
 import { generateContentWithRetry } from './lib/api';
 
+const LANG_FLAGS = { en: '🇬🇧', th: '🇹🇭', de: '🇩🇪' };
+const LANG_NAMES = { en: 'English', th: 'Thai', de: 'German' };
+const LANG_ORDER = ['en', 'th', 'de'];
+
+function getStepperClass(step, s) {
+  if (step === s) return 'bg-indigo-500 text-white ring-4 ring-indigo-500/20';
+  if (step > s) return 'bg-slate-700 text-slate-300';
+  return 'bg-slate-800 text-slate-500';
+}
+
+function getConnectorClass(step, s) {
+  return step > s ? 'bg-slate-700' : 'bg-slate-800';
+}
+
 export default function App() {
-  const [lang, setLang] = useState('en');
+  const [lang, setLang] = useState(() => {
+    try { return localStorage.getItem('pb-lang') || 'en'; } catch { return 'en'; }
+  });
   const t = DICTIONARY[lang];
 
   const [step, setStep] = useState(1);
@@ -29,12 +45,24 @@ export default function App() {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
 
+  // Persist language preference
+  useEffect(() => {
+    try { localStorage.setItem('pb-lang', lang); } catch { /* noop */ }
+    document.documentElement.lang = lang === 'th' ? 'th' : lang === 'de' ? 'de' : 'en';
+  }, [lang]);
+
   useEffect(() => {
     if (step === 2 && !currentQId) {
       setCurrentQId(QUESTION_FLOW[personaType].start);
       setQHistory([]);
     }
   }, [step, personaType]);
+
+  // Count total questions for progress indicator
+  const questionProgress = useMemo(() => {
+    if (!personaType || !currentQId) return null;
+    return { current: qHistory.length + 1, total: 6 }; // 6 dimensions always
+  }, [personaType, currentQId, qHistory]);
 
   const handleTypeSelect = (type) => {
     setPersonaType(type);
@@ -51,7 +79,9 @@ export default function App() {
     if (!selectedLabel) return;
 
     const currentQData = QUESTION_FLOW[personaType][currentQId];
-    const selectedOption = currentQData.options.find((o) => o.label[lang] === selectedLabel[lang] || o.label === selectedLabel);
+    const selectedOption = currentQData.options.find(
+      (o) => o.label === selectedLabel
+    );
 
     if (selectedOption?.nextId === 'END') {
       setStep(3);
@@ -89,12 +119,12 @@ export default function App() {
         const ans = answers[iterQId];
         if (!ans) break;
 
-        const ansLabel = ans[lang] ? ans[lang] : ans;
-        const qText = qObj.question[lang] ? qObj.question[lang] : qObj.question;
+        const ansLabel = ans[lang] || ans;
+        const qText = qObj.question[lang] || qObj.question;
 
-        pathData.push(`${qText}\n-> Selected: ${ansLabel}`);
+        pathData.push(qText + '\n-> Selected: ' + ansLabel);
 
-        const opt = qObj.options.find((o) => o.label[lang] === ansLabel || o.label === ansLabel);
+        const opt = qObj.options.find((o) => o.label === ans);
         iterQId = opt ? opt.nextId : 'END';
       }
 
@@ -104,37 +134,37 @@ export default function App() {
         .filter((s) => s.text.trim() !== '')
         .map((s, i) => {
           const sourceName = s.source === 'other' ? s.customSource : PLATFORMS.find((p) => p.id === s.source)?.name;
-          return `--- Sample ${i + 1} (From: ${sourceName}) ---\n${s.text}\n`;
+          return '--- Sample ' + (i + 1) + ' (From: ' + sourceName + ') ---\n' + s.text + '\n';
         })
         .join('\n');
 
-      const prompt = `
-        Create a skill.md file based on the following profile type: ${personaType}
+      const prompt = [
+        'Create a skill.md file based on the following profile type: ' + personaType,
+        '',
+        'Traits and conceptual logic selected by user:',
+        questionDataStr,
+        '',
+        '[Writing References provided by user]',
+        sampleData || 'No specific writing samples provided. Extrapolate based on the logic.',
+        '',
+        'The standard test phrase for the "Before vs After Example" is:',
+        '"We are launching our new project next week. We hope you like it. Please feel free to give us feedback."'
+      ].join('\n');
 
-        Traits and conceptual logic selected by user:
-        ${questionDataStr}
+      let result = await generateContentWithRetry(prompt, LANG_NAMES[lang] || 'English');
 
-        [Writing References provided by user]
-        ${sampleData || 'No specific writing samples provided. Extrapolate based on the logic.'}
-        
-        The standard test phrase for the "Before vs After Example" is:
-        "We are launching our new project next week. We hope you like it. Please feel free to give us feedback."
-      `;
-
-      let result = await generateContentWithRetry(prompt, lang);
-
-      // Simple heuristic parser for separating "Before vs After" from skill.md
-      // We look for phrases like "Before vs After", "Vorher vs", "Before vs." depending on language, or standard markdown splits.
+      // Heuristic parser for separating "Before vs After" from skill.md
       const lowerResult = result.toLowerCase();
       let splitIndex = result.length;
       
       const splitKeywords = [
-        "### before vs after example", 
-        "### before vs out", 
-        "before vs after",
-        "### vergleich",
-        "### ตัวอย่าง",
-        "## before vs",
+        '### before vs after example', 
+        '### before vs after',
+        'before vs after',
+        '### vergleich',
+        '### vorher vs',
+        '### ตัวอย่าง',
+        '## before vs',
       ];
       
       for (const keyword of splitKeywords) {
@@ -145,7 +175,7 @@ export default function App() {
       }
 
       let generatedSkill = result;
-      let generatedExample = "";
+      let generatedExample = '';
 
       if (splitIndex < result.length && splitIndex > 100) {
         generatedSkill = result.substring(0, splitIndex).trim();
@@ -159,7 +189,7 @@ export default function App() {
     } catch (err) {
       console.error(err);
       setGeneratedMarkdown(
-        `# 🤖 Persona: Default Fallback\n\n## 🎯 Core Identity\n- AI Generation Failed\n- ${t.aiError}\n\n## Raw Error:\n${err.message}`
+        '# 🤖 Persona: Default Fallback\n\n## 🎯 Core Identity\n- AI Generation Failed\n- ' + t.aiError + '\n\n## Raw Error:\n' + err.message
       );
       setError(t.aiError);
     } finally {
@@ -186,7 +216,10 @@ export default function App() {
   };
 
   const handleLanguageSwitch = () => {
-    setLang(prev => prev === 'en' ? 'th' : prev === 'th' ? 'de' : 'en');
+    setLang((prev) => {
+      const idx = LANG_ORDER.indexOf(prev);
+      return LANG_ORDER[(idx + 1) % LANG_ORDER.length];
+    });
   };
 
   const handleReset = () => {
@@ -200,8 +233,22 @@ export default function App() {
     setExampleMarkdown('');
   };
 
+  const cloneCardClass = personaType === 'clone'
+    ? 'border-indigo-500 bg-indigo-500/10 shadow-xl shadow-indigo-500/10'
+    : 'border-slate-800 bg-slate-900 hover:border-slate-700 hover:bg-slate-800';
+
+  const agentCardClass = personaType === 'agent'
+    ? 'border-cyan-500 bg-cyan-500/10 shadow-xl shadow-cyan-500/10'
+    : 'border-slate-800 bg-slate-900 hover:border-slate-700 hover:bg-slate-800';
+
+  const cloneIconClass = personaType === 'clone'
+    ? 'bg-indigo-500 text-white' : 'bg-slate-800 text-indigo-400 group-hover:bg-slate-700';
+
+  const agentIconClass = personaType === 'agent'
+    ? 'bg-cyan-500 text-white' : 'bg-slate-800 text-cyan-400 group-hover:bg-slate-700';
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-indigo-500/30 pb-20">
+    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-indigo-500/30 flex flex-col">
       {/* Header */}
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -214,68 +261,55 @@ export default function App() {
             </h1>
           </div>
           
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4 sm:gap-6">
+            {/* Step indicators */}
+            <div className="flex items-center gap-1 sm:gap-2">
               {[1, 2, 3, 4].map((s) => {
                 const stepLabels = [t.step1, t.step2, t.step3, t.step4];
                 return (
-                  <div key={s} className="flex items-center" title={stepLabels[s-1]}>
-                    <div
-                      className={\`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 \${
-                        step === s
-                          ? 'bg-indigo-500 text-white ring-4 ring-indigo-500/20'
-                          : step > s
-                            ? 'bg-slate-700 text-slate-300'
-                            : 'bg-slate-800 text-slate-500'
-                      }\`}
-                    >
+                  <div key={s} className="flex items-center" title={stepLabels[s - 1]}>
+                    <div className={'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ' + getStepperClass(step, s)}>
                       {step > s ? <CheckCircle2 className="w-4 h-4" /> : s}
                     </div>
                     {s < 4 && (
-                      <div
-                        className={\`w-4 sm:w-8 h-1 mx-1 rounded-full transition-all duration-300 \${step > s ? 'bg-slate-700' : 'bg-slate-800'}\`}
-                      />
+                      <div className={'w-4 sm:w-8 h-1 mx-1 rounded-full transition-all duration-300 ' + getConnectorClass(step, s)} />
                     )}
                   </div>
                 );
               })}
             </div>
 
+            {/* Language switcher */}
             <button 
               onClick={handleLanguageSwitch}
-              className="flex items-center justify-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700 font-medium text-sm"
+              className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700 font-medium text-sm"
+              title="Switch Language"
             >
-              <Globe className="w-4 h-4" />
-              {lang.toUpperCase()}
+              <span className="text-base leading-none">{LANG_FLAGS[lang]}</span>
+              <span className="hidden sm:inline">{lang.toUpperCase()}</span>
             </button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-12">
+      <main className="max-w-4xl mx-auto px-6 py-12 flex-1 w-full">
         {/* Step 1: Type Selection */}
         {step === 1 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-4 mb-12">
               <h2 className="text-4xl font-bold text-white tracking-tight">{t.typeSelectionTitle}</h2>
-              <p className="text-slate-400 text-lg" dangerouslySetInnerHTML={{ __html: t.typeSelectionSub }} />
+              <p className="text-slate-400 text-lg">
+                {t.typeSelectionSubText} <code className="bg-slate-800 px-2 py-1 rounded-md text-sm text-indigo-300">skill.md</code>
+              </p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <button
                 onClick={() => handleTypeSelect('clone')}
-                className={\`relative overflow-hidden group p-8 rounded-3xl border-2 transition-all text-left \${
-                  personaType === 'clone'
-                    ? 'border-indigo-500 bg-indigo-500/10 shadow-xl shadow-indigo-500/10'
-                    : 'border-slate-800 bg-slate-900 border-opacity-50 hover:border-slate-700 hover:bg-slate-800'
-                }\`}
+                className={'relative overflow-hidden group p-8 rounded-3xl border-2 transition-all text-left ' + cloneCardClass}
               >
-                <div
-                  className={\`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-colors \${
-                    personaType === 'clone' ? 'bg-indigo-500 text-white' : 'bg-slate-800 text-indigo-400 group-hover:bg-slate-700'
-                  }\`}
-                >
+                <div className={'w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-colors ' + cloneIconClass}>
                   <User className="w-8 h-8" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-3">{t.cloneTitle}</h3>
@@ -289,17 +323,9 @@ export default function App() {
 
               <button
                 onClick={() => handleTypeSelect('agent')}
-                className={\`relative overflow-hidden group p-8 rounded-3xl border-2 transition-all text-left \${
-                  personaType === 'agent'
-                    ? 'border-cyan-500 bg-cyan-500/10 shadow-xl shadow-cyan-500/10'
-                    : 'border-slate-800 bg-slate-900 border-opacity-50 hover:border-slate-700 hover:bg-slate-800'
-                }\`}
+                className={'relative overflow-hidden group p-8 rounded-3xl border-2 transition-all text-left ' + agentCardClass}
               >
-                <div
-                  className={\`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-colors \${
-                    personaType === 'agent' ? 'bg-cyan-500 text-white' : 'bg-slate-800 text-cyan-400 group-hover:bg-slate-700'
-                  }\`}
-                >
+                <div className={'w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-colors ' + agentIconClass}>
                   <Bot className="w-8 h-8" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-3">{t.agentTitle}</h3>
@@ -335,6 +361,11 @@ export default function App() {
                 <ArrowLeft className="w-4 h-4" /> {t.backButton}
               </button>
               <div className="flex-1 h-px bg-slate-800" />
+              {questionProgress && (
+                <span className="text-slate-500 text-xs font-mono">
+                  {questionProgress.current} / {questionProgress.total}
+                </span>
+              )}
             </div>
 
             <div key={currentQId} className="flex-1 animate-in fade-in slide-in-from-right-8 duration-500">
@@ -347,25 +378,22 @@ export default function App() {
               <div className="space-y-4">
                 {QUESTION_FLOW[personaType][currentQId].options.map((option, idx) => {
                   const labelText = option.label[lang] || option.label.en;
-                  const isSelected = answers[currentQId]?.[lang] === labelText || answers[currentQId] === option.label;
+                  const isSelected = answers[currentQId] === option.label;
+                  const selectedStyle = isSelected
+                    ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/5'
+                    : 'border-slate-800 bg-slate-900/50 hover:border-slate-600 hover:bg-slate-800';
+                  const textStyle = isSelected ? 'text-indigo-300' : 'text-slate-300 group-hover:text-white';
+                  const radioStyle = isSelected ? 'border-indigo-500' : 'border-slate-700';
                   return (
                     <button
                       key={idx}
                       onClick={() => handleAnswerSelect(option.label)}
-                      className={\`w-full text-left p-6 rounded-2xl border-2 transition-all flex items-center justify-between group \${
-                        isSelected
-                          ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/5'
-                          : 'border-slate-800 bg-slate-900/50 hover:border-slate-600 hover:bg-slate-800'
-                      }\`}
+                      className={'w-full text-left p-6 rounded-2xl border-2 transition-all flex items-center justify-between group ' + selectedStyle}
                     >
-                      <span className={\`text-lg font-medium \${isSelected ? 'text-indigo-300' : 'text-slate-300 group-hover:text-white'}\`}>
+                      <span className={'text-lg font-medium ' + textStyle}>
                         {labelText}
                       </span>
-                      <div
-                        className={\`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shrink-0 ml-4 \${
-                          isSelected ? 'border-indigo-500' : 'border-slate-700'
-                        }\`}
-                      >
+                      <div className={'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shrink-0 ml-4 ' + radioStyle}>
                         {isSelected && <div className="w-3 h-3 bg-indigo-500 rounded-full" />}
                       </div>
                     </button>
@@ -419,15 +447,14 @@ export default function App() {
                       {PLATFORMS.map((platform) => {
                         const Icon = platform.icon;
                         const isSelected = sample.source === platform.id;
+                        const btnStyle = isSelected
+                          ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/20'
+                          : 'bg-slate-950 text-slate-400 hover:bg-slate-800';
                         return (
                           <button
                             key={platform.id}
                             onClick={() => updateSample(sample.id, 'source', platform.id)}
-                            className={\`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all \${
-                              isSelected
-                                ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/20'
-                                : 'bg-slate-950 text-slate-400 hover:bg-slate-800'
-                            }\`}
+                            className={'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ' + btnStyle}
                           >
                             <Icon className="w-4 h-4" /> {platform.name}
                           </button>
@@ -567,7 +594,7 @@ export default function App() {
                           <div className="absolute top-0 left-0 w-1 h-full bg-slate-600"></div>
                           <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t.originalText}</h4>
                           <p className="text-slate-300 text-sm leading-relaxed italic opacity-80">
-                            "We are launching our new project next week. We hope you like it. Please feel free to give us feedback."
+                            &ldquo;We are launching our new project next week. We hope you like it. Please feel free to give us feedback.&rdquo;
                           </p>
                         </div>
 
@@ -602,6 +629,14 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-800 bg-slate-900/60 py-6 mt-auto">
+        <div className="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+          <span>Persona Builder &mdash; Powered by Cloudflare Workers AI</span>
+          <span>6-Dimension Deep Analysis Framework</span>
+        </div>
+      </footer>
     </div>
   );
 }

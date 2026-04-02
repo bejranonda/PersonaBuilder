@@ -1,5 +1,7 @@
 const MODEL = '@cf/meta/llama-3.1-8b-instruct'; // Can fallback to llama-3-8b-instruct
 
+const LANG_MAP = { en: 'English', th: 'Thai', de: 'German' };
+
 const SYSTEM_INSTRUCTION = `You are an elite AI Persona Design expert and Behavioral Psychologist. Your task is to extract traits from a 6-dimension deep dive to create a perfect 'skill.md' for Vibe-Coding.
 
 Rules:
@@ -41,7 +43,8 @@ export async function onRequestPost(context) {
       );
     }
 
-    const sysInst = SYSTEM_INSTRUCTION + `\n\nCRITICAL: You must generate the output entirely in ${language} language.`;
+    const langName = LANG_MAP[language] || language;
+    const sysInst = SYSTEM_INSTRUCTION + `\n\nCRITICAL: You must generate the output entirely in ${langName} language.`;
 
     const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${MODEL}`;
 
@@ -55,7 +58,8 @@ export async function onRequestPost(context) {
         messages: [
           { role: 'system', content: sysInst },
           { role: 'user', content: prompt }
-        ]
+        ],
+        max_tokens: 2048
       }),
     });
 
@@ -71,7 +75,8 @@ export async function onRequestPost(context) {
             messages: [
               { role: 'system', content: sysInst },
               { role: 'user', content: prompt }
-            ]
+            ],
+            max_tokens: 2048
           }),
         });
         if (fbResponse.ok) {
