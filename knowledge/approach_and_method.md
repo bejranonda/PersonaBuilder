@@ -49,3 +49,11 @@ To give users immediate confidence, each generated `skill.md` includes a rewrite
 ## 5. Branching Question logic
 
 The wizard isn't linear. Dimension 2 (Perception) and Dimension 5 (Persuasion) change based on the user's previous answers. This ensures that follow-up questions are always contextually relevant to the specific type of persona being built.
+
+---
+
+## 6. Real-time Feedback via SSE Streaming
+
+In v2.1, we migrated the generation pipeline from standard request/response to Server-Sent Events (SSE) streaming.
+- **Why?** Generating 1000+ tokens of deep persona markdown takes 15–30 seconds. A static loader decreases user trust and frustrates iteration.
+- **How?** The Cloudflare Worker proxy forwards the native Llama 3.1 stream. The React frontend uses a custom token parser (`generateContentStream`) to intercept boundary markers (`===PERSONA_MD_START===`) and route live tokens cleanly into separate UI Tabs (Persona, Summary, Example).

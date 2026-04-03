@@ -41,10 +41,11 @@ The project uses GitHub Actions for automated deployment and releasing.
 
 ## Modifying the AI Engine
 
-### The Proxy Function
+### The Proxy Function & Streaming
 The core AI logic is in `functions/api/generate.js`. 
 - **Model**: Defaulting to `@cf/meta/llama-3.1-8b-instruct`.
-- **System Prompt**: Defines how the traits are synthesized into the `persona.md` format.
+- **System Prompt**: Defines how the traits are synthesized into the 5 section markers (`===SUMMARY_START===`, etc.).
+- **Streaming**: Must use `stream: true` to prevent 30-second Cloudflare proxy timeouts and to forward Server-Sent Events natively to the React client (`src/lib/api.js`).
 
 ### Extending Languages
 1.  Update `src/data/questionFlow.js` helper `t()` and all question definitions.

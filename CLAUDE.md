@@ -21,10 +21,8 @@ PersonaBuilder is a specialized tool for generating AI Personas (`persona.md`) u
 
 ## Architectural Conventions
 - **Questionnaire**: Logic is stored in `src/data/questionFlow.js` using a branching tree structure. Data relies on `dimension`, `question`, `label`, and `tag` attributes for rich UI rendering.
-- **API**: Centralized in `src/lib/api.js`, calling the local `/api/generate` endpoint.
-- **i18n**: Custom dictionary-based system in `src/lib/i18n.js`.
-- **Persona Structure**: Focused on Worldview, Perception, Agency, Taste, Persuasion, and Guardrails.
-- **Output Format**: Enforces a strict 3-section format: Persona Summary, System Prompt, and Before vs After Example.
+- **Streaming API (SSE)**: `src/lib/api.js` utilizes `ReadableStream` to parse HTTP Event Streams from Cloudflare AI, preventing long timeouts. The raw output is parsed immediately token-by-token.
+- **Output Format**: Enforces a strict 5-section backend marker format (`===SUMMARY_START===` etc.) parsed natively in the React chunk processor to cleanly populate the 3 Tabbed interfaces (Persona, Summary, Example).
 
 ## Code Style
 - Functional components with hooks.

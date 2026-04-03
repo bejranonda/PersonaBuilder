@@ -1,4 +1,4 @@
-# 🤖 Persona Builder v2.0
+# 🤖 Persona Builder v2.1
 
 > Create a premium AI Persona (`persona.md`) for Vibe-Coding using a natural-language 6-dimension deep personality analysis framework.
 
@@ -6,18 +6,18 @@
 
 ---
 
-## ✨ Features v2.0
+## ✨ Features v2.1
 
 | Feature | Description |
 |---------|-------------|
+| **Streaming AI (SSE)** | Near-instant Time-to-First-Token (TTFB) using Server-Sent Events, drastically reducing generation wait times. |
+| **Tabbed Results UI** | Clean, organized display of persona.md, Summary, and Before/After Examples in isolated tabs. |
+| **Browser Language Detection** | Automatically boots in English, Thai, or German based on OS/Browser preferred languages (`navigator.language`). |
+| **Auto-Scroll Navigation** | Frictionless mobile experience; transitions automatically scroll to the top of the next question/step. |
 | **Natural Language UX** | Rephrased questions and options to sound like real-life scenarios rather than academic theory. |
-| **Custom UI/UX** | Premium glassmorphism design with a custom language selector and improved question flow. |
 | **6-Dimension Analysis** | Deep mapping of Worldview, Perception, Agency, Taste, Persuasion, and Guardrails. |
-| **Clone Mode 2.0** | Focus on daily-life decisions and instincts to accurately mirror your human voice. |
-| **Agent Mode 2.0** | Design expert AI Agents with clearly separated technical tags and strategic boundaries. |
-| **Comparison Preview** | Built-in "Before vs After" testing to see your persona in action immediately. |
-| **Cloudflare AI** | High-performance generation powered by **Llama 3.1 8B Instruct** via Cloudflare Workers AI. |
-| **persona.md Export** | Standardized markdown export (Summary, System Prompt, Example) ready for agentic AI. |
+| **Clone & Agent Modes** | Two distinct flows tailored for either mirroring human traits or defining exact specialist boundaries. |
+| **Cloudflare AI Edge** | High-performance generation powered by **Llama 3.1 8B Instruct** via Cloudflare Workers AI. |
 
 ## 🛠️ Tech Stack
 
@@ -84,9 +84,8 @@ flowchart LR
     User([User]) --> UI[React Frontend]
     UI --> Wiz[6-Dim Wizard]
     Wiz --> Proxy[CF Pages Function]
-    Proxy --> AI[Cloudflare Workers AI<br/>Llama 3.1 8B]
-    AI --> Res[skill.md Generator]
-    Res --> UI
+    Proxy -- Streaming SSE --> AI[Cloudflare Workers AI Llama 3.1]
+    AI -- Chunked Tokens --> UI
 ```
 
 - **Frontend**: A state-driven React app that manages the multi-step branching questionnaire.

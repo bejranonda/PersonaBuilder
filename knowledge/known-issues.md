@@ -26,14 +26,19 @@
 ### Phase 2: Natural Language UX (v2.0 - Completed)
 - [x] Refactored questionnaire to use regular human phrasing.
 - [x] Separated technical `tags` from textual `labels`.
-- [x] Implemented Custom Dropdown Language selector.
-- [x] Enforced strict 3-section AI output format (`persona.md` without skill.md contamination).
+- [x] Enforced strict AI output format (`persona.md` without skill.md contamination).
 
-### Phase 3: Enhanced Vision
+### Phase 3: Performance & Accessibility (v2.1 - Completed)
+- [x] **Browser Language Auto-Detection**: Initialization localized via `navigator.language`.
+- [x] **Server-Sent Events (SSE)**: Complete rewrite of generative pipeline to support real-time token streaming.
+- [x] **Results Tab UI**: Replaced the monolithic format with isolated Persona, Summary, and Example tabs.
+- [x] **Frictionless Mobile scroll**: Automated `scrollIntoView` anchoring.
+
+### Phase 4: Enhanced Vision
 - [ ] Integration with higher parameter models (Llama 3.1 70B) for better Thai/German reasoning.
 - [ ] Support for direct `persona.md` file uploads to "edit" existing personas.
 - [ ] Built-in prompt playground for immediate persona testing.
 
-### Phase 3: Ecosystem
+### Phase 5: Ecosystem
 - [ ] Export directly to popular AI coding tools (Windsurf, Cursor, etc.).
 - [ ] Communal library of pre-built "Base Agents".
