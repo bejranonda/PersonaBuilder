@@ -1,11 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   User, Bot, FileText, Download, Plus, Trash2, ArrowRight, ArrowLeft,
   Loader2, CheckCircle2, Sparkles, Copy, Globe, AlertTriangle
 } from 'lucide-react';
 import { QUESTION_FLOW, PLATFORMS } from './data/questionFlow';
 import { DICTIONARY } from './lib/i18n';
-import { generateContentWithRetry } from './lib/api';
+import { generateContentStream } from './lib/api';
 import ReactMarkdown from 'react-markdown';
 
 const LANG_FLAGS = { en: '🇬🇧', th: '🇹🇭', de: '🇩🇪' };
@@ -22,10 +22,19 @@ function getConnectorClass(step, s) {
   return step > s ? 'bg-slate-700' : 'bg-slate-800';
 }
 
+function detectBrowserLang() {
+  try {
+    const stored = localStorage.getItem('pb-lang');
+    if (stored) return stored;
+  } catch { /* noop */ }
+  const browserLang = (navigator.language || '').toLowerCase();
+  if (browserLang.startsWith('th')) return 'th';
+  if (browserLang.startsWith('de')) return 'de';
+  return 'en';
+}
+
 export default function App() {
-  const [lang, setLang] = useState(() => {
-    try { return localStorage.getItem('pb-lang') || 'en'; } catch { return 'en'; }
-  });
+  const [lang, setLang] = useState(detectBrowserLang);
   const t = DICTIONARY[lang];
 
   const [step, setStep] = useState(1);
@@ -42,7 +51,12 @@ export default function App() {
   // Generation State
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedMarkdown, setGeneratedMarkdown] = useState('');
-  const [exampleMarkdown, setExampleMarkdown] = useState('');
+  const [personaSummary, setPersonaSummary] = useState('');
+  const [examplePrompt, setExamplePrompt] = useState('');
+  const [exampleBefore, setExampleBefore] = useState('');
+  const [exampleAfter, setExampleAfter] = useState('');
+  const [activeTab, setActiveTab] = useState('persona'); // persona | summary | example
+  const topRef = useRef(null);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
@@ -96,9 +110,11 @@ export default function App() {
 
     if (selectedOption?.nextId === 'END') {
       setStep(3);
+      setTimeout(() => topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     } else if (selectedOption) {
       setQHistory((prev) => [...prev, currentQId]);
       setCurrentQId(selectedOption.nextId);
+      setTimeout(() => topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
     }
   };
 
@@ -110,6 +126,7 @@ export default function App() {
       const prevQId = newHistory.pop();
       setQHistory(newHistory);
       setCurrentQId(prevQId);
+      setTimeout(() => topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
     }
   };
 
@@ -120,7 +137,14 @@ export default function App() {
   const handleGenerate = async () => {
     setIsGenerating(true);
     setError('');
+    setGeneratedMarkdown('');
+    setPersonaSummary('');
+    setExamplePrompt('');
+    setExampleBefore('');
+    setExampleAfter('');
+    setActiveTab('persona');
     setStep(4);
+    setTimeout(() => topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 
     try {
       const pathData = [];
@@ -130,14 +154,14 @@ export default function App() {
         const ans = answers[iterQId];
         if (!ans) break;
 
-        const ansLabel = ans[lang] || ans.en;
         const qDim = qObj.dimension[lang] || qObj.dimension.en;
         const qText = qObj.question[lang] || qObj.question.en;
 
         const opt = qObj.options.find((o) => o.label === ans);
         const tagLabel = opt?.tag ? (opt.tag[lang] || opt.tag.en) : '';
+        const optLabel = opt?.label?.[lang] || opt?.label?.en || ans;
 
-        pathData.push(`[${qDim}] ${qText}\n-> Answer Selection: ${tagLabel ? tagLabel + ' - ' : ''}${ansLabel}`);
+        pathData.push(`[${qDim}] ${qText}\n-> Answer Selection: ${tagLabel ? tagLabel + ' - ' : ''}${optLabel}`);
 
         iterQId = opt ? opt.nextId : 'END';
       }
@@ -152,74 +176,45 @@ export default function App() {
         })
         .join('\n');
 
-      const prompt = `You are a professional AI Persona Engineer. Your task is to generate a premium "persona.md" file that defines an AI's personality, worldview, and behavior patterns.
-
-[INPUT CONTEXT]
-- Persona Type: ${personaType === 'clone' ? 'Personal Clone (Mimicking a specific human)' : 'Specialized AI Agent'}
+      const userPrompt = `[INPUT CONTEXT]
+- Persona Type: ${personaType === 'clone' ? 'Personal Clone' : 'Specialized Agent'}
 - 6-Dimension Deep Analysis Results:
 ${questionDataStr}
 
 [WRITING STYLE REFERENCES]
 ${sampleData || 'No specific writing samples provided. Extrapolate tone from the selection logic.'}
 
-[REQUIRED OUTPUT FORMAT]
-You MUST output the result in EXACTLY three sections. Do NOT mention "skill.md".
+Output ONLY the requested sections in ${LANG_NAMES[lang]}. Do not output any thinking or extra markdown code blocks outside the sections.`;
 
-1. **สรุปคุณลักษณะ Persona ที่ใช้**
-   A professional summary in ${LANG_NAMES[lang]} of the resulting persona's traits, strengths, and communication style.
+      let fullRawResult = '';
 
-2. **Prompt ตัวอย่าง**
-   A high-quality system prompt (in English for best AI performance) that can be inserted into an LLM to activate this persona. Use the "Act as [Name/Role]" format.
-
-3. **### Before vs After Example**
-   Show a comparison using this standard test phrase:
-   "We are launching our new project next week. We hope you like it. Please feel free to give us feedback."
-   
-   Format:
-   - **Original Text (Before)**: (The phrase above)
-   - **Persona Applied (After)**: (The phrase rewritten as this persona would say it)
-
-[CRITICAL RULE]
-- Do NOT wrap the output in extra markdown code blocks if you are already inside one.
-- DO NOT generate a "skill.md" section. 
-- Ensure the "After" example strongly reflects the 6 dimensions selected.`;
-
-      let result = await generateContentWithRetry(prompt, LANG_NAMES[lang] || 'English');
-
-      // Enhanced parser for separating "Before vs After" from persona.md
-      const lowerResult = result.toLowerCase();
-      let splitIndex = result.length;
-      
-      const splitKeywords = [
-        '### before vs after example', 
-        '### before vs after',
-        '### before vs',
-        'before vs after',
-        '### vergleich',
-        '### vorher vs',
-        '### ตัวอย่าง',
-        '## before vs',
-      ];
-      
-      for (const keyword of splitKeywords) {
-        const idx = lowerResult.lastIndexOf(keyword);
-        if (idx !== -1 && idx < splitIndex) {
-          splitIndex = idx;
+      const extractSection = (text, startMark, endMarks) => {
+        const startIdx = text.indexOf(startMark);
+        if (startIdx === -1) return '';
+        const contentStart = startIdx + startMark.length;
+        let endIdx = text.length;
+        for (const endMark of endMarks) {
+          const markIdx = text.indexOf(endMark, contentStart);
+          if (markIdx !== -1 && markIdx < endIdx) endIdx = markIdx;
         }
-      }
+        return text.substring(contentStart, endIdx).replace(/^```[a-z]*\n/i, '').replace(/\n```$/i, '').trim();
+      };
 
-      let generatedSkill = result;
-      let generatedExample = '';
+      await generateContentStream(userPrompt, lang, (chunk) => {
+        fullRawResult += chunk;
 
-      if (splitIndex < result.length && splitIndex > 100) {
-        generatedSkill = result.substring(0, splitIndex).trim();
-        generatedExample = result.substring(splitIndex).trim();
-      }
+        const summary = extractSection(fullRawResult, '===SUMMARY_START===', ['===PERSONA_MD_START===']);
+        const personaMd = extractSection(fullRawResult, '===PERSONA_MD_START===', ['===EXAMPLE_PROMPT_START===']);
+        const promptExp = extractSection(fullRawResult, '===EXAMPLE_PROMPT_START===', ['===BEFORE_START===']);
+        const before = extractSection(fullRawResult, '===BEFORE_START===', ['===AFTER_START===']);
+        const after = extractSection(fullRawResult, '===AFTER_START===', ['===END===']);
 
-      // Cleanup logic
-      generatedSkill = generatedSkill.replace(/^```[a-z]*\n/i, '').replace(/\n```$/i, '');
-      setGeneratedMarkdown(generatedSkill);
-      setExampleMarkdown(generatedExample);
+        if (summary) setPersonaSummary(summary);
+        if (personaMd) setGeneratedMarkdown(personaMd);
+        if (promptExp) setExamplePrompt(promptExp);
+        if (before) setExampleBefore(before);
+        if (after) setExampleAfter(after);
+      });
 
     } catch (err) {
       console.error(err);
@@ -258,7 +253,12 @@ You MUST output the result in EXACTLY three sections. Do NOT mention "skill.md".
     setAnswers({});
     setSamples([{ id: Date.now(), text: '', source: 'facebook', customSource: '' }]);
     setGeneratedMarkdown('');
-    setExampleMarkdown('');
+    setPersonaSummary('');
+    setExamplePrompt('');
+    setExampleBefore('');
+    setExampleAfter('');
+    setActiveTab('persona');
+    setError('');
   };
 
   const cloneCardClass = personaType === 'clone'
@@ -357,7 +357,7 @@ You MUST output the result in EXACTLY three sections. Do NOT mention "skill.md".
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-12 flex-1 w-full">
+      <main ref={topRef} className="max-w-4xl mx-auto px-6 py-12 flex-1 w-full relative">
         {/* Step 1: Type Selection */}
         {step === 1 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -592,43 +592,6 @@ You MUST output the result in EXACTLY three sections. Do NOT mention "skill.md".
         {/* Step 4: Result */}
         {step === 4 && (
           <div className="space-y-8 animate-in zoom-in-95 duration-500">
-            {isGenerating ? (
-              <div className="py-12 md:py-20 flex flex-col items-center justify-center space-y-8 animate-pulse text-center">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-indigo-500 rounded-full blur-3xl opacity-20" />
-                  <Loader2 className="w-16 h-16 text-indigo-400 animate-spin relative z-10" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-2">{t.generatingTitle}</h2>
-                  <p className="text-slate-400">{t.generatingSub}</p>
-                </div>
-                
-                {/* Shimmer Skeleton matching the result layout */}
-                <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-8 mt-12 text-left opacity-30">
-                  <div className="bg-[#0d1117] border border-slate-800 rounded-3xl overflow-hidden h-[400px] flex flex-col">
-                    <div className="bg-slate-900 px-4 py-3 border-b border-slate-800 flex gap-2">
-                       <div className="w-3 h-3 rounded-full bg-slate-700" />
-                       <div className="w-3 h-3 rounded-full bg-slate-700" />
-                       <div className="w-3 h-3 rounded-full bg-slate-700" />
-                    </div>
-                    <div className="p-8 space-y-4">
-                      <div className="h-4 bg-slate-800 rounded w-3/4"></div>
-                      <div className="h-4 bg-slate-800 rounded w-1/2"></div>
-                      <div className="h-4 bg-slate-800 rounded w-5/6"></div>
-                      <div className="h-4 bg-slate-800 rounded w-2/3 mt-8"></div>
-                      <div className="h-4 bg-slate-800 rounded w-4/5"></div>
-                      <div className="h-4 bg-slate-800 rounded w-1/2"></div>
-                    </div>
-                  </div>
-                  <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-8 h-[400px] flex flex-col justify-start">
-                    <div className="h-6 bg-slate-800 rounded w-1/3 mb-4"></div>
-                    <div className="h-4 bg-slate-800 rounded w-2/3 mb-10"></div>
-                    <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 mb-6 h-24"></div>
-                    <div className="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-5 flex-1"></div>
-                  </div>
-                </div>
-              </div>
-            ) : (
               <div className="space-y-6">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-slate-900/50 p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl backdrop-blur-md">
                   <div>
@@ -663,78 +626,124 @@ You MUST output the result in EXACTLY three sections. Do NOT mention "skill.md".
                   </div>
                 )}
 
-                <div className="grid lg:grid-cols-2 gap-8">
-                  {/* Generated Markdown view */}
-                  <div className="bg-[#0d1117] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl relative h-full flex flex-col">
-                    <div className="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center gap-2 shrink-0">
-                      <div className="flex gap-2">
-                        <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                        <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                        <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                      </div>
-                      <span className="ml-4 text-sm font-mono text-slate-400 flex items-center gap-2">
-                        <FileText className="w-4 h-4" /> persona.md
-                      </span>
-                    </div>
-                    <div className="p-6 sm:p-8 overflow-auto flex-1 max-h-[500px] custom-scrollbar">
-                      <div className="text-slate-300 text-sm leading-relaxed prose prose-invert prose-slate max-w-none prose-headings:text-white prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-strong:text-slate-200 prose-code:text-indigo-300 prose-code:bg-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800 prose-li:marker:text-slate-600">
-                        <ReactMarkdown>{generatedMarkdown}</ReactMarkdown>
-                      </div>
-                    </div>
+                <div className="space-y-6">
+                  {/* Tabs */}
+                  <div className="flex bg-slate-900/50 p-1.5 rounded-2xl border border-slate-800 shadow-lg w-full max-w-lg mx-auto md:mx-0">
+                    <button
+                      onClick={() => setActiveTab('persona')}
+                      className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'persona' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+                    >
+                      {t.tabPersona}
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('summary')}
+                      className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'summary' ? 'bg-purple-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+                    >
+                      {t.tabSummary}
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('example')}
+                      className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'example' ? 'bg-cyan-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+                    >
+                      {t.tabExample}
+                    </button>
                   </div>
 
-                  {/* Before vs After view */}
-                  {exampleMarkdown && (
-                    <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative flex flex-col">
-                      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-cyan-400" /> {t.compareTitle}
+                  {/* Tab Content: Persona.md */}
+                  {activeTab === 'persona' && (
+                    <div className="bg-[#0d1117] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl relative h-[500px] flex flex-col mb-8 animate-in fade-in zoom-in-95 duration-300">
+                      <div className="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center gap-2 shrink-0">
+                        <div className="flex gap-2">
+                          <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                          <div className="w-3 h-3 rounded-full bg-amber-500/80" />
+                          <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                        </div>
+                        <span className="ml-4 text-sm font-mono text-slate-400 flex items-center gap-2">
+                          <FileText className="w-4 h-4" /> persona.md
+                        </span>
+                      </div>
+                      <div className="p-6 sm:p-8 overflow-auto flex-1 custom-scrollbar">
+                        <div className="text-slate-300 text-sm leading-relaxed prose prose-invert prose-slate max-w-none prose-headings:text-white prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-strong:text-slate-200 prose-code:text-indigo-300 prose-code:bg-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800 prose-li:marker:text-slate-600">
+                          {generatedMarkdown ? (
+                            <ReactMarkdown>{generatedMarkdown}</ReactMarkdown>
+                          ) : (
+                            <div className="flex items-center gap-2 text-indigo-400 animate-pulse"><Loader2 className="w-4 h-4 animate-spin" /> {t.generatingSub}</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tab Content: Summary */}
+                  {activeTab === 'summary' && (
+                    <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative h-[500px] flex flex-col mb-8 animate-in fade-in zoom-in-95 duration-300">
+                      <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                        <User className="w-5 h-5 text-purple-400" /> {t.tabSummary}
                       </h3>
-                      <p className="text-sm text-slate-400 mb-6">{t.compareDesc}</p>
-                      
-                      <div className="space-y-6 flex-1 overflow-auto custom-scrollbar pr-2 pb-4">
-                        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
-                          <div className="absolute top-0 left-0 w-1 h-full bg-slate-600"></div>
-                          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t.originalText}</h4>
-                          <p className="text-slate-300 text-sm leading-relaxed italic opacity-80">
-                            &ldquo;We are launching our new project next week. We hope you like it. Please feel free to give us feedback.&rdquo;
-                          </p>
+                      <div className="overflow-auto custom-scrollbar pr-2 flex-1 space-y-6">
+                        <div className="text-slate-300 text-sm leading-relaxed prose prose-invert prose-purple max-w-none">
+                           {personaSummary ? (
+                             <ReactMarkdown>{personaSummary}</ReactMarkdown>
+                           ) : (
+                             <div className="flex items-center gap-2 text-indigo-400 animate-pulse"><Loader2 className="w-4 h-4 animate-spin" /> {t.generatingSub}</div>
+                           )}
                         </div>
 
-                        <div className="flex justify-center text-slate-600">
-                          <ArrowRight className="w-6 h-6 rotate-90 lg:rotate-0" />
-                        </div>
-
-                        <div className="bg-purple-950/20 border border-purple-500/20 rounded-2xl p-5 relative overflow-hidden">
+                        <div className="bg-purple-950/20 border border-purple-500/20 rounded-2xl p-5 relative overflow-hidden mt-6">
                           <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
-                          <h4 className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2">
-                            {lang === 'th' ? 'คุณลักษณะ Persona ที่ใช้' : lang === 'de' ? 'Angewandte Persona-Attribute' : 'Applied Persona Attributes'}
+                          <h4 className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-3">
+                            {t.appliedAttributes || 'Applied Persona Attributes'}
                           </h4>
-                          <ul className="text-slate-300 text-sm leading-relaxed list-disc pl-4 space-y-1.5">
+                          <ul className="text-slate-300 text-sm leading-relaxed list-disc pl-4 space-y-2">
                             {Object.entries(answers).map(([qId, ans], idx) => {
                               const qObj = QUESTION_FLOW[personaType]?.[qId];
                               const opt = qObj?.options.find((o) => o.label === ans);
                               const tag = opt?.tag ? (opt.tag[lang] || opt.tag.en) : null;
+                              const ansLabel = opt?.label?.[lang] || opt?.label?.en || ans;
                               return (
                                 <li key={idx} className="opacity-90">
-                                  {tag && <strong className="text-purple-300 mr-1">{tag}:</strong>}
-                                  {ans[lang] || ans.en || ans}
+                                  {tag && <strong className="text-purple-300 mr-1 bg-purple-500/10 px-1 py-0.5 rounded">{tag}:</strong>}
+                                  {ansLabel}
                                 </li>
                               );
                             })}
                           </ul>
                         </div>
+                      </div>
+                    </div>
+                  )}
 
-                        <div className="flex justify-center text-slate-600">
-                          <ArrowRight className="w-6 h-6 rotate-90 lg:rotate-0" />
+                  {/* Tab Content: Example */}
+                  {activeTab === 'example' && (
+                    <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative h-[500px] flex flex-col mb-8 animate-in fade-in zoom-in-95 duration-300">
+                      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-cyan-400" /> {t.compareTitle}
+                      </h3>
+                      <p className="text-sm text-slate-400 mb-6">{t.compareDesc}</p>
+                      
+                      <div className="space-y-4 flex-1 overflow-auto custom-scrollbar pr-2 pb-4">
+                        <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4">
+                          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{t.examplePromptLabel}</h4>
+                          {examplePrompt ? (
+                            <p className="text-slate-200 text-sm italic">&ldquo;{examplePrompt}&rdquo;</p>
+                          ) : (
+                             <div className="h-4 bg-slate-700 rounded w-3/4 animate-pulse"></div>
+                          )}
                         </div>
 
-                        <div className="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-5 relative overflow-hidden">
-                          <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
-                          <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">{t.personaText}</h4>
-                          <div className="text-slate-200 text-sm leading-relaxed prose prose-invert prose-indigo max-w-none prose-p:leading-relaxed prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800">
-                            <ReactMarkdown>
-                              {exampleMarkdown.replace(/^#{1,3}\s*(before|vorher|ตัวอย่าง|vergleich).*$/gim, '').trim()}
-                            </ReactMarkdown>
+                        <div className="grid md:grid-cols-2 gap-4 mt-2">
+                          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 text-[10px] font-bold tracking-wider px-2 py-1 bg-slate-800 text-slate-400 rounded-br-lg">{t.exampleBeforeBadge}</div>
+                            <div className="mt-4 text-slate-300 text-sm leading-relaxed opacity-80">
+                               {exampleBefore ? <ReactMarkdown>{exampleBefore}</ReactMarkdown> : <div className="h-20 bg-slate-800 rounded animate-pulse"></div>}
+                            </div>
+                          </div>
+
+                          <div className="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-5 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 text-[10px] font-bold tracking-wider px-2 py-1 bg-indigo-500 text-white rounded-br-lg shadow-sm shadow-indigo-500/20">{t.exampleAfterBadge}</div>
+                            <div className="mt-4 text-slate-200 text-sm leading-relaxed prose prose-invert prose-indigo max-w-none prose-p:leading-relaxed">
+                               {exampleAfter ? <ReactMarkdown>{exampleAfter}</ReactMarkdown> : <div className="h-20 bg-indigo-900/50 rounded animate-pulse mt-1"></div>}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -753,11 +762,10 @@ You MUST output the result in EXACTLY three sections. Do NOT mention "skill.md".
                     onClick={handleGenerate}
                     className="flex items-center gap-2 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white px-5 py-2 rounded-xl font-medium transition-colors border border-slate-700"
                   >
-                    <Sparkles className="w-4 h-4" /> {lang === 'th' ? 'สร้างใหม่อีกครั้ง' : lang === 'de' ? 'Neu generieren' : 'Regenerate'}
+                    <Sparkles className="w-4 h-4" /> {t.regenerateButton || 'Regenerate'}
                   </button>
                 </div>
               </div>
-            )}
           </div>
         )}
       </main>
