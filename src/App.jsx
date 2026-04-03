@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { QUESTION_FLOW, PLATFORMS } from './data/questionFlow';
 import { DICTIONARY } from './lib/i18n';
-import { generateContentStream } from './lib/api';
+import { generateContentStream, stripMarkdownFences } from './lib/api';
 import ReactMarkdown from 'react-markdown';
 
 const LANG_FLAGS = { en: '🇬🇧', th: '🇹🇭', de: '🇩🇪' };
@@ -32,6 +32,73 @@ function detectBrowserLang() {
   if (browserLang.startsWith('de')) return 'de';
   return 'en';
 }
+
+// Build an instant fallback persona.md from user answers (no AI needed)
+function buildFallbackPersona(personaType, answers, lang) {
+  const dimensions = [];
+  let iterQId = QUESTION_FLOW[personaType].start;
+  while (iterQId && iterQId !== 'END') {
+    const qObj = QUESTION_FLOW[personaType][iterQId];
+    const ans = answers[iterQId];
+    if (!ans) break;
+    const dim = qObj.dimension.en || qObj.dimension[lang];
+    const opt = qObj.options.find(o => o.label === ans);
+    const tagEn = opt?.tag?.en || '';
+    const labelEn = opt?.label?.en || '';
+    dimensions.push({ dim, tagEn, labelEn });
+    iterQId = opt ? opt.nextId : 'END';
+  }
+
+  const isClone = personaType === 'clone';
+  const title = isClone ? 'Personal Clone Persona' : 'Specialized AI Agent Persona';
+  const roleDesc = isClone
+    ? 'Act as a personalized AI clone that mirrors the user\'s thinking patterns, communication style, and decision-making approach.'
+    : 'Act as a specialized AI agent configured with precise behavioral protocols and strategic guardrails.';
+
+  const dimSections = dimensions.map(d =>
+    `### ${d.dim}\n**${d.tagEn}** — ${d.labelEn}`
+  ).join('\n\n');
+
+  const rules = dimensions.map(d => `- Apply **${d.tagEn}** approach consistently`).join('\n');
+
+  const guardrail = dimensions.length > 0
+    ? `- Primary constraint: **${dimensions[dimensions.length - 1].tagEn}** — ${dimensions[dimensions.length - 1].labelEn}`
+    : '- Follow standard safety and accuracy guidelines.';
+
+  return `# ${title}\n\n## Core Identity\n${roleDesc}\n\n## Personality Dimensions\n${dimSections}\n\n## Communication Rules\n${rules}\n\n## Guardrails\n${guardrail}\n- Stay in character at all times\n- Be consistent with the defined personality dimensions`;
+}
+
+const PERSONA_SYSTEM_PROMPT = `You are an elite AI Persona Design expert. Create a complete, ready-to-use persona.md system prompt from a 6-dimension personality analysis.
+
+Rules:
+1. Output ONLY the persona.md content as clean Markdown. Do NOT wrap it in code blocks or fences.
+2. Use the "Act as [Role]" format at the beginning.
+3. Include sections for: Core Identity, Communication Style, Decision Framework, Guardrails.
+4. Make instructions explicit enough for any LLM to follow exactly.
+5. Do NOT reference or create a "skill.md" file. The output IS a persona.md file.
+6. NEVER wrap the output in \`\`\`markdown or \`\`\` code fences. Output raw Markdown only.`;
+
+const EXTRAS_SYSTEM_PROMPT = `You are analyzing an AI persona definition. Generate supplementary materials for it.
+
+Rules:
+1. Generate EXACTLY the sections below with the EXACT markers shown.
+2. Do NOT include the persona.md content itself.
+3. NEVER wrap output in code fences.
+4. Format:
+
+===SUMMARY_START===
+A professional summary of the persona's key traits, strengths, and communication style (3-5 short paragraphs).
+
+===EXAMPLE_PROMPT_START===
+A realistic sample user prompt (1-2 sentences) that someone would ask this persona.
+
+===BEFORE_START===
+A standard, generic AI response to the example prompt (without the persona).
+
+===AFTER_START===
+The same response rewritten entirely through this persona's voice and traits.
+
+===END===`;
 
 export default function App() {
   const [lang, setLang] = useState(detectBrowserLang);
@@ -60,6 +127,9 @@ export default function App() {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const [generationPhase, setGenerationPhase] = useState('idle');
+  const [fallbackMarkdown, setFallbackMarkdown] = useState('');
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   // Close language dropdown on Escape key
   useEffect(() => {
@@ -75,6 +145,16 @@ export default function App() {
     try { localStorage.setItem('pb-lang', lang); } catch { /* noop */ }
     document.documentElement.lang = lang === 'th' ? 'th' : lang === 'de' ? 'de' : 'en';
   }, [lang]);
+
+  // Elapsed time counter during generation
+  useEffect(() => {
+    let interval;
+    if (isGenerating) {
+      setElapsedSeconds(0);
+      interval = setInterval(() => setElapsedSeconds(s => s + 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isGenerating]);
 
   useEffect(() => {
     if (step === 2 && personaType && !currentQId) {
@@ -144,39 +224,58 @@ export default function App() {
     setExampleAfter('');
     setActiveTab('persona');
     setStep(4);
+    setGenerationPhase('building');
+
+    // Phase 0: Instant fallback persona from answers (0ms)
+    const fallback = buildFallbackPersona(personaType, answers, lang);
+    setFallbackMarkdown(fallback);
+    setGenerationPhase('enhancing');
+
     setTimeout(() => topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 
-    try {
-      const pathData = [];
-      let iterQId = QUESTION_FLOW[personaType].start;
-      while (iterQId && iterQId !== 'END') {
-        const qObj = QUESTION_FLOW[personaType][iterQId];
-        const ans = answers[iterQId];
-        if (!ans) break;
+    // Build shared prompt context from answers
+    const pathData = [];
+    let iterQId = QUESTION_FLOW[personaType].start;
+    while (iterQId && iterQId !== 'END') {
+      const qObj = QUESTION_FLOW[personaType][iterQId];
+      const ans = answers[iterQId];
+      if (!ans) break;
+      const qDim = qObj.dimension[lang] || qObj.dimension.en;
+      const qText = qObj.question[lang] || qObj.question.en;
+      const opt = qObj.options.find((o) => o.label === ans);
+      const tagLabel = opt?.tag ? (opt.tag[lang] || opt.tag.en) : '';
+      const optLabel = opt?.label?.[lang] || opt?.label?.en || ans;
+      pathData.push(`[${qDim}] ${qText}\n-> Answer Selection: ${tagLabel ? tagLabel + ' - ' : ''}${optLabel}`);
+      iterQId = opt ? opt.nextId : 'END';
+    }
 
-        const qDim = qObj.dimension[lang] || qObj.dimension.en;
-        const qText = qObj.question[lang] || qObj.question.en;
+    const questionDataStr = pathData.join('\n\n');
+    const sampleData = samples
+      .filter((s) => s.text.trim() !== '')
+      .map((s, i) => {
+        const sourceName = s.source === 'other' ? s.customSource : PLATFORMS.find((p) => p.id === s.source)?.name;
+        return `--- Reference Sample ${i + 1} (Source: ${sourceName}) ---\n${s.text}\n`;
+      })
+      .join('\n');
 
-        const opt = qObj.options.find((o) => o.label === ans);
-        const tagLabel = opt?.tag ? (opt.tag[lang] || opt.tag.en) : '';
-        const optLabel = opt?.label?.[lang] || opt?.label?.en || ans;
-
-        pathData.push(`[${qDim}] ${qText}\n-> Answer Selection: ${tagLabel ? tagLabel + ' - ' : ''}${optLabel}`);
-
-        iterQId = opt ? opt.nextId : 'END';
+    const extractSection = (text, startMark, endMarks) => {
+      const startIdx = text.indexOf(startMark);
+      if (startIdx === -1) return '';
+      const contentStart = startIdx + startMark.length;
+      let endIdx = text.length;
+      for (const endMark of endMarks) {
+        const markIdx = text.indexOf(endMark, contentStart);
+        if (markIdx !== -1 && markIdx < endIdx) endIdx = markIdx;
       }
+      return text.substring(contentStart, endIdx).replace(/^```[a-z]*\n/i, '').replace(/\n```$/i, '').trim();
+    };
 
-      const questionDataStr = pathData.join('\n\n');
+    let aiPersonaMd = '';
+    let timeoutId;
 
-      const sampleData = samples
-        .filter((s) => s.text.trim() !== '')
-        .map((s, i) => {
-          const sourceName = s.source === 'other' ? s.customSource : PLATFORMS.find((p) => p.id === s.source)?.name;
-          return `--- Reference Sample ${i + 1} (Source: ${sourceName}) ---\n${s.text}\n`;
-        })
-        .join('\n');
-
-      const userPrompt = `[INPUT CONTEXT]
+    try {
+      // Phase 1: Generate persona.md ONLY (focused prompt → faster)
+      const personaUserPrompt = `[INPUT CONTEXT]
 - Persona Type: ${personaType === 'clone' ? 'Personal Clone' : 'Specialized Agent'}
 - 6-Dimension Deep Analysis Results:
 ${questionDataStr}
@@ -184,51 +283,89 @@ ${questionDataStr}
 [WRITING STYLE REFERENCES]
 ${sampleData || 'No specific writing samples provided. Extrapolate tone from the selection logic.'}
 
-Output ONLY the requested sections in ${LANG_NAMES[lang]}. Do not output any thinking or extra markdown code blocks outside the sections.`;
+Generate the persona.md system prompt in ${LANG_NAMES[lang]}. Output ONLY the raw Markdown content. Do NOT wrap in code fences.`;
 
-      let fullRawResult = '';
+      const personaPromise = generateContentStream(
+        personaUserPrompt, lang,
+        (chunk) => {
+          aiPersonaMd += chunk;
+          setGeneratedMarkdown(stripMarkdownFences(aiPersonaMd));
+        },
+        { maxTokens: 2048, systemPrompt: PERSONA_SYSTEM_PROMPT, retries: 2 }
+      );
 
-      const extractSection = (text, startMark, endMarks) => {
-        const startIdx = text.indexOf(startMark);
-        if (startIdx === -1) return '';
-        const contentStart = startIdx + startMark.length;
-        let endIdx = text.length;
-        for (const endMark of endMarks) {
-          const markIdx = text.indexOf(endMark, contentStart);
-          if (markIdx !== -1 && markIdx < endIdx) endIdx = markIdx;
-        }
-        return text.substring(contentStart, endIdx).replace(/^```[a-z]*\n/i, '').replace(/\n```$/i, '').trim();
-      };
-
-      await generateContentStream(userPrompt, lang, (chunk) => {
-        fullRawResult += chunk;
-
-        const summary = extractSection(fullRawResult, '===SUMMARY_START===', ['===PERSONA_MD_START===']);
-        const personaMd = extractSection(fullRawResult, '===PERSONA_MD_START===', ['===EXAMPLE_PROMPT_START===']);
-        const promptExp = extractSection(fullRawResult, '===EXAMPLE_PROMPT_START===', ['===BEFORE_START===']);
-        const before = extractSection(fullRawResult, '===BEFORE_START===', ['===AFTER_START===']);
-        const after = extractSection(fullRawResult, '===AFTER_START===', ['===END===']);
-
-        if (summary) setPersonaSummary(summary);
-        if (personaMd) setGeneratedMarkdown(personaMd);
-        if (promptExp) setExamplePrompt(promptExp);
-        if (before) setExampleBefore(before);
-        if (after) setExampleAfter(after);
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('TIMEOUT')), 90000);
       });
 
-    } catch (err) {
-      console.error(err);
-      setGeneratedMarkdown(
-        `# ⚠️ Generation Interrupted\n\nThe AI core is currently offline or unreachable.\n\n### Troubleshooting\n- **API Status:** The request failed with \`${err.message}\`.\n- **Local Dev:** Ensure \`.dev.vars\` contains valid tokens and you started with \`npm run pages:dev\`.\n- **Production:** Verify Cloudflare built successfully and environment variables are bound.\n\n> **System Note:** ${t.aiError}`
+      await Promise.race([personaPromise, timeoutPromise]);
+      clearTimeout(timeoutId);
+
+      // Clean final persona output
+      aiPersonaMd = stripMarkdownFences(aiPersonaMd);
+      setGeneratedMarkdown(aiPersonaMd);
+
+      // Phase 2: Generate extras (summary + examples) in background
+      setGenerationPhase('extras');
+
+      const extrasUserPrompt = `[PERSONA DEFINITION]
+${aiPersonaMd}
+
+Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow the marker format exactly.`;
+
+      let extrasRaw = '';
+      const extrasPromise = generateContentStream(
+        extrasUserPrompt, lang,
+        (chunk) => {
+          extrasRaw += chunk;
+          const summary = extractSection(extrasRaw, '===SUMMARY_START===', ['===EXAMPLE_PROMPT_START===']);
+          const promptExp = extractSection(extrasRaw, '===EXAMPLE_PROMPT_START===', ['===BEFORE_START===']);
+          const before = extractSection(extrasRaw, '===BEFORE_START===', ['===AFTER_START===']);
+          const after = extractSection(extrasRaw, '===AFTER_START===', ['===END===']);
+          if (summary) setPersonaSummary(summary);
+          if (promptExp) setExamplePrompt(promptExp);
+          if (before) setExampleBefore(before);
+          if (after) setExampleAfter(after);
+        },
+        { maxTokens: 2048, systemPrompt: EXTRAS_SYSTEM_PROMPT, retries: 2 }
       );
-      setError(t.aiError);
+
+      const extrasTimeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('EXTRAS_TIMEOUT')), 60000);
+      });
+
+      await Promise.race([extrasPromise, extrasTimeoutPromise]);
+      clearTimeout(timeoutId);
+      setGenerationPhase('done');
+
+    } catch (err) {
+      clearTimeout(timeoutId);
+      console.error(err);
+
+      if (err.message === 'TIMEOUT') {
+        setGenerationPhase('timeout');
+        if (!aiPersonaMd.trim()) {
+          setGeneratedMarkdown(fallback);
+        }
+      } else if (err.message === 'EXTRAS_TIMEOUT') {
+        // persona.md is complete, extras just timed out — acceptable
+        setGenerationPhase('done');
+      } else {
+        setGenerationPhase('error');
+        setError(t.aiError);
+        if (!aiPersonaMd.trim()) {
+          setGeneratedMarkdown(fallback);
+        }
+      }
     } finally {
       setIsGenerating(false);
     }
   };
 
   const handleDownload = () => {
-    const blob = new Blob([generatedMarkdown], { type: 'text/markdown' });
+    const content = generatedMarkdown || fallbackMarkdown;
+    if (!content) return;
+    const blob = new Blob([content], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -240,7 +377,8 @@ Output ONLY the requested sections in ${LANG_NAMES[lang]}. Do not output any thi
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(generatedMarkdown);
+    const content = generatedMarkdown || fallbackMarkdown;
+    navigator.clipboard.writeText(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -259,6 +397,9 @@ Output ONLY the requested sections in ${LANG_NAMES[lang]}. Do not output any thi
     setExampleAfter('');
     setActiveTab('persona');
     setError('');
+    setGenerationPhase('idle');
+    setFallbackMarkdown('');
+    setElapsedSeconds(0);
   };
 
   const cloneCardClass = personaType === 'clone'
@@ -595,28 +736,58 @@ Output ONLY the requested sections in ${LANG_NAMES[lang]}. Do not output any thi
               <div className="space-y-6">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-slate-900/50 p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl backdrop-blur-md">
                   <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-sm font-bold mb-4 border border-green-500/20">
-                      <CheckCircle2 className="w-4 h-4" /> {t.successTitle}
-                    </div>
-                    <p className="text-slate-400 mt-2">{t.successSub}</p>
+                    {isGenerating ? (
+                      <>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-sm font-bold mb-4 border border-indigo-500/20">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          {generationPhase === 'extras' ? t.phaseExtras : t.phaseEnhancing}
+                        </div>
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className="text-slate-500 text-xs font-mono bg-slate-800 px-2 py-1 rounded-lg">
+                            {elapsedSeconds}s
+                          </span>
+                          {(generatedMarkdown || fallbackMarkdown) && (
+                            <span className="text-emerald-400/80 text-xs font-medium">
+                              ✓ {t.downloadAvailable}
+                            </span>
+                          )}
+                        </div>
+                      </>
+                    ) : generationPhase === 'timeout' ? (
+                      <>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 text-sm font-bold mb-4 border border-amber-500/20">
+                          <AlertTriangle className="w-4 h-4" /> {t.phaseTimeout}
+                        </div>
+                        <p className="text-slate-400 mt-2">{t.timeoutSub}</p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-sm font-bold mb-4 border border-green-500/20">
+                          <CheckCircle2 className="w-4 h-4" /> {t.successTitle}
+                        </div>
+                        <p className="text-slate-400 mt-2">{t.successSub}</p>
+                      </>
+                    )}
                   </div>
 
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      onClick={handleCopy}
-                      className="flex-1 md:flex-none flex justify-center items-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-xl hover:bg-slate-700 transition-colors font-bold"
-                    >
-                      {copied ? <CheckCircle2 className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
-                      {copied ? t.copied : t.copy}
-                    </button>
-                    <button
-                      onClick={handleDownload}
-                      className="flex-1 md:flex-none flex justify-center items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20 font-bold"
-                    >
-                      <Download className="w-5 h-5" />
-                      {t.download}
-                    </button>
-                  </div>
+                  {(generatedMarkdown || fallbackMarkdown) && (
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        onClick={handleCopy}
+                        className="flex-1 md:flex-none flex justify-center items-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-xl hover:bg-slate-700 transition-colors font-bold"
+                      >
+                        {copied ? <CheckCircle2 className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
+                        {copied ? t.copied : t.copy}
+                      </button>
+                      <button
+                        onClick={handleDownload}
+                        className="flex-1 md:flex-none flex justify-center items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20 font-bold"
+                      >
+                        <Download className="w-5 h-5" />
+                        {t.download}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {error && (
@@ -664,8 +835,16 @@ Output ONLY the requested sections in ${LANG_NAMES[lang]}. Do not output any thi
                       </div>
                       <div className="p-6 sm:p-8 overflow-auto flex-1 custom-scrollbar">
                         <div className="text-slate-300 text-sm leading-relaxed prose prose-invert prose-slate max-w-none prose-headings:text-white prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-strong:text-slate-200 prose-code:text-indigo-300 prose-code:bg-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800 prose-li:marker:text-slate-600">
-                          {generatedMarkdown ? (
-                            <ReactMarkdown>{generatedMarkdown}</ReactMarkdown>
+                          {(generatedMarkdown || fallbackMarkdown) ? (
+                            <>
+                              {!generatedMarkdown && isGenerating && fallbackMarkdown && (
+                                <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs px-3 py-2 rounded-lg flex items-center gap-2 mb-4">
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                  {t.enhancingNote}
+                                </div>
+                              )}
+                              <ReactMarkdown>{generatedMarkdown || fallbackMarkdown}</ReactMarkdown>
+                            </>
                           ) : (
                             <div className="flex items-center gap-2 text-indigo-400 animate-pulse"><Loader2 className="w-4 h-4 animate-spin" /> {t.generatingSub}</div>
                           )}

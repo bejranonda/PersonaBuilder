@@ -10,7 +10,8 @@
 
 | Feature | Description |
 |---------|-------------|
-| **Streaming AI (SSE)** | Near-instant Time-to-First-Token (TTFB) using Server-Sent Events, drastically reducing generation wait times. |
+| **2-Phase Streaming** | Generates `persona.md` instantly (2048 tokens), then processes Summary & Examples in the background. |
+| **Instant Fallback** | Creates a functional template from user answers in 0ms, gracefully handling AI timeouts/errors. |
 | **Tabbed Results UI** | Clean, organized display of persona.md, Summary, and Before/After Examples in isolated tabs. |
 | **Browser Language Detection** | Automatically boots in English, Thai, or German based on OS/Browser preferred languages (`navigator.language`). |
 | **Auto-Scroll Navigation** | Frictionless mobile experience; transitions automatically scroll to the top of the next question/step. |
@@ -82,9 +83,11 @@ Pushing a tag (e.g., `git push origin v1.0.1`) triggers `.github/workflows/relea
 ```mermaid
 flowchart LR
     User([User]) --> UI[React Frontend]
+    UI -->|0ms| Fallback[Instant Fallback Persona]
     UI --> Wiz[6-Dim Wizard]
     Wiz --> Proxy[CF Pages Function]
-    Proxy -- Streaming SSE --> AI[Cloudflare Workers AI Llama 3.1]
+    Proxy -- Phase 1: Stream persona.md --> AI[Cloudflare Llama 3.1]
+    Proxy -- Phase 2: Stream extras --> AI
     AI -- Chunked Tokens --> UI
 ```
 

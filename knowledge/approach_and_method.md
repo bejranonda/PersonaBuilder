@@ -52,8 +52,11 @@ The wizard isn't linear. Dimension 2 (Perception) and Dimension 5 (Persuasion) c
 
 ---
 
-## 6. Real-time Feedback via SSE Streaming
+## 6. Multi-Phase Generation & Instant Fallback
 
-In v2.1, we migrated the generation pipeline from standard request/response to Server-Sent Events (SSE) streaming.
-- **Why?** Generating 1000+ tokens of deep persona markdown takes 15–30 seconds. A static loader decreases user trust and frustrates iteration.
-- **How?** The Cloudflare Worker proxy forwards the native Llama 3.1 stream. The React frontend uses a custom token parser (`generateContentStream`) to intercept boundary markers (`===PERSONA_MD_START===`) and route live tokens cleanly into separate UI Tabs (Persona, Summary, Example).
+In v2.2, we overhauled the pipeline to solve the "blank screen" timeout issue caused by generating 4000+ tokens at once:
+
+1. **Instant Fallback**: Before the AI even responds, we generate a highly structured `persona.md` directly from the user's 6-dimension answers using a deterministic template function. The user has a functional result in 0ms.
+2. **Phase 1 (Persona Enhancement)**: We prompt the AI to generate *only* the `persona.md` file (max 2048 tokens). This reduces payload size and takes ~20 seconds via SSE streaming.
+3. **Phase 2 (Background Extras)**: Once the core persona is complete, we make a secondary AI call to generate the Summary and Before/After examples, populating the remaining UI tabs without blocking the primary export.
+4. **Graceful Degradation**: If Cloudflare AI times out (90s) or fails, the interface silently catches the exception, ensures the Instant Fallback is in place, and unlocks the download button. The user never leaves empty-handed.

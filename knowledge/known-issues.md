@@ -7,8 +7,8 @@
 - **Workaround**: The proxy function automatically falls back to `llama-3-8b-instruct` to ensure the app continues to function.
 
 ### 2. Output Parsing
-- **Problem**: The app parses the AI's markdown response using a keyword-based split (`### Before vs After Example`). While reliable, it can fail if the AI radically changes the heading format.
-- **Status**: Stable, but monitoring.
+- **Problem**: Lower-param models (8B) occasionally wrap output in ```markdown fences or hallucinates headers.
+- **Status**: Mitigated via `stripMarkdownFences()` and the new 2-Phase generation architecture that isolates the persona payload from summary statistics.
 
 ### 3. Multi-language Consistency
 - **Problem**: Lower-parameter models (8B) can sometimes code-switch or use awkward phrasing in Thai or German.
@@ -28,10 +28,10 @@
 - [x] Separated technical `tags` from textual `labels`.
 - [x] Enforced strict AI output format (`persona.md` without skill.md contamination).
 
-### Phase 3: Performance & Accessibility (v2.1 - Completed)
-- [x] **Browser Language Auto-Detection**: Initialization localized via `navigator.language`.
-- [x] **Server-Sent Events (SSE)**: Complete rewrite of generative pipeline to support real-time token streaming.
-- [x] **Results Tab UI**: Replaced the monolithic format with isolated Persona, Summary, and Example tabs.
+### Phase 3: Performance & Architecture (v2.2 - Completed)
+- [x] **2-Phase Generation**: Split the monolithic AI prompt into Persona (Phase 1) and Extras (Phase 2) to bypass 4096-max token delays.
+- [x] **Instant Fallback**: Construct a deterministic template in 0ms to ensure users can download a basic persona even if Cloudflare times out.
+- [x] **Phase Progress UI**: Real-time timer and multi-stage status indicator replacing the static spinner.
 - [x] **Frictionless Mobile scroll**: Automated `scrollIntoView` anchoring.
 
 ### Phase 4: Enhanced Vision

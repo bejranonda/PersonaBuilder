@@ -50,7 +50,7 @@ export async function onRequestPost(context) {
   }
 
   try {
-    const { prompt, language, stream } = await context.request.json();
+    const { prompt, language, stream, max_tokens: reqMaxTokens, system_prompt: customSystemPrompt } = await context.request.json();
 
     if (!prompt || typeof prompt !== 'string') {
       return Response.json(
@@ -60,7 +60,9 @@ export async function onRequestPost(context) {
     }
 
     const langName = LANG_MAP[language] || LANG_MAP[Object.keys(LANG_MAP).find(k => LANG_MAP[k] === language)] || language;
-    const sysInst = SYSTEM_INSTRUCTION + `\n\nCRITICAL: You must generate the output entirely in ${langName} language. Never mention or generate "skill.md".`;
+    const langSuffix = `\n\nCRITICAL: Generate the output entirely in ${langName} language. Never mention or generate "skill.md".`;
+    const sysInst = customSystemPrompt ? customSystemPrompt + langSuffix : SYSTEM_INSTRUCTION + langSuffix;
+    const maxTokens = Math.min(reqMaxTokens || 4096, 4096);
 
     const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${MODEL}`;
 
@@ -75,7 +77,7 @@ export async function onRequestPost(context) {
           { role: 'system', content: sysInst },
           { role: 'user', content: prompt }
         ],
-        max_tokens: 4096,
+        max_tokens: maxTokens,
         stream: !!stream
       }),
     });
@@ -93,7 +95,7 @@ export async function onRequestPost(context) {
               { role: 'system', content: sysInst },
               { role: 'user', content: prompt }
             ],
-            max_tokens: 4096,
+            max_tokens: maxTokens,
             stream: !!stream
           }),
         });

@@ -1,18 +1,30 @@
 const RETRY_DELAYS = [2000, 5000, 10000];
 
 /**
+ * Strip markdown code fences the AI sometimes wraps around output.
+ * e.g. ```markdown ... ``` → clean content
+ */
+export function stripMarkdownFences(text) {
+  return text
+    .replace(/^```(?:markdown|md)?\s*\n/i, '')
+    .replace(/\n```\s*$/i, '')
+    .trim();
+}
+
+/**
  * Call the Cloudflare Workers AI with streaming + retry.
  * @param {string} prompt
  * @param {string} language - language code (e.g. 'en', 'th', 'de')
  * @param {function} onChunk - called with each text token
- * @param {number} retries - max retry attempts
+ * @param {object} options - { retries, maxTokens, systemPrompt }
  */
-export async function generateContentStream(prompt, language, onChunk, retries = 3) {
+export async function generateContentStream(prompt, language, onChunk, options = {}) {
+  const { retries = 3, maxTokens, systemPrompt } = options;
   let lastError;
 
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
-      await streamFromProxy(prompt, language, onChunk);
+      await streamFromProxy(prompt, language, onChunk, { maxTokens, systemPrompt });
       return; // success
     } catch (err) {
       lastError = err;
@@ -26,11 +38,15 @@ export async function generateContentStream(prompt, language, onChunk, retries =
   throw lastError;
 }
 
-async function streamFromProxy(prompt, language, onChunk) {
+async function streamFromProxy(prompt, language, onChunk, options = {}) {
+  const body = { prompt, language, stream: true };
+  if (options.maxTokens) body.max_tokens = options.maxTokens;
+  if (options.systemPrompt) body.system_prompt = options.systemPrompt;
+
   const response = await fetch('/api/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt, language, stream: true }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
