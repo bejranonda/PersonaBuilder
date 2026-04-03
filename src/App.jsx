@@ -219,7 +219,7 @@ Output ONLY the requested sections in ${LANG_NAMES[lang]}. Do not output any thi
     } catch (err) {
       console.error(err);
       setGeneratedMarkdown(
-        `# 🤖 Persona: Default Fallback\n\n## 🎯 Core Identity\n- AI Generation Failed\n- ${t.aiError}\n\n## Raw Error:\n${err.message}`
+        `# ⚠️ Generation Interrupted\n\nThe AI core is currently offline or unreachable.\n\n### Troubleshooting\n- **API Status:** The request failed with \`${err.message}\`.\n- **Local Dev:** Ensure \`.dev.vars\` contains valid tokens and you started with \`npm run pages:dev\`.\n- **Production:** Verify Cloudflare built successfully and environment variables are bound.\n\n> **System Note:** ${t.aiError}`
       );
       setError(t.aiError);
     } finally {
