@@ -60,3 +60,66 @@ In v2.2, we overhauled the pipeline to solve the "blank screen" timeout issue ca
 2. **Phase 1 (Persona Enhancement)**: We prompt the AI to generate *only* the `persona.md` file (max 2048 tokens). This reduces payload size and takes ~20 seconds via SSE streaming.
 3. **Phase 2 (Background Extras)**: Once the core persona is complete, we make a secondary AI call to generate the Summary and Before/After examples, populating the remaining UI tabs without blocking the primary export.
 4. **Graceful Degradation**: If Cloudflare AI times out (90s) or fails, the interface silently catches the exception, ensures the Instant Fallback is in place, and unlocks the download button. The user never leaves empty-handed.
+
+---
+
+## 7. Light & Warm Theme (v3.0)
+
+PersonaBuilder v3.0 switched from a dark (`slate-950`) theme to a **Light & Warm** theme designed for creative workflows:
+
+- **Color Palette**: Uses `stone-*` for backgrounds, `amber-*` for primary accents, and `teal-*` for secondary accents
+- **Rationale**: Dark themes feel gloomy for creative writing tools; warm tones invite ideation and creativity
+- **Code Viewer Exception**: The markdown preview panel retains a dark background (`bg-stone-800`) with `prose-invert` for optimal code readability
+
+### Color Mapping (Dark → Light)
+| Role | Dark (v2.x) | Light (v3.0) |
+|------|-------------|---------------|
+| Page background | `bg-slate-950` | `bg-stone-50` |
+| Card/panel | `bg-slate-900` | `bg-white` |
+| Primary text | `text-white` | `text-stone-800` |
+| Secondary text | `text-slate-400` | `text-stone-500` |
+| Borders | `border-slate-800` | `border-stone-200` |
+| Primary accent | `indigo-500` | `amber-500` |
+| Secondary accent | `cyan-500` | `teal-500` |
+
+---
+
+## 8. Situational Tooltip System (v3.0)
+
+Each questionnaire option now includes a **real-world example** to help users understand what each choice means in practice:
+
+- **Data Source**: All 63 options in `questionFlow.js` have an `example` field with 3-language translations (TH/EN/DE)
+- **Desktop UX**: Hover/click the `(i)` info icon shows a positioned tooltip popup above the option card
+- **Mobile UX**: Tap toggles inline expand below the label text
+- **Technical Implementation**: Uses `stopPropagation()` to prevent option selection when tapping tooltip
+
+### Example Format
+```js
+example: t(
+  'เช่น เวลาเจอปัญหาน้ำท่วม จะไม่ดูแค่ระดับน้ำแต่จะไปดูโครงสร้างระบบระบายน้ำทั้งเมือง',
+  'e.g. When facing flooding, you investigate the entire drainage system, not just the water level.',
+  'z.B. Bei Hochwasser prüfen Sie das gesamte Entwässerungssystem, nicht nur den Wasserstand.'
+)
+```
+
+---
+
+## 9. Platform Guidance & Quick Actions (v3.0)
+
+After persona generation, users see guidance cards explaining how to use their `persona.md` across different AI tools:
+
+### Supported Platforms
+| Platform | Usage |
+|----------|-------|
+| **Gemini** | Paste into Settings > System Instructions |
+| **Cursor** | Paste into Settings > Rules for AI |
+| **OpenClaw / Claude** | Use as System Prompt or save as soul.md |
+| **Any AI Chat** | Paste at start of conversation or upload .md file |
+
+### Quick Export Actions
+| Action | Description |
+|--------|-------------|
+| **Copy** | Copy persona.md as-is (existing) |
+| **Download persona.md** | Download as .md file (existing) |
+| **Download soul.md** | Same content, filename `soul.md` (new in v3.0) |
+| **Copy as System Prompt** | Wraps in `[SYSTEM INSTRUCTIONS]...[END]` block (new in v3.0) |

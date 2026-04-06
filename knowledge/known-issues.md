@@ -34,11 +34,18 @@
 - [x] **Phase Progress UI**: Real-time timer and multi-stage status indicator replacing the static spinner.
 - [x] **Frictionless Mobile scroll**: Automated `scrollIntoView` anchoring.
 
-### Phase 4: Enhanced Vision
+### Phase 4: UI/UX Redesign (v3.0 - Completed)
+- [x] **Light & Warm Theme**: Converted from dark (gloomy) to warm, inviting theme using stone/amber/teal palette.
+- [x] **Situational Tooltips**: Added 63 real-world example scenarios to all questionnaire options (3 languages).
+- [x] **Platform Guidance Cards**: Result page now shows how to use persona.md in Gemini, Cursor, OpenClaw/Claude, and any AI tool.
+- [x] **Quick Export Actions**: One-click "Download as soul.md" and "Copy as System Prompt" buttons.
+- [x] **Mobile Optimization**: Improved touch targets (44px), responsive spacing, inline tooltip expand.
+
+### Phase 5: Enhanced Vision (Planned)
 - [ ] Integration with higher parameter models (Llama 3.1 70B) for better Thai/German reasoning.
 - [ ] Support for direct `persona.md` file uploads to "edit" existing personas.
 - [ ] Built-in prompt playground for immediate persona testing.
 
-### Phase 5: Ecosystem
+### Phase 6: Ecosystem (Planned)
 - [ ] Export directly to popular AI coding tools (Windsurf, Cursor, etc.).
 - [ ] Communal library of pre-built "Base Agents".

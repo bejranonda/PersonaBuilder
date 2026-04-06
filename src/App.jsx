@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   User, Bot, FileText, Download, Plus, Trash2, ArrowRight, ArrowLeft,
-  Loader2, CheckCircle2, Sparkles, Copy, Globe, AlertTriangle
+  Loader2, CheckCircle2, Sparkles, Copy, Globe, AlertTriangle, Info,
+  MessageSquare, ExternalLink, Monitor
 } from 'lucide-react';
 import { QUESTION_FLOW, PLATFORMS } from './data/questionFlow';
 import { DICTIONARY } from './lib/i18n';
@@ -13,13 +14,13 @@ const LANG_NAMES = { en: 'English', th: 'Thai', de: 'German' };
 const LANG_ORDER = ['en', 'th', 'de'];
 
 function getStepperClass(step, s) {
-  if (step === s) return 'bg-indigo-500 text-white ring-4 ring-indigo-500/20';
-  if (step > s) return 'bg-slate-700 text-slate-300';
-  return 'bg-slate-800 text-slate-500';
+  if (step === s) return 'bg-amber-500 text-white ring-4 ring-amber-500/20';
+  if (step > s) return 'bg-amber-100 text-amber-700';
+  return 'bg-stone-100 text-stone-400';
 }
 
 function getConnectorClass(step, s) {
-  return step > s ? 'bg-slate-700' : 'bg-slate-800';
+  return step > s ? 'bg-amber-300' : 'bg-stone-200';
 }
 
 function detectBrowserLang() {
@@ -126,10 +127,12 @@ export default function App() {
   const topRef = useRef(null);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [copiedSystemPrompt, setCopiedSystemPrompt] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [generationPhase, setGenerationPhase] = useState('idle');
   const [fallbackMarkdown, setFallbackMarkdown] = useState('');
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [expandedTooltip, setExpandedTooltip] = useState(null);
 
   // Close language dropdown on Escape key
   useEffect(() => {
@@ -383,6 +386,29 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDownloadSoul = () => {
+    const content = generatedMarkdown || fallbackMarkdown;
+    if (!content) return;
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'soul.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopySystemPrompt = () => {
+    const content = generatedMarkdown || fallbackMarkdown;
+    if (!content) return;
+    const systemPrompt = `[SYSTEM INSTRUCTIONS]\nYou are now embodying the following persona. Follow all instructions, traits, and guardrails defined below:\n\n${content}\n\n[END SYSTEM INSTRUCTIONS]`;
+    navigator.clipboard.writeText(systemPrompt);
+    setCopiedSystemPrompt(true);
+    setTimeout(() => setCopiedSystemPrompt(false), 2000);
+  };
+
   const handleReset = () => {
     setStep(1);
     setPersonaType(null);
@@ -403,29 +429,29 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
   };
 
   const cloneCardClass = personaType === 'clone'
-    ? 'border-indigo-500 bg-indigo-500/10 shadow-xl shadow-indigo-500/10'
-    : 'border-slate-800 bg-slate-900 hover:border-slate-700 hover:bg-slate-800';
+    ? 'border-amber-500 bg-amber-50 shadow-xl shadow-amber-500/10'
+    : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50';
 
   const agentCardClass = personaType === 'agent'
-    ? 'border-cyan-500 bg-cyan-500/10 shadow-xl shadow-cyan-500/10'
-    : 'border-slate-800 bg-slate-900 hover:border-slate-700 hover:bg-slate-800';
+    ? 'border-teal-500 bg-teal-50 shadow-xl shadow-teal-500/10'
+    : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50';
 
   const cloneIconClass = personaType === 'clone'
-    ? 'bg-indigo-500 text-white' : 'bg-slate-800 text-indigo-400 group-hover:bg-slate-700';
+    ? 'bg-amber-500 text-white' : 'bg-stone-100 text-amber-500 group-hover:bg-stone-200';
 
   const agentIconClass = personaType === 'agent'
-    ? 'bg-cyan-500 text-white' : 'bg-slate-800 text-cyan-400 group-hover:bg-slate-700';
+    ? 'bg-teal-500 text-white' : 'bg-stone-100 text-teal-500 group-hover:bg-stone-200';
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-indigo-500/30 flex flex-col">
+    <div className="min-h-screen bg-stone-50 text-stone-700 font-sans selection:bg-amber-500/30 flex flex-col">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-stone-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-indigo-500 to-cyan-500 p-2 rounded-xl shadow-lg shadow-indigo-500/20">
+            <div className="bg-gradient-to-br from-amber-500 to-teal-500 p-2 rounded-xl shadow-lg shadow-amber-500/20">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent hidden sm:block">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-stone-800 to-stone-500 bg-clip-text text-transparent hidden sm:block">
               {t.appTitle}
             </h1>
           </div>
@@ -452,9 +478,9 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
             <div className="relative">
               <button
                 onClick={() => setIsLangOpen(!isLangOpen)}
-                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl border border-slate-700 transition-all text-sm font-medium focus:ring-2 focus:ring-indigo-500/50"
+                className="flex items-center gap-2 bg-stone-100 hover:bg-stone-200 text-stone-700 px-3 py-2 rounded-xl border border-stone-300 transition-all text-sm font-medium focus:ring-2 focus:ring-amber-500/50"
               >
-                <Globe className="w-4 h-4 text-indigo-400" />
+                <Globe className="w-4 h-4 text-amber-500" />
                 <span className="hidden sm:inline">{LANG_NAMES[lang]}</span>
                 <span className="inline sm:hidden">{LANG_FLAGS[lang]}</span>
                 <ArrowRight className={`w-3 h-3 transition-transform duration-300 ${isLangOpen ? 'rotate-90' : ''}`} />
@@ -466,7 +492,7 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                     className="fixed inset-0 z-40" 
                     onClick={() => setIsLangOpen(false)} 
                   />
-                  <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-stone-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
                     <div className="p-1.5 space-y-1">
                       {LANG_ORDER.map((l) => (
                         <button
@@ -476,9 +502,9 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                             setIsLangOpen(false);
                           }}
                           className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-colors ${
-                            lang === l 
-                              ? 'bg-indigo-500/10 text-indigo-400 font-bold' 
-                              : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                            lang === l
+                              ? 'bg-amber-50 text-amber-700 font-bold'
+                              : 'text-stone-600 hover:bg-stone-50 hover:text-stone-800'
                           }`}
                         >
                           <div className="flex items-center gap-3">
@@ -503,9 +529,9 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
         {step === 1 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-4 mb-12">
-              <h2 className="text-4xl font-bold text-white tracking-tight">{t.typeSelectionTitle}</h2>
-              <p className="text-slate-400 text-lg">
-                {t.typeSelectionSubText} <code className="bg-slate-800 px-2 py-1 rounded-md text-sm text-indigo-300">persona.md</code>
+              <h2 className="text-4xl font-bold text-stone-800 tracking-tight">{t.typeSelectionTitle}</h2>
+              <p className="text-stone-500 text-lg">
+                {t.typeSelectionSubText} <code className="bg-stone-100 px-2 py-1 rounded-md text-sm text-amber-600">persona.md</code>
               </p>
             </div>
 
@@ -517,10 +543,10 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                 <div className={'w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-colors ' + cloneIconClass}>
                   <User className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">{t.cloneTitle}</h3>
-                <p className="text-slate-400 leading-relaxed text-sm">{t.cloneDesc}</p>
+                <h3 className="text-2xl font-bold text-stone-800 mb-3">{t.cloneTitle}</h3>
+                <p className="text-stone-500 leading-relaxed text-sm">{t.cloneDesc}</p>
                 {personaType === 'clone' && (
-                  <div className="absolute top-6 right-6 text-indigo-500 animate-in zoom-in duration-300">
+                  <div className="absolute top-6 right-6 text-amber-500 animate-in zoom-in duration-300">
                     <CheckCircle2 className="w-8 h-8" />
                   </div>
                 )}
@@ -533,10 +559,10 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                 <div className={'w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-colors ' + agentIconClass}>
                   <Bot className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">{t.agentTitle}</h3>
-                <p className="text-slate-400 leading-relaxed text-sm">{t.agentDesc}</p>
+                <h3 className="text-2xl font-bold text-stone-800 mb-3">{t.agentTitle}</h3>
+                <p className="text-stone-500 leading-relaxed text-sm">{t.agentDesc}</p>
                 {personaType === 'agent' && (
-                  <div className="absolute top-6 right-6 text-cyan-500 animate-in zoom-in duration-300">
+                  <div className="absolute top-6 right-6 text-teal-500 animate-in zoom-in duration-300">
                     <CheckCircle2 className="w-8 h-8" />
                   </div>
                 )}
@@ -547,7 +573,7 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
               <button
                 onClick={() => setStep(2)}
                 disabled={!personaType}
-                className="flex items-center gap-2 bg-white text-slate-900 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white hover:scale-105 active:scale-95"
+                className="flex items-center gap-2 bg-stone-800 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-stone-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-stone-800 hover:scale-105 active:scale-95"
               >
                 {t.startButton} <ArrowRight className="w-5 h-5" />
               </button>
@@ -558,16 +584,16 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
         {/* Step 2: Questions */}
         {step === 2 && currentQId && QUESTION_FLOW[personaType]?.[currentQId] && (
           <div className="max-w-2xl mx-auto flex flex-col min-h-[50vh]">
-            <div className="mb-8 flex items-center gap-4 text-sm font-medium text-slate-400">
+            <div className="mb-8 flex items-center gap-4 text-sm font-medium text-stone-500">
               <button
                 onClick={handlePrevQuestion}
-                className="hover:text-white transition-colors flex items-center gap-1 bg-slate-800/50 px-3 py-1.5 rounded-lg"
+                className="hover:text-stone-800 transition-colors flex items-center gap-1 bg-stone-100 px-3 py-1.5 rounded-lg"
               >
                 <ArrowLeft className="w-4 h-4" /> {t.backButton}
               </button>
-              <div className="flex-1 h-px bg-slate-800" />
+              <div className="flex-1 h-px bg-stone-200" />
               {questionProgress && (
-                <span className="text-slate-500 text-xs font-mono">
+                <span className="text-stone-400 text-xs font-mono">
                   {questionProgress.current} / {questionProgress.total}
                 </span>
               )}
@@ -575,10 +601,10 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
 
             <div key={currentQId} className="flex-1 animate-in fade-in slide-in-from-right-8 duration-500">
               <div className="mb-10 text-left">
-                <div className="inline-block px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-[10px] font-bold uppercase tracking-widest mb-4 border border-indigo-500/20">
+                <div className="inline-block px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-[10px] font-bold uppercase tracking-widest mb-4 border border-amber-200">
                   {QUESTION_FLOW[personaType][currentQId].dimension[lang] || QUESTION_FLOW[personaType][currentQId].dimension.en}
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-white leading-snug">
+                <h2 className="text-2xl sm:text-3xl font-bold text-stone-800 leading-snug">
                   {QUESTION_FLOW[personaType][currentQId].question[lang] || QUESTION_FLOW[personaType][currentQId].question.en}
                 </h2>
               </div>
@@ -589,10 +615,10 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                   const tagText = option.tag ? (option.tag[lang] || option.tag.en) : null;
                   const isSelected = answers[currentQId] === option.label;
                   const selectedStyle = isSelected
-                    ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/5'
-                    : 'border-slate-800 bg-slate-900/50 hover:border-slate-600 hover:bg-slate-800';
-                  const textStyle = isSelected ? 'text-indigo-300' : 'text-slate-300 group-hover:text-white';
-                  const radioStyle = isSelected ? 'border-indigo-500' : 'border-slate-700';
+                    ? 'border-amber-500 bg-amber-50 shadow-lg shadow-amber-500/5'
+                    : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50';
+                  const textStyle = isSelected ? 'text-amber-700' : 'text-stone-600 group-hover:text-stone-800';
+                  const radioStyle = isSelected ? 'border-amber-500' : 'border-stone-300';
                   return (
                     <button
                       key={idx}
@@ -602,7 +628,7 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                       <div className="flex items-center justify-between w-full">
                         <div className="flex flex-col gap-1">
                           {tagText && (
-                            <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-indigo-400' : 'text-slate-500'}`}>
+                            <span className={`text-[11px] sm:text-xs font-bold uppercase tracking-wider ${isSelected ? 'text-amber-500' : 'text-stone-400'}`}>
                               {tagText}
                             </span>
                           )}
@@ -610,8 +636,8 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                             {labelText}
                           </span>
                         </div>
-                        <div className={'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shrink-0 ml-4 ' + radioStyle}>
-                          {isSelected && <div className="w-3 h-3 bg-indigo-500 rounded-full" />}
+                        <div className={'w-7 h-7 rounded-full border-2 flex items-center justify-center transition-colors shrink-0 ml-4 ' + radioStyle}>
+                          {isSelected && <div className="w-3.5 h-3.5 bg-amber-500 rounded-full" />}
                         </div>
                       </div>
                     </button>
@@ -624,7 +650,7 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
               <button
                 onClick={handleNextQuestion}
                 disabled={!answers[currentQId]}
-                className="flex items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shadow-lg shadow-indigo-500/20"
+                className="flex items-center gap-2 bg-amber-500 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-amber-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shadow-lg shadow-amber-500/20"
               >
                 {t.nextButton} <ArrowRight className="w-5 h-5" />
               </button>
@@ -636,10 +662,10 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
         {step === 3 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-500 max-w-2xl mx-auto">
             <div className="space-y-3 text-center mb-10">
-              <h2 className="text-3xl font-bold text-white">{t.samplesTitle}</h2>
-              <p className="text-slate-400">
+              <h2 className="text-3xl font-bold text-stone-800">{t.samplesTitle}</h2>
+              <p className="text-stone-500">
                 {t.samplesSub1}
-                <span className="text-indigo-400 block mt-1">{t.samplesSub2}</span>
+                <span className="text-amber-600 block mt-1">{t.samplesSub2}</span>
               </p>
             </div>
 
@@ -647,12 +673,12 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
               {samples.map((sample) => (
                 <div
                   key={sample.id}
-                  className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-6 sm:p-8 rounded-3xl relative group transition-all shadow-xl"
+                  className="bg-white border border-stone-200 p-6 sm:p-8 rounded-3xl relative group transition-all shadow-lg"
                 >
                   {samples.length > 1 && (
                     <button
                       onClick={() => removeSample(sample.id)}
-                      className="absolute top-6 right-6 text-slate-500 hover:text-red-400 transition-colors p-2 bg-slate-950 rounded-full"
+                      className="absolute top-6 right-6 text-stone-400 hover:text-red-500 transition-colors p-2 bg-stone-100 rounded-full"
                       title="Remove"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -660,14 +686,14 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                   )}
 
                   <div className="mb-6">
-                    <label className="block text-sm font-bold text-slate-400 mb-3">{t.sourceLabel}</label>
+                    <label className="block text-sm font-bold text-stone-500 mb-3">{t.sourceLabel}</label>
                     <div className="flex flex-wrap gap-2">
                       {PLATFORMS.map((platform) => {
                         const Icon = platform.icon;
                         const isSelected = sample.source === platform.id;
                         const btnStyle = isSelected
-                          ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/20'
-                          : 'bg-slate-950 text-slate-400 hover:bg-slate-800';
+                          ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                          : 'bg-stone-100 text-stone-500 hover:bg-stone-200';
                         return (
                           <button
                             key={platform.id}
@@ -688,7 +714,7 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                         placeholder={t.customSourcePlaceholder}
                         value={sample.customSource}
                         onChange={(e) => updateSample(sample.id, 'customSource', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-stone-700 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
                       />
                     </div>
                   )}
@@ -699,7 +725,7 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                       value={sample.text}
                       onChange={(e) => updateSample(sample.id, 'text', e.target.value)}
                       rows={6}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-5 text-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all resize-none placeholder:text-slate-600"
+                      className="w-full bg-stone-50 border border-stone-200 rounded-xl p-5 text-stone-700 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all resize-none placeholder:text-stone-400"
                     />
                   </div>
                 </div>
@@ -708,7 +734,7 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
 
             <button
               onClick={addSample}
-              className="flex items-center justify-center w-full gap-2 border-2 border-dashed border-slate-700 text-slate-400 hover:text-indigo-400 hover:border-indigo-500 hover:bg-indigo-500/10 py-5 rounded-3xl transition-all font-bold text-lg mt-6"
+              className="flex items-center justify-center w-full gap-2 border-2 border-dashed border-stone-300 text-stone-400 hover:text-amber-600 hover:border-amber-400 hover:bg-amber-50 py-5 rounded-3xl transition-all font-bold text-lg mt-6"
             >
               <Plus className="w-6 h-6" /> {t.addSample}
             </button>
@@ -716,13 +742,13 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
             <div className="flex justify-between pt-10">
               <button
                 onClick={() => setStep(2)}
-                className="flex items-center gap-2 text-slate-400 hover:text-white px-6 py-4 rounded-2xl font-medium transition-colors"
+                className="flex items-center gap-2 text-stone-400 hover:text-stone-700 px-6 py-4 rounded-2xl font-medium transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" /> {t.backButton}
               </button>
               <button
                 onClick={handleGenerate}
-                className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-cyan-500 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:opacity-90 transition-opacity shadow-lg shadow-indigo-500/25 hover:scale-105 active:scale-95"
+                className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-teal-500 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:opacity-90 transition-opacity shadow-lg shadow-amber-500/25 hover:scale-105 active:scale-95"
               >
                 <Sparkles className="w-5 h-5" /> {t.generateButton}
               </button>
@@ -734,20 +760,20 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
         {step === 4 && (
           <div className="space-y-8 animate-in zoom-in-95 duration-500">
               <div className="space-y-6">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-slate-900/50 p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl backdrop-blur-md">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-lg">
                   <div>
                     {isGenerating ? (
                       <>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-sm font-bold mb-4 border border-indigo-500/20">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-sm font-bold mb-4 border border-amber-200">
                           <Loader2 className="w-4 h-4 animate-spin" />
                           {generationPhase === 'extras' ? t.phaseExtras : t.phaseEnhancing}
                         </div>
                         <div className="flex items-center gap-3 mt-2">
-                          <span className="text-slate-500 text-xs font-mono bg-slate-800 px-2 py-1 rounded-lg">
+                          <span className="text-stone-400 text-xs font-mono bg-stone-100 px-2 py-1 rounded-lg">
                             {elapsedSeconds}s
                           </span>
                           {(generatedMarkdown || fallbackMarkdown) && (
-                            <span className="text-emerald-400/80 text-xs font-medium">
+                            <span className="text-emerald-600 text-xs font-medium">
                               ✓ {t.downloadAvailable}
                             </span>
                           )}
@@ -755,17 +781,17 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                       </>
                     ) : generationPhase === 'timeout' ? (
                       <>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 text-sm font-bold mb-4 border border-amber-500/20">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-sm font-bold mb-4 border border-amber-200">
                           <AlertTriangle className="w-4 h-4" /> {t.phaseTimeout}
                         </div>
-                        <p className="text-slate-400 mt-2">{t.timeoutSub}</p>
+                        <p className="text-stone-500 mt-2">{t.timeoutSub}</p>
                       </>
                     ) : (
                       <>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-sm font-bold mb-4 border border-green-500/20">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-sm font-bold mb-4 border border-emerald-200">
                           <CheckCircle2 className="w-4 h-4" /> {t.successTitle}
                         </div>
-                        <p className="text-slate-400 mt-2">{t.successSub}</p>
+                        <p className="text-stone-500 mt-2">{t.successSub}</p>
                       </>
                     )}
                   </div>
@@ -774,14 +800,14 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                     <div className="flex flex-wrap gap-3">
                       <button
                         onClick={handleCopy}
-                        className="flex-1 md:flex-none flex justify-center items-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-xl hover:bg-slate-700 transition-colors font-bold"
+                        className="flex-1 md:flex-none flex justify-center items-center gap-2 bg-stone-100 text-stone-700 px-6 py-3 rounded-xl hover:bg-stone-200 transition-colors font-bold"
                       >
                         {copied ? <CheckCircle2 className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
                         {copied ? t.copied : t.copy}
                       </button>
                       <button
                         onClick={handleDownload}
-                        className="flex-1 md:flex-none flex justify-center items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20 font-bold"
+                        className="flex-1 md:flex-none flex justify-center items-center gap-2 bg-amber-500 text-white px-6 py-3 rounded-xl hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20 font-bold"
                       >
                         <Download className="w-5 h-5" />
                         {t.download}
@@ -799,22 +825,22 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
 
                 <div className="space-y-6">
                   {/* Tabs */}
-                  <div className="flex bg-slate-900/50 p-1.5 rounded-2xl border border-slate-800 shadow-lg w-full max-w-lg mx-auto md:mx-0">
+                  <div className="flex bg-stone-100 p-1.5 rounded-2xl border border-stone-200 shadow-sm w-full max-w-lg mx-auto md:mx-0">
                     <button
                       onClick={() => setActiveTab('persona')}
-                      className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'persona' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+                      className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'persona' ? 'bg-amber-500 text-white shadow-md' : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100'}`}
                     >
                       {t.tabPersona}
                     </button>
                     <button
                       onClick={() => setActiveTab('summary')}
-                      className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'summary' ? 'bg-purple-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+                      className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'summary' ? 'bg-amber-500 text-white shadow-md' : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100'}`}
                     >
                       {t.tabSummary}
                     </button>
                     <button
                       onClick={() => setActiveTab('example')}
-                      className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'example' ? 'bg-cyan-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+                      className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'example' ? 'bg-teal-500 text-white shadow-md' : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100'}`}
                     >
                       {t.tabExample}
                     </button>
@@ -855,25 +881,25 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
 
                   {/* Tab Content: Summary */}
                   {activeTab === 'summary' && (
-                    <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative h-[500px] flex flex-col mb-8 animate-in fade-in zoom-in-95 duration-300">
-                      <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                        <User className="w-5 h-5 text-purple-400" /> {t.tabSummary}
+                    <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-lg relative h-[500px] flex flex-col mb-8 animate-in fade-in zoom-in-95 duration-300">
+                      <h3 className="text-xl font-bold text-stone-800 mb-6 flex items-center gap-2">
+                        <User className="w-5 h-5 text-amber-500" /> {t.tabSummary}
                       </h3>
                       <div className="overflow-auto custom-scrollbar pr-2 flex-1 space-y-6">
-                        <div className="text-slate-300 text-sm leading-relaxed prose prose-invert prose-purple max-w-none">
+                        <div className="text-stone-600 text-sm leading-relaxed prose prose-stone max-w-none">
                            {personaSummary ? (
                              <ReactMarkdown>{personaSummary}</ReactMarkdown>
                            ) : (
-                             <div className="flex items-center gap-2 text-indigo-400 animate-pulse"><Loader2 className="w-4 h-4 animate-spin" /> {t.generatingSub}</div>
+                             <div className="flex items-center gap-2 text-amber-500 animate-pulse"><Loader2 className="w-4 h-4 animate-spin" /> {t.generatingSub}</div>
                            )}
                         </div>
 
-                        <div className="bg-purple-950/20 border border-purple-500/20 rounded-2xl p-5 relative overflow-hidden mt-6">
-                          <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
-                          <h4 className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-3">
+                        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 relative overflow-hidden mt-6">
+                          <div className="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
+                          <h4 className="text-xs font-bold text-amber-600 uppercase tracking-wider mb-3">
                             {t.appliedAttributes || 'Applied Persona Attributes'}
                           </h4>
-                          <ul className="text-slate-300 text-sm leading-relaxed list-disc pl-4 space-y-2">
+                          <ul className="text-stone-600 text-sm leading-relaxed list-disc pl-4 space-y-2">
                             {Object.entries(answers).map(([qId, ans], idx) => {
                               const qObj = QUESTION_FLOW[personaType]?.[qId];
                               const opt = qObj?.options.find((o) => o.label === ans);
@@ -881,7 +907,7 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                               const ansLabel = opt?.label?.[lang] || opt?.label?.en || ans;
                               return (
                                 <li key={idx} className="opacity-90">
-                                  {tag && <strong className="text-purple-300 mr-1 bg-purple-500/10 px-1 py-0.5 rounded">{tag}:</strong>}
+                                  {tag && <strong className="text-amber-700 mr-1 bg-amber-100 px-1 py-0.5 rounded">{tag}:</strong>}
                                   {ansLabel}
                                 </li>
                               );
@@ -894,34 +920,34 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
 
                   {/* Tab Content: Example */}
                   {activeTab === 'example' && (
-                    <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative h-[500px] flex flex-col mb-8 animate-in fade-in zoom-in-95 duration-300">
-                      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-cyan-400" /> {t.compareTitle}
+                    <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-2xl relative h-[500px] flex flex-col mb-8 animate-in fade-in zoom-in-95 duration-300">
+                      <h3 className="text-xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-teal-500" /> {t.compareTitle}
                       </h3>
-                      <p className="text-sm text-slate-400 mb-6">{t.compareDesc}</p>
-                      
+                      <p className="text-sm text-stone-500 mb-6">{t.compareDesc}</p>
+
                       <div className="space-y-4 flex-1 overflow-auto custom-scrollbar pr-2 pb-4">
-                        <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4">
-                          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{t.examplePromptLabel}</h4>
+                        <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4">
+                          <h4 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">{t.examplePromptLabel}</h4>
                           {examplePrompt ? (
-                            <p className="text-slate-200 text-sm italic">&ldquo;{examplePrompt}&rdquo;</p>
+                            <p className="text-stone-700 text-sm italic">&ldquo;{examplePrompt}&rdquo;</p>
                           ) : (
-                             <div className="h-4 bg-slate-700 rounded w-3/4 animate-pulse"></div>
+                             <div className="h-4 bg-stone-200 rounded w-3/4 animate-pulse"></div>
                           )}
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-4 mt-2">
-                          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
-                            <div className="absolute top-0 left-0 text-[10px] font-bold tracking-wider px-2 py-1 bg-slate-800 text-slate-400 rounded-br-lg">{t.exampleBeforeBadge}</div>
-                            <div className="mt-4 text-slate-300 text-sm leading-relaxed opacity-80">
-                               {exampleBefore ? <ReactMarkdown>{exampleBefore}</ReactMarkdown> : <div className="h-20 bg-slate-800 rounded animate-pulse"></div>}
+                          <div className="bg-stone-100 border border-stone-200 rounded-2xl p-5 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 text-[10px] font-bold tracking-wider px-2 py-1 bg-stone-300 text-stone-600 rounded-br-lg">{t.exampleBeforeBadge}</div>
+                            <div className="mt-4 text-stone-600 text-sm leading-relaxed opacity-80">
+                               {exampleBefore ? <ReactMarkdown>{exampleBefore}</ReactMarkdown> : <div className="h-20 bg-stone-200 rounded animate-pulse"></div>}
                             </div>
                           </div>
 
-                          <div className="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-5 relative overflow-hidden">
-                            <div className="absolute top-0 left-0 text-[10px] font-bold tracking-wider px-2 py-1 bg-indigo-500 text-white rounded-br-lg shadow-sm shadow-indigo-500/20">{t.exampleAfterBadge}</div>
-                            <div className="mt-4 text-slate-200 text-sm leading-relaxed prose prose-invert prose-indigo max-w-none prose-p:leading-relaxed">
-                               {exampleAfter ? <ReactMarkdown>{exampleAfter}</ReactMarkdown> : <div className="h-20 bg-indigo-900/50 rounded animate-pulse mt-1"></div>}
+                          <div className="bg-teal-50 border border-teal-200 rounded-2xl p-5 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 text-[10px] font-bold tracking-wider px-2 py-1 bg-teal-500 text-white rounded-br-lg shadow-sm shadow-teal-500/20">{t.exampleAfterBadge}</div>
+                            <div className="mt-4 text-stone-700 text-sm leading-relaxed prose prose-teal max-w-none prose-p:leading-relaxed">
+                               {exampleAfter ? <ReactMarkdown>{exampleAfter}</ReactMarkdown> : <div className="h-20 bg-teal-100 rounded animate-pulse mt-1"></div>}
                             </div>
                           </div>
                         </div>
@@ -930,16 +956,74 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
                   )}
                 </div>
 
+                {/* How to Use Section */}
+                {!isGenerating && (generatedMarkdown || fallbackMarkdown) && (
+                  <div className="mt-8 pt-8 border-t border-stone-200">
+                    <h3 className="text-lg font-bold text-stone-700 mb-5 flex items-center gap-2">
+                      <ExternalLink className="w-5 h-5 text-amber-500" />
+                      {t.guidanceTitle || 'How to use your persona.md'}
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="bg-white rounded-2xl border border-stone-200 p-5 hover:border-amber-300 hover:shadow-md transition-all">
+                        <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center mb-3">
+                          <Sparkles className="w-5 h-5 text-amber-600" />
+                        </div>
+                        <h4 className="text-sm font-bold text-stone-800">Gemini</h4>
+                        <p className="text-xs text-stone-500 leading-relaxed mt-2">{t.guidanceGemini}</p>
+                        <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer" className="text-xs text-amber-600 hover:text-amber-700 font-medium mt-3 inline-flex items-center gap-1">
+                          {t.openPlatform || 'Open'} <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                      <div className="bg-white rounded-2xl border border-stone-200 p-5 hover:border-amber-300 hover:shadow-md transition-all">
+                        <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center mb-3">
+                          <Monitor className="w-5 h-5 text-stone-600" />
+                        </div>
+                        <h4 className="text-sm font-bold text-stone-800">Cursor</h4>
+                        <p className="text-xs text-stone-500 leading-relaxed mt-2">{t.guidanceCursor}</p>
+                        <a href="https://cursor.sh" target="_blank" rel="noopener noreferrer" className="text-xs text-amber-600 hover:text-amber-700 font-medium mt-3 inline-flex items-center gap-1">
+                          {t.openPlatform || 'Open'} <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                      <div className="bg-white rounded-2xl border border-stone-200 p-5 hover:border-amber-300 hover:shadow-md transition-all">
+                        <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center mb-3">
+                          <Bot className="w-5 h-5 text-teal-600" />
+                        </div>
+                        <h4 className="text-sm font-bold text-stone-800">OpenClaw / Claude</h4>
+                        <p className="text-xs text-stone-500 leading-relaxed mt-2">{t.guidanceOpenClaw}</p>
+                        <button
+                          onClick={handleDownloadSoul}
+                          className="text-xs text-amber-600 hover:text-amber-700 font-medium mt-3 inline-flex items-center gap-1"
+                        >
+                          {t.downloadAsSoul || 'Download soul.md'} <Download className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <div className="bg-white rounded-2xl border border-stone-200 p-5 hover:border-amber-300 hover:shadow-md transition-all">
+                        <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center mb-3">
+                          <MessageSquare className="w-5 h-5 text-stone-600" />
+                        </div>
+                        <h4 className="text-sm font-bold text-stone-800">{t.guidanceGeneralTitle || 'Any AI Chat'}</h4>
+                        <p className="text-xs text-stone-500 leading-relaxed mt-2">{t.guidanceGeneral}</p>
+                        <button
+                          onClick={handleCopySystemPrompt}
+                          className="text-xs text-amber-600 hover:text-amber-700 font-medium mt-3 inline-flex items-center gap-1"
+                        >
+                          {copiedSystemPrompt ? (t.copiedSystemPrompt || 'Copied!') : (t.copyAsSystemPrompt || 'Copy as System Prompt')} <Copy className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex justify-center gap-6 pt-8">
                   <button
                     onClick={handleReset}
-                    className="text-slate-500 hover:text-white transition-colors font-medium flex items-center gap-2"
+                    className="text-stone-400 hover:text-stone-700 transition-colors font-medium flex items-center gap-2"
                   >
                     <ArrowLeft className="w-4 h-4" /> {t.reset}
                   </button>
                   <button
                     onClick={handleGenerate}
-                    className="flex items-center gap-2 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white px-5 py-2 rounded-xl font-medium transition-colors border border-slate-700"
+                    className="flex items-center gap-2 bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800 px-5 py-2 rounded-xl font-medium transition-colors border border-stone-200"
                   >
                     <Sparkles className="w-4 h-4" /> {t.regenerateButton || 'Regenerate'}
                   </button>
@@ -950,10 +1034,10 @@ Generate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-900/60 py-8 mt-auto">
-        <div className="max-w-4xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <footer className="border-t border-stone-200 bg-white py-8 mt-auto">
+        <div className="max-w-4xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-stone-400">
           <div className="flex flex-col items-center md:items-start gap-1">
-            <span className="font-medium text-slate-400">Persona Builder v{__APP_VERSION__} &mdash; Inspired by the philosophical approach of Poramate Minsiri</span>
+            <span className="font-medium text-stone-500">Persona Builder v{__APP_VERSION__} &mdash; Inspired by the philosophical approach of Poramate Minsiri</span>
             <span>6-Dimension Deep Analysis Framework</span>
           </div>
           <div className="flex flex-col items-center md:items-end gap-1">
