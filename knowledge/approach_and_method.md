@@ -33,19 +33,20 @@ In v2.5, we introduced the **Objective-Based Flow**. Before defining a persona, 
 
 ## 3. Inline Scenario Panels (Touch-First UX)
 
-To improve context-aware help on mobile and touchscreen devices, we moved away from tooltips and hover-states.
+To improve context-aware help on mobile and touchscreen devices, we moved away from tooltips and hover-states, and integrated the help directly into the choice cards.
 
-- **Solution**: The `ScenarioPanel.jsx` provides an inline, expandable accordion below each choice.
-- **Benefit**: Users see a real-world example (e.g., "If a server crashes, you would...") which makes abstract choices concrete without disrupting the vertical scrolling flow.
+- **Solution**: The `ScenarioPanel.jsx` provides an inline, expandable accordion directly *inside* the option card.
+- **Visual Connection**: By keeping the help text inside the card's border, the user never loses track of which choice the help corresponds to.
+- **Expansion**: Every single option in the flow (over 100 choices across both Clone and Agent paths) now includes a dedicated `helpExample` string.
 
 ---
 
-## 4. Multi-Phase Generation & Transformer Edge
+## 4. Multi-Phase Generation & Lazy Loading
 
-We utilize a tiered generation pipeline to maximize performance and utility:
+We utilize a tiered generation pipeline to maximize performance and minimize token waste:
 
-1. **Phase 1 (Persona.md)**: Streams the core ruleset instantly.
-2. **Phase 2 (Extras)**: Streams the Summary and Examples in parallel tabs.
+1. **Phase 1 (Persona.md)**: Streams the core ruleset instantly upon completion of the questionnaire.
+2. **Phase 2 (Lazy-Loaded Extras)**: The Summary and Example tabs are *not* generated automatically. The secondary AI call (saving ~2048 tokens) is only triggered when the user explicitly clicks the "Summary" or "Example" tab.
 3. **SOUL.md Transform**: A dedicated, secondary AI execution that reformats the current persona into the specific **OpenClaw SOUL.md** structure (Core Truths, Boundaries, Vibe, Continuity).
 
 ---

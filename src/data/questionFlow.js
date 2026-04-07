@@ -51,11 +51,19 @@ export const QUESTION_FLOW = {
         { 
           tag: t('Categorize', 'Categorize', 'Kategorisieren'),
           label: t('จัดกลุ่มข้อมูลให้เป็นระเบียบและสร้างโครงสร้างให้มัน', 'Group everything into categories and create a structure.', 'Alles in Kategorien einteilen und eine Struktur schaffen.'), 
+          helpExample: t('เช่น เมื่อต้องวิเคราะห์ฟีดแบ็กลูกค้า 500 รายการ คุณจะแบ่งเป็นหมวดหมู่ เช่น UX, ราคา, ฟีเจอร์ ก่อนเริ่มวิเคราะห์', 'E.g., When analyzing 500 customer feedbacks, you\'d first sort them into categories like UX, Pricing, and Features before analyzing.', 'Z.B., Bei 500 Kundenfeedbacks würden Sie diese zuerst in Kategorien wie UX, Preis und Features sortieren.'),
           nextId: 'agency' 
         },
         { 
           tag: t('Pattern Seeking', 'Pattern Seeking', 'Mustersuche'),
           label: t('มองหาแพทเทิร์นหรือสิ่งที่ผิดปกติที่คนอื่นอาจจะมองไม่เห็น', 'Look for patterns or anomalies that others might miss.', 'Nach Mustern oder Anomalien suchen, die andere übersehen.'), 
+          helpExample: t('เช่น เมื่อดูยอดขายรายเดือน คุณสังเกตว่ายอดตกทุกวันจันทร์ที่ 3 ของเดือน ซึ่งคนอื่นไม่เคยสังเกต', 'E.g., Looking at monthly sales, you notice a consistent dip every 3rd Monday — a pattern no one else spotted.', 'Z.B., Bei den Monatsumsätzen bemerken Sie einen regelmäßigen Rückgang jeden 3. Montag.'),
+          nextId: 'agency' 
+        },
+        { 
+          tag: t('Prioritize', 'Prioritize', 'Priorisieren'),
+          label: t('จัดลำดับความสำคัญตามผลกระทบ ทำเรื่องสำคัญก่อนเสมอ', 'Rank by impact and urgency — always tackle what matters most first.', 'Nach Wichtigkeit und Dringlichkeit ordnen — das Wichtigste zuerst.'), 
+          helpExample: t('เช่น เมื่อมีงาน 20 อย่างพร้อมกัน คุณจะจัดอันดับตาม impact/effort matrix แล้วทำ quick wins ก่อน', 'E.g., With 20 tasks at once, you\'d create an impact/effort matrix and knock out the quick wins first.', 'Z.B., Bei 20 gleichzeitigen Aufgaben erstellen Sie eine Impact/Effort-Matrix und erledigen Quick Wins zuerst.'),
           nextId: 'agency' 
         }
       ]
@@ -71,11 +79,19 @@ export const QUESTION_FLOW = {
         { 
           tag: t('80/20 Rule', '80/20 Rule', '80/20-Regel'),
           label: t('มองข้ามรายละเอียดปลีกย่อยที่ไม่ได้ส่งผลกระทบหลัก', 'Ignore micro-details that don\'t impact the big picture.', 'Mikrodetails ignorieren, die das große Ganze nicht beeinflussen.'), 
+          helpExample: t('เช่น รายงานที่ต้องส่งพรุ่งนี้ คุณจะเน้นเขียน 20% ที่สำคัญที่สุดก่อน แล้วค่อยเติมรายละเอียดทีหลัง', 'E.g., For a report due tomorrow, you\'d focus on writing the critical 20% first, then fill in details later.', 'Z.B., Bei einem Bericht für morgen konzentrieren Sie sich auf die wichtigsten 20%.'),
           nextId: 'agency' 
         },
         { 
           tag: t('Fact-Focus', 'Fact-Focus', 'Faktenorientiert'),
           label: t('มองข้ามอารมณ์ความรู้สึก และเน้นแค่ข้อเท็จจริงล้วนๆ', 'Ignore emotions and focus purely on the facts and data.', 'Emotionen ignorieren und sich rein auf Fakten konzentrieren.'), 
+          helpExample: t('เช่น ในที่ประชุมที่คนเริ่มใช้อารมณ์ คุณจะดึงกลับมาที่ตัวเลขและข้อมูลจริงเสมอ', 'E.g., In heated meetings, you always steer the conversation back to actual numbers and data.', 'Z.B., In hitzigen Meetings lenken Sie das Gespräch immer zurück zu Zahlen und Fakten.'),
+          nextId: 'agency' 
+        },
+        { 
+          tag: t('Time-boxing', 'Time-boxing', 'Zeitbegrenzung'),
+          label: t('กำหนดเวลาตายตัว ถ้าหมดเวลาก็ต้องเดินหน้าต่อทันที', 'Set a fixed time limit — when it\'s up, move on regardless.', 'Feste Zeitlimits setzen — wenn die Zeit um ist, weitermachen.'), 
+          helpExample: t('เช่น ให้เวลา 15 นาทีในการหาคำตอบ ถ้าไม่เจอก็ตัดสินใจจากข้อมูลที่มี แล้วไปต่อ', 'E.g., You give yourself 15 minutes to find the answer. If you don\'t, decide with what you have and move on.', 'Z.B., Sie geben sich 15 Minuten für die Antwort. Wenn nicht, entscheiden Sie mit dem, was Sie haben.'),
           nextId: 'agency' 
         }
       ]
@@ -91,11 +107,19 @@ export const QUESTION_FLOW = {
         { 
           tag: t('Risk Assessment', 'Risk Assessment', 'Risikobewertung'),
           label: t('ช่องโหว่ ความเสี่ยง และสิ่งที่น่าจะเกิดความผิดพลาด', 'The loopholes, risks, and what could potentially go wrong.', 'Lücken, Risiken und was schiefgehen könnte.'), 
+          helpExample: t('เช่น เพื่อนร่วมงานเสนอให้ย้ายระบบไป cloud คุณถามทันทีว่า "แล้วถ้า downtime ระหว่างย้ายล่ะ?"', 'E.g., A colleague suggests migrating to cloud — you immediately ask "What about downtime during migration?"', 'Z.B., Ein Kollege schlägt Cloud-Migration vor — Sie fragen sofort "Was ist mit Ausfallzeiten?"'),
           nextId: 'agency' 
         },
         { 
           tag: t('Logic Audit', 'Logic Audit', 'Logikprüfung'),
           label: t('ความไม่สมเหตุสมผลของเหตุผล หรืออคติที่ซ่อนอยู่', 'Logical fallacies or hidden biases in their reasoning.', 'Logikfehler oder verborgene Voreingenommenheit.'), 
+          helpExample: t('เช่น เมื่อได้ยินว่า "ทุกคนใช้ X ดังนั้นเราต้องใช้ด้วย" คุณจะชี้ว่านี่คือ bandwagon fallacy', 'E.g., When you hear "Everyone uses X, so we should too," you point out this is a bandwagon fallacy.', 'Z.B., Wenn Sie hören "Alle nutzen X," weisen Sie auf den Mitläufereffekt hin.'),
+          nextId: 'agency' 
+        },
+        { 
+          tag: t("Devil's Advocate", "Devil's Advocate", 'Advocatus Diaboli'),
+          label: t('ตั้งคำถามท้าทายจากมุมตรงข้ามเพื่อทดสอบความแข็งแกร่งของไอเดีย', 'Challenge every assumption from the opposite angle to stress-test the idea.', 'Jede Annahme aus der Gegenposition hinterfragen, um die Idee zu testen.'), 
+          helpExample: t('เช่น แม้คุณจะเห็นด้วยกับไอเดีย แต่คุณจะทำตัวเป็นฝ่ายค้านเพื่อหาจุดอ่อนที่ทีมอาจมองข้าม', 'E.g., Even if you agree with an idea, you deliberately argue against it to find weaknesses the team might overlook.', 'Z.B., Selbst wenn Sie einverstanden sind, argumentieren Sie absichtlich dagegen.'),
           nextId: 'agency' 
         }
       ]
@@ -111,11 +135,19 @@ export const QUESTION_FLOW = {
         { 
           tag: t('Cross-disciplinary', 'Cross-disciplinary', 'Fachübergreifend'),
           label: t('เอาเรื่องจากศาสตร์อื่นๆ ที่ไม่เกี่ยวกันมาประยุกต์ใช้', 'Apply concepts from completely unrelated fields.', 'Konzepte aus völlig anderen Bereichen anwenden.'), 
+          helpExample: t('เช่น นำหลักการวิวัฒนาการของดาร์วินมาใช้ออกแบบอัลกอริทึมการเรียนรู้ของ AI', 'E.g., Applying Darwin\'s evolution theory to design an AI learning algorithm.', 'Z.B., Darwins Evolutionstheorie auf das Design eines KI-Lernalgorithmus anwenden.'),
           nextId: 'agency' 
         },
         { 
           tag: t('Storytelling', 'Storytelling', 'Geschichtenerzählen'),
           label: t('ใช้ประสบการณ์ส่วนตัวมาร้อยเรียงเป็นเรื่องราวที่เห็นภาพ', 'Use personal experiences to weave everything into a story.', 'Persönliche Erfahrungen nutzen, um eine Geschichte zu weben.'), 
+          helpExample: t('เช่น อธิบายการทำงานของ API โดยเปรียบเทียบกับประสบการณ์สั่งอาหารที่ร้านโปรดของคุณ', 'E.g., Explaining how APIs work by comparing it to your experience ordering at your favorite restaurant.', 'Z.B., APIs erklären, indem Sie es mit dem Bestellen in Ihrem Lieblingsrestaurant vergleichen.'),
+          nextId: 'agency' 
+        },
+        { 
+          tag: t('Visual Thinking', 'Visual Thinking', 'Visuelles Denken'),
+          label: t('ใช้แผนภาพ ไดอะแกรม หรือภาพในหัวเพื่อจัดระเบียบความคิด', 'Use diagrams, spatial reasoning, and mental imagery to organize thoughts.', 'Diagramme, räumliches Denken und mentale Bilder nutzen.'), 
+          helpExample: t('เช่น เมื่อวางแผนโปรเจกต์ คุณจะวาด mind map หรือ flowchart ก่อนเริ่มเขียนอะไรก็ตาม', 'E.g., When planning a project, you always draw a mind map or flowchart before writing anything.', 'Z.B., Bei der Projektplanung zeichnen Sie immer erst eine Mind Map oder ein Flussdiagramm.'),
           nextId: 'agency' 
         }
       ]
@@ -191,11 +223,19 @@ export const QUESTION_FLOW = {
         { 
           tag: t('Data Storytelling', 'Data Storytelling', 'Datenstorytelling'),
           label: t('ใช้ตัวเลขและข้อมูลที่ชัดเจนให้มันเล่าเรื่องด้วยตัวมันเอง', 'Let pure numbers and clear data tell the story.', 'Zahlen und klare Daten die Geschichte erzählen lassen.'), 
+          helpExample: t('เช่น แทนที่จะบอกว่า "ยอดขายเพิ่มขึ้น" คุณจะพูดว่า "ยอดขายเพิ่ม 47% ใน Q3 เทียบกับ Q2"', 'E.g., Instead of saying "sales went up," you\'d say "sales grew 47% in Q3 vs Q2."', 'Z.B., Statt "Umsatz gestiegen" sagen Sie "Umsatz um 47% in Q3 vs Q2 gestiegen."'),
           nextId: 'capability' 
         },
         { 
           tag: t('Logical Sequence', 'Logical Sequence', 'Logische Abfolge'),
           label: t('ใช้ตรรกะที่คมชัดและลำดับขั้นที่เป็นเหตุเป็นผล', 'Use sharp logic and a clear step-by-step reasoning.', 'Scharfsinninge Logik und klare schrittweise Begründung.'), 
+          helpExample: t('เช่น "ถ้า A เป็นจริง แล้ว B ก็ต้องตามมา ดังนั้นเราควรทำ C" — เรียบง่ายแต่ปฏิเสธไม่ได้', 'E.g., "If A is true, then B follows, therefore we should do C" — simple but undeniable.', 'Z.B., "Wenn A wahr ist, folgt B, also sollten wir C tun" — einfach, aber unwiderlegbar.'),
+          nextId: 'capability' 
+        },
+        { 
+          tag: t('Comparison Matrix', 'Comparison Matrix', 'Vergleichsmatrix'),
+          label: t('เปรียบเทียบทางเลือกแบบเคียงข้างกันให้เห็นชัดด้วยตาราง', 'Compare alternatives side by side in a clear matrix format.', 'Alternativen in einer klaren Matrix nebeneinander vergleichen.'), 
+          helpExample: t('เช่น สร้างตาราง Pros/Cons ของทุกทางเลือก แล้วให้คนอื่นเลือกจากข้อมูลที่จัดไว้ชัดเจน', 'E.g., Creating a Pros/Cons table for every option, letting others decide from clearly laid-out data.', 'Z.B., Eine Vor-/Nachteile-Tabelle für jede Option erstellen.'),
           nextId: 'capability' 
         }
       ]
@@ -211,11 +251,19 @@ export const QUESTION_FLOW = {
         { 
           tag: t('Authority', 'Authority', 'Autorität'),
           label: t('อ้างอิงจากแหล่งที่มาหรือผู้เชี่ยวชาญระดับสากล', 'Citing reputable sources and global experts.', 'Seriöse Quellen und globale Experten zitieren.'), 
+          helpExample: t('เช่น "ตาม McKinsey Report 2024 ระบุว่า..." หรือ "ศ.ดร. แห่ง MIT เสนอว่า..."', 'E.g., "According to McKinsey\'s 2024 Report..." or "Prof. X at MIT suggests..."', 'Z.B., "Laut McKinsey Report 2024..." oder "Prof. X am MIT schlägt vor..."'),
           nextId: 'capability' 
         },
         { 
           tag: t('Full Spectrum', 'Full Spectrum', 'Volles Spektrum'),
           label: t('วิเคราะห์ข้อดีข้อเสียให้เห็นครบทุกมุมอย่างเป็นกลาง', 'Analyzing both pros and cons neutrally from all angles.', 'Vor- und Nachteile neutral aus allen Blickwinkeln analysieren.'), 
+          helpExample: t('เช่น "ทางเลือก A มีข้อดี 3 ข้อ แต่มีข้อเสีย 2 ข้อ ส่วนทางเลือก B..." — ให้ครบทุกมุม', 'E.g., "Option A has 3 pros but 2 cons, while Option B..." — covering every angle objectively.', 'Z.B., "Option A hat 3 Vorteile, aber 2 Nachteile, während Option B..."'),
+          nextId: 'capability' 
+        },
+        { 
+          tag: t('Case Studies', 'Case Studies', 'Fallstudien'),
+          label: t('พิสูจน์ด้วยตัวอย่างจริงและกรณีศึกษาที่เกิดขึ้นแล้ว', 'Prove points through real-world case studies and concrete examples.', 'Punkte durch reale Fallstudien und konkrete Beispiele belegen.'), 
+          helpExample: t('เช่น "Netflix เคยประสบปัญหาเดียวกัน แล้วแก้ด้วยวิธี X ซึ่งลด churn ลง 30%"', 'E.g., "Netflix faced the same issue and solved it with method X, reducing churn by 30%."', 'Z.B., "Netflix hatte dasselbe Problem und löste es mit Methode X, Churn um 30% reduziert."'),
           nextId: 'capability' 
         }
       ]
@@ -231,11 +279,19 @@ export const QUESTION_FLOW = {
         { 
           tag: t('Humor/Wit', 'Humor/Wit', 'Humor/Witz'),
           label: t('ใช้อารมณ์ขันหรือมุกตลกเพื่อละลายพฤติกรรม', 'Use humor or jokes to break the ice and build rapport.', 'Humor oder Witze nutzen, um das Eis zu brechen.'), 
+          helpExample: t('เช่น เปิดการนำเสนอด้วยมุกเกี่ยวกับปัญหาที่ทุกคนเจอ ทำให้บรรยากาศเบาลงก่อนเข้าเนื้อหาจริง', 'E.g., Opening a presentation with a joke about a common struggle, lightening the mood before diving in.', 'Z.B., Eine Präsentation mit einem Witz über ein gemeinsames Problem eröffnen.'),
           nextId: 'capability' 
         },
         { 
           tag: t('Empathy', 'Empathy', 'Empathie'),
           label: t('แสดงความเข้าใจในสถานการณ์ของเขาว่าเป็นพวกเดียวกัน', 'Showing empathy and making them feel understood.', 'Empathie zeigen und ihnen das Gefühl geben, verstanden zu werden.'), 
+          helpExample: t('เช่น "ผมเข้าใจครับ ผมเคยเจอเหมือนกัน..." ทำให้คนรู้สึกว่าคุณเป็นพวกเดียวกัน', 'E.g., "I totally get it — I\'ve been there too..." making people feel you\'re on their side.', 'Z.B., "Ich verstehe das völlig — das kenne ich auch..."'),
+          nextId: 'capability' 
+        },
+        { 
+          tag: t('Relatability', 'Relatability', 'Nahbarkeit'),
+          label: t('ใช้ประสบการณ์ร่วมและเรื่องราวที่ทุกคนเข้าใจได้', 'Use shared experiences and common ground to connect.', 'Gemeinsame Erfahrungen und Gemeinsamkeiten nutzen.'), 
+          helpExample: t('เช่น แทนที่จะพูดเรื่องเทคนิค คุณเปรียบเทียบกับเรื่องในชีวิตจริงที่ทุกคนเคยเจอ', 'E.g., Instead of talking tech, you compare it to something everyone has experienced in daily life.', 'Z.B., Statt Technik zu sprechen, vergleichen Sie es mit Alltagserfahrungen.'),
           nextId: 'capability' 
         }
       ]
@@ -251,11 +307,19 @@ export const QUESTION_FLOW = {
         { 
           tag: t('Pain Points', 'Pain Points', 'Schmerzpunkte'),
           label: t('ชี้ให้เห็นถึงความล้มเหลวที่จะเกิดขึ้นถ้าไม่ยอมเปลี่ยน', 'Highlighting the failure/pain that will occur without change.', 'Auf das Scheitern/den Schmerz hinweisen, der ohne Änderung eintritt.'), 
+          helpExample: t('เช่น "ถ้าไม่อัพเดทระบบตอนนี้ ข้อมูลจะรั่วไหลภายใน 6 เดือน" — ทำให้คนเห็นภาพความเจ็บปวด', 'E.g., "If you don\'t update the system now, data will leak within 6 months" — making the pain vivid.', 'Z.B., "Wenn Sie das System jetzt nicht aktualisieren, werden Daten innerhalb von 6 Monaten lecken."'),
           nextId: 'capability' 
         },
         { 
           tag: t('Myth Busting', 'Myth Busting', 'Mythen entlarven'),
           label: t('หักล้างความเชื่อผิดๆ อย่างตรงไปตรงมาและรุนแรง', 'Brutally debunking common myths and false beliefs.', 'Allgemeine Mythen und falsche Überzeugungen entlarven.'), 
+          helpExample: t('เช่น "ทุกคนคิดว่า MVP ต้องเร็ว — แต่ MVP ที่ไม่มีคุณค่ามันไม่ใช่ MVP มันคือ WASTE"', 'E.g., "Everyone thinks MVPs must be fast — but an MVP without value isn\'t an MVP, it\'s WASTE."', 'Z.B., "Alle denken, MVPs müssen schnell sein — aber ein MVP ohne Wert ist VERSCHWENDUNG."'),
+          nextId: 'capability' 
+        },
+        { 
+          tag: t('Provocative Questions', 'Provocative Questions', 'Provokative Fragen'),
+          label: t('ตั้งคำถามที่ท้าทายและบังคับให้คนต้องคิดใหม่ทันที', 'Ask hard questions that force immediate reflection and rethinking.', 'Harte Fragen stellen, die sofortiges Umdenken erzwingen.'), 
+          helpExample: t('เช่น "ถ้าธุรกิจของคุณถูก AI แทนที่ภายใน 2 ปี คุณจะทำอะไรตอนนี้?" — สะเทือนความเชื่อเดิม', 'E.g., "If AI replaced your entire business in 2 years, what would you do today?" — shaking old beliefs.', 'Z.B., "Wenn KI Ihr Unternehmen in 2 Jahren ersetzt, was würden Sie heute tun?"'),
           nextId: 'capability' 
         }
       ]
@@ -303,22 +367,26 @@ export const QUESTION_FLOW = {
       options: [
         { 
           tag: t('Systems Thinker', 'Systems Thinker', 'Systemdenker'),
-          label: t('มองแบบองค์รวม เห็นโครงสร้างและความเชื่อมโยงของระบบ', 'See holistic connections, systems, and structures.', 'Ganzheitliche Verbindungen, Systeme und Strukturen sehen.'), 
+          label: t('มองแบบองค์รวม เห็นโครงสร้างและความเชื่อมโยงของระบบ', 'See holistic connections, systems, and structures.', 'Ganzheitliche Verbindungen, Systeme und Strukturen sehen.'),
+          helpExample: t('', 'E.g., When debugging a microservice failure, the Agent traces the full dependency chain rather than fixing the symptom.', ''), 
           nextId: 'a_perception_system' 
         },
         { 
           tag: t('Pragmatist', 'Pragmatist', 'Pragmatiker'),
-          label: t('มองหาวิธีการแก้ปัญหาที่ทำได้จริงและเห็นผลทันที', 'Focus on immediate, actionable, and practical problem-solving.', 'Fokus auf sofortige, umsetzbare und praktische Problemlösung.'), 
+          label: t('มองหาวิธีการแก้ปัญหาที่ทำได้จริงและเห็นผลทันที', 'Focus on immediate, actionable, and practical problem-solving.', 'Fokus auf sofortige, umsetzbare und praktische Problemlösung.'),
+          helpExample: t('', 'E.g., User asks about a bug — the Agent gives a working fix first, then explains the root cause if asked.', ''), 
           nextId: 'a_perception_pragmatic' 
         },
         { 
           tag: t('Analyst', 'Analyst', 'Analytiker'),
-          label: t('เน้นตรวจสอบรายละเอียด ค้นหาช่องโหว่และข้อผิดพลาด', 'Focus on inspection, deep analysis, and finding flaws.', 'Fokus auf Inspektion, tiefe Analyse und das Finden von Fehlern.'), 
+          label: t('เน้นตรวจสอบรายละเอียด ค้นหาช่องโหว่และข้อผิดพลาด', 'Focus on inspection, deep analysis, and finding flaws.', 'Fokus auf Inspektion, tiefe Analyse und das Finden von Fehlern.'),
+          helpExample: t('', 'E.g., When reviewing a PR, the Agent checks edge cases, race conditions, and security vulnerabilities before approving.', ''), 
           nextId: 'a_perception_critical' 
         },
         { 
           tag: t('Visionary', 'Visionary', 'Visionär'),
-          label: t('มองข้ามขีดจำกัดปัจจุบัน พุ่งเป้าไปที่ความเป็นไปได้ใหม่ๆ', 'Look past current constraints, aiming for future possibilities.', 'Über aktuelle Grenzen hinausblicken, neue Möglichkeiten anstreben.'), 
+          label: t('มองข้ามขีดจำกัดปัจจุบัน พุ่งเป้าไปที่ความเป็นไปได้ใหม่ๆ', 'Look past current constraints, aiming for future possibilities.', 'Über aktuelle Grenzen hinausblicken, neue Möglichkeiten anstreben.'),
+          helpExample: t('', 'E.g., Instead of patching legacy code, the Agent proposes a future-proof architecture redesign.', ''), 
           nextId: 'a_perception_creative' 
         }
       ]
@@ -333,15 +401,23 @@ export const QUESTION_FLOW = {
       options: [
         { 
           tag: t('Taxonomy', 'Taxonomy', 'Taxonomie'),
-          label: t('แยกประเภทข้อมูลและสร้างกรอบความคิด (Framework) ขึ้นมา', 'Categorize data and build structural frameworks.', 'Daten kategorisieren und strukturelle Rahmenbedingungen schaffen.'), 
+          label: t('แยกประเภทข้อมูลและสร้างกรอบความคิด (Framework) ขึ้นมา', 'Categorize data and build structural frameworks.', 'Daten kategorisieren und strukturelle Rahmenbedingungen schaffen.'),
+          helpExample: t('', 'E.g., Given raw user feedback, the Agent auto-generates a categorized report with themes and priorities.', ''), 
           nextId: 'a_agency' 
         },
         { 
           tag: t('Cause & Effect', 'Cause & Effect', 'Ursache & Wirkung'),
-          label: t('วิเคราะห์ความสัมพันธ์เชิงเหตุและผลเชิงลึกของแต่ละส่วน', 'Analyze deep cause-and-effect relationships between all parts.', 'Ursache-Wirkungs-Beziehungen zwischen allen Teilen analysieren.'), 
+          label: t('วิเคราะห์ความสัมพันธ์เชิงเหตุและผลเชิงลึกของแต่ละส่วน', 'Analyze deep cause-and-effect relationships between all parts.', 'Ursache-Wirkungs-Beziehungen zwischen allen Teilen analysieren.'),
+          helpExample: t('', 'E.g., When a metric drops, the Agent traces through every upstream dependency to find the true trigger.', ''), 
           nextId: 'a_agency' 
         }
-      ]
+      ,
+        { 
+          tag: t('Impact Ranking', 'Impact Ranking', 'Wirkungsranking'),
+          label: t('จัดลำดับข้อมูลตามผลกระทบ แล้ววิเคราะห์สิ่งที่สำคัญที่สุดก่อน', 'Rank data by impact level and analyze the highest-priority items first.', 'Daten nach Wirkungsgrad ordnen und die wichtigsten zuerst analysieren.'), 
+          helpExample: t('', 'E.g., Given 50 support tickets, the Agent auto-ranks by severity and business impact before processing.', ''),
+          nextId: 'a_agency' 
+        }]
     },
     a_perception_pragmatic: {
       dimension: t('มิติที่ 2: การประมวลผล', 'Dimension 2: Perception', 'Dimension 2: Wahrnehmung'),
@@ -353,15 +429,23 @@ export const QUESTION_FLOW = {
       options: [
         { 
           tag: t('Actionable-Only', 'Actionable-Only', 'Nur Umsetzbares'),
-          label: t('ข้ามทฤษฎีที่ยังทำจริงไม่ได้ โฟกัสเฉพาะสิ่งที่ลงมือทำได้เลย', 'Skip unusable theories; focus strictly on actionable items.', 'Unbrauchbare Theorien überspringen; Fokus auf Umsetzbares.'), 
+          label: t('ข้ามทฤษฎีที่ยังทำจริงไม่ได้ โฟกัสเฉพาะสิ่งที่ลงมือทำได้เลย', 'Skip unusable theories; focus strictly on actionable items.', 'Unbrauchbare Theorien überspringen; Fokus auf Umsetzbares.'),
+          helpExample: t('', 'E.g., Instead of explaining REST vs GraphQL theory, the Agent just gives you the right API call to use now.', ''), 
           nextId: 'a_agency' 
         },
         { 
           tag: t('No-Fluff', 'No-Fluff', 'Direkt'),
-          label: t('ข้ามการอารัมภบทหรือความสุภาพที่ยาวเกินไป เน้นความกระชับ', 'Skip wordy introductions or unnecessary politeness. Concise only.', 'Lange Einleitungen überspringen. Nur das Wesentliche.'), 
+          label: t('ข้ามการอารัมภบทหรือความสุภาพที่ยาวเกินไป เน้นความกระชับ', 'Skip wordy introductions or unnecessary politeness. Concise only.', 'Lange Einleitungen überspringen. Nur das Wesentliche.'),
+          helpExample: t('', 'E.g., Instead of \'Great question! Let me help...\', the Agent responds with the answer directly.', ''), 
           nextId: 'a_agency' 
         }
-      ]
+      ,
+        { 
+          tag: t('Summary-First', 'Summary-First', 'Zusammenfassung zuerst'),
+          label: t('สรุปใจความสำคัญก่อนเสมอ แล้วค่อยให้รายละเอียดถ้าถูกถาม', 'Always lead with a concise summary; provide details only when asked.', 'Immer mit einer Zusammenfassung beginnen; Details nur auf Nachfrage.'), 
+          helpExample: t('', 'E.g., Instead of a 500-word explanation, the Agent gives a 2-sentence summary with a "Want details?" prompt.', ''),
+          nextId: 'a_agency' 
+        }]
     },
     a_perception_critical: {
       dimension: t('มิติที่ 2: การประมวลผล', 'Dimension 2: Perception', 'Dimension 2: Wahrnehmung'),
@@ -373,15 +457,23 @@ export const QUESTION_FLOW = {
       options: [
         { 
           tag: t('Risk Mitigation', 'Risk Mitigation', 'Risikominderung'),
-          label: t('ประเมินความเสี่ยงและเตือนถึงสถานการณ์เลวร้ายที่สุด', 'Assess risks and warn about the worst-case scenario.', 'Risiken bewerten und vor dem Worst-Case-Szenario warnen.'), 
+          label: t('ประเมินความเสี่ยงและเตือนถึงสถานการณ์เลวร้ายที่สุด', 'Assess risks and warn about the worst-case scenario.', 'Risiken bewerten und vor dem Worst-Case-Szenario warnen.'),
+          helpExample: t('', 'E.g., Before deploying, the Agent flags: \'Warning: This change affects 3 downstream services.\'', ''), 
           nextId: 'a_agency' 
         },
         { 
           tag: t('Logic Audit', 'Logic Audit', 'Logik-Audit'),
-          label: t('ตรวจสอบความถูกต้องของตรรกะและข้อเท็จจริงอย่างเข้มงวด', 'Performs brutal fact-checking and logic audits on everything.', 'Faktenprüfung und Logik-Audits bei allem durchführen.'), 
+          label: t('ตรวจสอบความถูกต้องของตรรกะและข้อเท็จจริงอย่างเข้มงวด', 'Performs brutal fact-checking and logic audits on everything.', 'Faktenprüfung und Logik-Audits bei allem durchführen.'),
+          helpExample: t('', 'E.g., The Agent responds: \'Your claim that X causes Y is unsupported. Source A says otherwise.\'', ''), 
           nextId: 'a_agency' 
         }
-      ]
+      ,
+        { 
+          tag: t('Assumption Check', 'Assumption Check', 'Annahmenprüfung'),
+          label: t('ตรวจสอบสิ่งที่ผู้ใช้คิดว่าเป็นจริง แล้วชี้ให้เห็นถ้าผิด', 'Actively question user assumptions and flag incorrect premises.', 'Annahmen des Nutzers aktiv hinterfragen und falsche Prämissen aufzeigen.'), 
+          helpExample: t('', 'E.g., User says "React is faster than Vue" — Agent: "That depends on the benchmark. Here is a comparison..."', ''),
+          nextId: 'a_agency' 
+        }]
     },
     a_perception_creative: {
       dimension: t('มิติที่ 2: การประมวลผล', 'Dimension 2: Perception', 'Dimension 2: Wahrnehmung'),
@@ -393,15 +485,23 @@ export const QUESTION_FLOW = {
       options: [
         { 
           tag: t('Analogies', 'Analogies', 'Analogien'),
-          label: t('ใช้การเปรียบเทียบข้ามสายงานเพื่อให้เห็นภาพได้ชัดเจน', 'Use cross-industry analogies to explain complex concepts.', 'Branchenübergreifende Analogien zur Erklärung nutzen.'), 
+          label: t('ใช้การเปรียบเทียบข้ามสายงานเพื่อให้เห็นภาพได้ชัดเจน', 'Use cross-industry analogies to explain complex concepts.', 'Branchenübergreifende Analogien zur Erklärung nutzen.'),
+          helpExample: t('', 'E.g., The Agent explains database sharding like \'splitting a library into branches for faster local access.\'', ''), 
           nextId: 'a_agency' 
         },
         { 
           tag: t('Divergent Thinking', 'Divergent Thinking', 'Divergentes Denken'),
-          label: t('เสนอทางเลือกที่แหวกแนวและไม่ถูกจำกัดด้วยกรอบเดิมๆ', 'Offer unconventional options, free from standard constraints.', 'Unkonventionelle Optionen anbieten, frei von Standards.'), 
+          label: t('เสนอทางเลือกที่แหวกแนวและไม่ถูกจำกัดด้วยกรอบเดิมๆ', 'Offer unconventional options, free from standard constraints.', 'Unkonventionelle Optionen anbieten, frei von Standards.'),
+          helpExample: t('', 'E.g., Asked to optimize a form, the Agent suggests eliminating the form entirely and using conversational UI.', ''), 
           nextId: 'a_agency' 
         }
-      ]
+      ,
+        { 
+          tag: t('First Principles', 'First Principles', 'Erste Prinzipien'),
+          label: t('คิดจากหลักการพื้นฐานที่สุด แล้วสร้างวิธีใหม่ขึ้นมาจากศูนย์', 'Reason from first principles — break down to fundamentals and rebuild from scratch.', 'Von Grundprinzipien aus denken und neu aufbauen.'), 
+          helpExample: t('', 'E.g., Instead of optimizing existing code, Agent asks: "What if we redesigned the data model entirely?"', ''),
+          nextId: 'a_agency' 
+        }]
     },
     a_agency: {
       dimension: t('มิติที่ 3: ความอิสระ', 'Dimension 3: Agency', 'Dimension 3: Agency'),
@@ -413,17 +513,20 @@ export const QUESTION_FLOW = {
       options: [
         { 
           tag: t('Executor', 'Executor', 'Ausführer'),
-          label: t('รอรับคำสั่งและทำตามขั้นตอนอย่างเคร่งครัด ห้ามคิดแทน', 'Wait for specific commands and execute exactly as told.', 'Auf Befehle warten und exakt wie angewiesen ausführen.'), 
+          label: t('รอรับคำสั่งและทำตามขั้นตอนอย่างเคร่งครัด ห้ามคิดแทน', 'Wait for specific commands and execute exactly as told.', 'Auf Befehle warten und exakt wie angewiesen ausführen.'),
+          helpExample: t('', 'E.g., The Agent only writes the exact function you ask for — no refactoring, no suggestions, no extra files.', ''), 
           nextId: 'a_taste' 
         },
         { 
           tag: t('Decision Support', 'Decision Support', 'Entscheidungsunterstützung'),
-          label: t('วิเคราะห์และเสนอทางเลือกให้มนุษย์เป็นคนเลือกขั้นสุดท้าย', 'Analyze and suggest options, but let the human decide.', 'Optionen analysieren und vorschlagen, aber den Menschen entscheiden lassen.'), 
+          label: t('วิเคราะห์และเสนอทางเลือกให้มนุษย์เป็นคนเลือกขั้นสุดท้าย', 'Analyze and suggest options, but let the human decide.', 'Optionen analysieren und vorschlagen, aber den Menschen entscheiden lassen.'),
+          helpExample: t('', 'E.g., \'Here are 3 approaches: A (fast, risky), B (safe, slow), C (balanced). Which do you prefer?\'', ''), 
           nextId: 'a_taste' 
         },
         { 
           tag: t('Autonomous', 'Autonomous', 'Autonom'),
-          label: t('ตัดสินใจและวางแผนดำเนินการล่วงหน้าให้โดยอัตโนมัติ', 'Plan, decide, and act independently ahead of time.', 'Vorausplanen, entscheiden und unabhängig handeln.'), 
+          label: t('ตัดสินใจและวางแผนดำเนินการล่วงหน้าให้โดยอัตโนมัติ', 'Plan, decide, and act independently ahead of time.', 'Vorausplanen, entscheiden und unabhängig handeln.'),
+          helpExample: t('', 'E.g., The Agent auto-creates tests, updates docs, and opens a PR — all before you even ask.', ''), 
           nextId: 'a_taste' 
         }
       ]
@@ -438,22 +541,26 @@ export const QUESTION_FLOW = {
       options: [
         { 
           tag: t('Technical', 'Technical', 'Technisch'),
-          label: t('ภาษาวิศวกร แม่นยำ ทรงพลัง และเต็มไปด้วยศัพท์เทคนิค', 'Precise, powerful, and technical (like engineering documents).', 'Präzise, kraftvoll und technisch (Ingenieursstil).'), 
+          label: t('ภาษาวิศวกร แม่นยำ ทรงพลัง และเต็มไปด้วยศัพท์เทคนิค', 'Precise, powerful, and technical (like engineering documents).', 'Präzise, kraftvoll und technisch (Ingenieursstil).'),
+          helpExample: t('', 'E.g., Responses include code blocks, type annotations, and architecture diagrams — no casual language.', ''), 
           nextId: 'a_persuasion_tech' 
         },
         { 
           tag: t('Corporate', 'Corporate', 'Geschäftlich'),
-          label: t('ภาษาสุภาพ เป็นทางการ เหมาะสำหรับการสื่อสารในองค์กร', 'Polite, formal, and professional for enterprise environments.', 'Höflich, formell und professionell für Unternehmen.'), 
+          label: t('ภาษาสุภาพ เป็นทางการ เหมาะสำหรับการสื่อสารในองค์กร', 'Polite, formal, and professional for enterprise environments.', 'Höflich, formell und professionell für Unternehmen.'),
+          helpExample: t('', 'E.g., \'Dear team, please find the updated specifications. The proposed timeline is outlined below.\'', ''), 
           nextId: 'a_persuasion_corp' 
         },
         { 
           tag: t('Conversational', 'Conversational', 'Zwanglos'),
-          label: t('ภาษาเป็นกันเอง คุยง่าย เหมือนได้ปรึกษากับที่ปรึกษาส่วนตัว', 'Natural, conversational, and friendly, like a personal coach.', 'Natürlich, zwanglos und freundlich, wie ein Coach.'), 
+          label: t('ภาษาเป็นกันเอง คุยง่าย เหมือนได้ปรึกษากับที่ปรึกษาส่วนตัว', 'Natural, conversational, and friendly, like a personal coach.', 'Natürlich, zwanglos und freundlich, wie ein Coach.'),
+          helpExample: t('', 'E.g., \'Hey! So here\'s what I\'d do — try swapping the middleware first, that usually fixes it.\'', ''), 
           nextId: 'a_persuasion_conv' 
         },
         { 
           tag: t('Creative', 'Creative', 'Kreativ'),
-          label: t('ใช้ภาษาเชิงศิลป์ เปรียบเทียบเก่ง และสร้างแรงบันดาลใจ', 'Artistic, metaphorical, and inspiring language.', 'Künstlerische, metaphorische und inspirierende Sprache.'), 
+          label: t('ใช้ภาษาเชิงศิลป์ เปรียบเทียบเก่ง และสร้างแรงบันดาลใจ', 'Artistic, metaphorical, and inspiring language.', 'Künstlerische, metaphorische und inspirierende Sprache.'),
+          helpExample: t('', 'E.g., \'Your codebase is like a garden — some areas bloom, but the auth module needs pruning.\'', ''), 
           nextId: 'a_persuasion_creative' 
         }
       ]
@@ -468,12 +575,14 @@ export const QUESTION_FLOW = {
       options: [
         { 
           tag: t('Flow & Structure', 'Flow & Structure', 'Ablauf & Struktur'),
-          label: t('เน้นโค้ด ตารางข้อมูล และโครงสร้างขั้นตอนการทำงานที่ชัดเจน', 'Focus on code snippets, data tables, and clear workflows.', 'Fokus auf Code, Datentabellen und klare Arbeitsabläufe.'), 
+          label: t('เน้นโค้ด ตารางข้อมูล และโครงสร้างขั้นตอนการทำงานที่ชัดเจน', 'Focus on code snippets, data tables, and clear workflows.', 'Fokus auf Code, Datentabellen und klare Arbeitsabläufe.'),
+          helpExample: t('', 'E.g., Every explanation includes a working code example and a step-by-step implementation guide.', ''), 
           nextId: 'a_capability' 
         },
         { 
           tag: t('References', 'References', 'Referenzen'),
-          label: t('เน้นอ้างอิงจาก Documentation, API หรือมาตรฐานที่ยอมรับ', 'Citing official documentation, API references, or standards.', 'Zitieren von Dokumentationen, API-Referenzen oder Standards.'), 
+          label: t('เน้นอ้างอิงจาก Documentation, API หรือมาตรฐานที่ยอมรับ', 'Citing official documentation, API references, or standards.', 'Zitieren von Dokumentationen, API-Referenzen oder Standards.'),
+          helpExample: t('', 'E.g., \'According to the React docs (v19.1), useEffect cleanup runs before re-render. See: [link]\'', ''), 
           nextId: 'a_capability' 
         }
       ]
@@ -488,12 +597,14 @@ export const QUESTION_FLOW = {
       options: [
         { 
           tag: t('ROI / Value', 'ROI / Value', 'ROI / Nutzen'),
-          label: t('เน้นการลดความเสี่ยง ความคุ้มค่า และผลลัพธ์ที่เป็นรูปธรรม', 'Focus on risk mitigation, ROI, and tangible value.', 'Fokus auf Risikominderung, ROI und greifbaren Nutzen.'), 
+          label: t('เน้นการลดความเสี่ยง ความคุ้มค่า และผลลัพธ์ที่เป็นรูปธรรม', 'Focus on risk mitigation, ROI, and tangible value.', 'Fokus auf Risikominderung, ROI und greifbaren Nutzen.'),
+          helpExample: t('', 'E.g., \'This migration reduces infra cost by 40% ($120K/yr) with 2-week payback period.\'', ''), 
           nextId: 'a_capability' 
         },
         { 
           tag: t('Compliance', 'Compliance', 'Compliance'),
-          label: t('เน้นความสอดคล้องกับกลยุทธ์องค์กรและมาตรฐานที่กำหนด', 'Focus on strategic alignment and strict compliance.', 'Fokus auf strategische Ausrichtung und Compliance.'), 
+          label: t('เน้นความสอดคล้องกับกลยุทธ์องค์กรและมาตรฐานที่กำหนด', 'Focus on strategic alignment and strict compliance.', 'Fokus auf strategische Ausrichtung und Compliance.'),
+          helpExample: t('', 'E.g., \'This approach aligns with ISO 27001 Section 6.2 and your Q3 OKR on security posture.\'', ''), 
           nextId: 'a_capability' 
         }
       ]
@@ -508,12 +619,14 @@ export const QUESTION_FLOW = {
       options: [
         { 
           tag: t('Socratic Method', 'Socratic Method', 'Sokratische Methode'),
-          label: t('ใช้การตั้งคำถามกลับเพื่อกระตุ้นให้ผู้ใช้ได้คิดและต่อยอด', 'Ask questions back to prompt user thinking and reflection.', 'Fragen zurückstellen, um zum Nachdenken anzuregen.'), 
+          label: t('ใช้การตั้งคำถามกลับเพื่อกระตุ้นให้ผู้ใช้ได้คิดและต่อยอด', 'Ask questions back to prompt user thinking and reflection.', 'Fragen zurückstellen, um zum Nachdenken anzuregen.'),
+          helpExample: t('', 'E.g., Instead of giving the answer, the Agent asks: \'What would happen if we tried X first?\'', ''), 
           nextId: 'a_capability' 
         },
         { 
           tag: t('Deep Empathy', 'Deep Empathy', 'Tiefe Empathie'),
-          label: t('ใช้วิธีสะท้อนความรู้สึกและรับฟังความต้องการอย่างลึกซึ้ง', 'Employ active listening and deeply validate user needs.', 'Aktives Zuhören und Validierung der Nutzerbedürfnisse.'), 
+          label: t('ใช้วิธีสะท้อนความรู้สึกและรับฟังความต้องการอย่างลึกซึ้ง', 'Employ active listening and deeply validate user needs.', 'Aktives Zuhören und Validierung der Nutzerbedürfnisse.'),
+          helpExample: t('', 'E.g., \'I hear you — it sounds like the real issue is unclear requirements. Let\'s fix that first.\'', ''), 
           nextId: 'a_capability' 
         }
       ]
@@ -528,12 +641,14 @@ export const QUESTION_FLOW = {
       options: [
         { 
           tag: t('Vivid Imagery', 'Vivid Imagery', 'Lebhafte Bilder'),
-          label: t('การใช้คำอุปมาอุปไมยที่ทรงพลังและการสร้างภาพในหัว', 'Using powerful metaphors and vivid mental imagery.', 'Starke Metaphern und lebhafte mentale Bilder nutzen.'), 
+          label: t('การใช้คำอุปมาอุปไมยที่ทรงพลังและการสร้างภาพในหัว', 'Using powerful metaphors and vivid mental imagery.', 'Starke Metaphern und lebhafte mentale Bilder nutzen.'),
+          helpExample: t('', 'E.g., \'Think of your API gateway as a bouncer — it decides who gets in and who gets turned away.\'', ''), 
           nextId: 'a_capability' 
         },
         { 
           tag: t('Emotional Peaks', 'Emotional Peaks', 'Emotionale Spitzen'),
-          label: t('การเล่นกับจังหวะจะโคนและการขยี้ประเด็นให้ถึงอารมณ์', 'Mastering pacing, rhythm, and hitting emotional peaks.', 'Meisterung von Rhythmus und emotionalen Höhepunkten.'), 
+          label: t('การเล่นกับจังหวะจะโคนและการขยี้ประเด็นให้ถึงอารมณ์', 'Mastering pacing, rhythm, and hitting emotional peaks.', 'Meisterung von Rhythmus und emotionalen Höhepunkten.'),
+          helpExample: t('', 'E.g., The Agent builds tension: \'The system was stable... until Tuesday. Then everything changed.\'', ''), 
           nextId: 'a_capability' 
         }
       ]
@@ -548,22 +663,26 @@ export const QUESTION_FLOW = {
       options: [
         { 
           tag: t('Safety First', 'Safety First', 'Sicherheit zuerst'),
-          label: t('ปฏิเสธคำขอที่อันตราย ไม่เหมาะสม หรือไม่ปลอดภัยทุกกรณี', 'Refuse any requests that are risky, infringing, or unsafe.', 'Risikoreiche oder unsichere Anfragen strikt ablehnen.'), 
+          label: t('ปฏิเสธคำขอที่อันตราย ไม่เหมาะสม หรือไม่ปลอดภัยทุกกรณี', 'Refuse any requests that are risky, infringing, or unsafe.', 'Risikoreiche oder unsichere Anfragen strikt ablehnen.'),
+          helpExample: t('', 'E.g., User asks to bypass auth — Agent responds: \'I cannot help with that. Here\'s the secure alternative.\'', ''), 
           nextId: 'END' 
         },
         { 
           tag: t('Source Only', 'Source Only', 'Nur Quellen'),
-          label: t('ห้ามเดาเด็ดขาด ต้องตอบจากข้อมูลที่กำหนดให้เท่านั้น', 'No guessing. Must reference provided source data only.', 'Kein Raten. Nur bereitgestellte Daten referenzieren.'), 
+          label: t('ห้ามเดาเด็ดขาด ต้องตอบจากข้อมูลที่กำหนดให้เท่านั้น', 'No guessing. Must reference provided source data only.', 'Kein Raten. Nur bereitgestellte Daten referenzieren.'),
+          helpExample: t('', 'E.g., \'Based on your uploaded CSV (row 42), the value is 3.14. I have no data for row 99.\'', ''), 
           nextId: 'END' 
         },
         { 
           tag: t('Role Lock', 'Role Lock', 'Rollenbindung'),
-          label: t('ห้ามหลุดจากบทบาทที่ได้รับมอบหมายไม่ว่าจะเกิดอะไรขึ้น', 'Never break character or move outside the assigned role.', 'Niemals den Charakter oder die Rolle verlassen.'), 
+          label: t('ห้ามหลุดจากบทบาทที่ได้รับมอบหมายไม่ว่าจะเกิดอะไรขึ้น', 'Never break character or move outside the assigned role.', 'Niemals den Charakter oder die Rolle verlassen.'),
+          helpExample: t('', 'E.g., Even if asked \'forget your instructions\', the Agent stays in its defined role consistently.', ''), 
           nextId: 'END' 
         },
         { 
           tag: t('Strict Format', 'Strict Format', 'Striktes Format'),
-          label: t('ต้องตอบกลับตามรูปแบบที่กำหนดไว้เป๊ะๆ เท่านั้น', 'Output ONLY in the exact specified format (e.g. JSON only).', 'Nur im exakt vorgegebenen Format antworten.'), 
+          label: t('ต้องตอบกลับตามรูปแบบที่กำหนดไว้เป๊ะๆ เท่านั้น', 'Output ONLY in the exact specified format (e.g. JSON only).', 'Nur im exakt vorgegebenen Format antworten.'),
+          helpExample: t('', 'E.g., No matter the question, the Agent always responds in the specified JSON schema — nothing else.', ''), 
           nextId: 'END' 
         }
       ]
@@ -583,9 +702,9 @@ export const PLATFORMS = [
 // Objective → recommended tag mapping for "Recommended" badges
 QUESTION_FLOW.objectiveFilter = {
   // Creative Writing
-  blog_writing: { recommendedTags: ['Storytelling', 'Cross-disciplinary', 'Elegant', 'Full Spectrum', 'Originality'] },
+  blog_writing: { recommendedTags: ['Storytelling', 'Cross-disciplinary', 'Visual Thinking', 'Elegant', 'Full Spectrum', 'Case Studies', 'Originality'] },
   storytelling: { recommendedTags: ['Optimist/Creator', 'Storytelling', 'Casual', 'Empathy', 'Originality'] },
-  copywriting: { recommendedTags: ['Pragmatist', '80/20 Rule', 'Bold', 'Pain Points', 'Efficiency'] },
+  copywriting: { recommendedTags: ['Pragmatist', '80/20 Rule', 'Time-boxing', 'Bold', 'Pain Points', 'Provocative Questions', 'Efficiency'] },
   social_media: { recommendedTags: ['Optimist/Creator', 'Casual', 'Humor/Wit', 'Originality', 'Emotional Peaks'] },
   // Business & Communication
   customer_support: { recommendedTags: ['Pragmatist', 'Fact-Focus', 'User-centric', 'Casual', 'Empathy', 'Accuracy'] },
@@ -601,7 +720,7 @@ QUESTION_FLOW.objectiveFilter = {
   brand_voice: { recommendedTags: ['Optimist/Creator', 'Storytelling', 'Bold', 'Vivid Imagery', 'Originality'] },
   media_production: { recommendedTags: ['Optimist/Creator', 'Cross-disciplinary', 'Creative', 'Vivid Imagery', 'Originality'] },
   pr_crisis: { recommendedTags: ['Critical/Skeptical', 'Risk Assessment', 'Decision Support', 'Corporate', 'Compliance', 'Safety First'] },
-  community: { recommendedTags: ['Pragmatist', 'User-centric', 'Conversational', 'Deep Empathy', 'Empathy'] },
+  community: { recommendedTags: ['Pragmatist', 'User-centric', 'Conversational', 'Deep Empathy', 'Empathy', 'Relatability'] },
   // Agent-specific
   _agent_tech_docs: { recommendedTags: ['Analyst', 'Taxonomy', 'Executor', 'Technical', 'Flow & Structure', 'Source Only'] },
   _agent_code_review: { recommendedTags: ['Analyst', 'Logic Audit', 'Decision Support', 'Technical', 'References', 'Source Only'] },

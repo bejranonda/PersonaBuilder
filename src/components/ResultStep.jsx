@@ -7,13 +7,21 @@ import ApplicationGuide from './ApplicationGuide';
 import TransformModal from './TransformModal';
 
 export default function ResultStep({
-  isGenerating, generatedMarkdown, fallbackMarkdown,
+  isGenerating, isGeneratingExtras, extrasLoaded,
+  generatedMarkdown, fallbackMarkdown,
   personaSummary, examplePrompt, exampleBefore, exampleAfter,
   activeTab, setActiveTab, error, copied, generationPhase, elapsedSeconds,
-  onCopy, onDownload, onReset, onRegenerate,
+  onCopy, onDownload, onReset, onRegenerate, onGenerateExtras,
   personaType, answers, lang, t
 }) {
   const [showTransform, setShowTransform] = useState(false);
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+    if ((tab === 'summary' || tab === 'example') && !extrasLoaded && !isGeneratingExtras) {
+      onGenerateExtras();
+    }
+  };
 
   return (
     <div className="space-y-6 animate-in zoom-in-95 duration-500">
@@ -81,13 +89,13 @@ export default function ResultStep({
 
       {/* Tabs */}
       <div className="flex bg-[var(--color-surface-sunken)] p-1.5 rounded-2xl border border-[var(--color-border)] w-full max-w-lg mx-auto md:mx-0">
-        <button onClick={() => setActiveTab('persona')}
+        <button onClick={() => handleTabClick('persona')}
           className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all min-h-[44px] touch-manipulation ${activeTab === 'persona' ? 'bg-[var(--color-accent)] text-white shadow-md' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}
         >{t.tabPersona}</button>
-        <button onClick={() => setActiveTab('summary')}
+        <button onClick={() => handleTabClick('summary')}
           className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all min-h-[44px] touch-manipulation ${activeTab === 'summary' ? 'bg-[var(--color-clone)] text-white shadow-md' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}
         >{t.tabSummary}</button>
-        <button onClick={() => setActiveTab('example')}
+        <button onClick={() => handleTabClick('example')}
           className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all min-h-[44px] touch-manipulation ${activeTab === 'example' ? 'bg-[var(--color-agent)] text-white shadow-md' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}
         >{t.tabExample}</button>
       </div>

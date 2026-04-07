@@ -26,9 +26,11 @@
 - [x] **Full UI Refactor**: Modular React 19 + Vite 6 + Component-based split.
 - [x] **New Light Theme**: Clean, creative writing-first aesthetic.
 - [x] **Objective-Driven Logic**: "Recommended" badges tailored to the user's goal.
-- [x] **Inline Context Help**: Scenario-based examples replacing static tooltips.
+- [x] **Expanded Answer Choices**: Broadened semantic coverage mapped to objective tags.
+- [x] **Inline Context Help**: Scenario-based examples integrated inside choice cards replacing static tooltips.
+- [x] **Lazy-Load Generation**: Deferred/lazy generation of Summary and Example tabs to save tokens.
 - [x] **Ecosystem Transforms**: One-click "persona.md → SOUL.md" reformatting via AI.
-- [x] **Application Guide**: Visual integration instructions for Gemini, Cursor, etc.
+- [x] **Smart App Guide**: Generic tool categories with expandable step-by-step instructions for AI integration.
 
 ### Phase 5: Enhanced Vision
 - [ ] Support for **direct `persona.md` uploads** to "edit" existing personas without restarting the wizard.

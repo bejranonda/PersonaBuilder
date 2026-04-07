@@ -12,10 +12,12 @@
 |---------|-------------|
 | **Light Creative Theme** | A clean, modern, and high-contrast "writing-friendly" theme with warm indigo and coral accents. |
 | **Objective-Based Logic** | Tailors recommendations ("Recommended" badges) across the flow based on your goal (e.g. Creative Writing, Customer Support). |
-| **Inline Scenario Panels** | Replaces abstract tooltips with touch-friendly inline accordion help providing real-world contextual examples. |
+| **Expanded Answer Pool** | Broadened semantic coverage with enriched options for all dimensions, including 100+ context-aware help examples. |
+| **Inline Scenario Panels** | Replaces abstract tooltips with touch-friendly inline accordion help integrated directly inside choice cards. |
 | **OpenClaw SOUL.md Transform** | Automated secondary AI call to transform your `persona.md` into the specialized OpenClaw `SOUL.md` format. |
 | **Modular Architecture** | Fully refactored codebase using a component-based structure with custom hooks (`usePersonaWizard`, `usePersonaGenerator`). |
-| **2-Phase Streaming** | Generates `persona.md` instantly (2048 tokens), then processes Summary & Examples in the background. |
+| **Lazy-Load Generation** | Generates `persona.md` instantly, deferring Summary & Extras generation until viewed to save API tokens and bandwidth. |
+| **Smart Application Guide** | Generic tool categories with expandable panels showing step-by-step setup guides and code snippets for immediate integration. |
 | **Instant Fallback** | Creates a functional template from user answers in 0ms, gracefully handling AI timeouts/errors. |
 | **Tabbed Results UI** | Clean, organized display of persona.md, Summary, and Before/After Examples in isolated tabs. |
 | **6-Dimension Analysis** | Deep mapping of Worldview, Perception, Agency, Taste, Persuasion, and Guardrails. |
@@ -83,7 +85,7 @@ flowchart TD
     Wizard --> WizHook
     Results --> GenHook
     GenHook -->|Phase 1: persona.md| Proxy[CF Pages Function]
-    GenHook -->|Phase 2: extras| Proxy
+    GenHook -->|Phase 2: extras (Lazy)| Proxy
     GenHook -->|Transform| Proxy
     Proxy --> AI[Cloudflare Workers AI]
 ```

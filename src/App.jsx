@@ -90,6 +90,8 @@ export default function App() {
         {wizard.step === 4 && (
           <ResultStep
             isGenerating={generator.isGenerating}
+            isGeneratingExtras={generator.isGeneratingExtras}
+            extrasLoaded={generator.extrasLoaded}
             generatedMarkdown={generator.generatedMarkdown}
             fallbackMarkdown={generator.fallbackMarkdown}
             personaSummary={generator.personaSummary}
@@ -106,6 +108,7 @@ export default function App() {
             onDownload={generator.handleDownload}
             onReset={handleReset}
             onRegenerate={handleRegenerate}
+            onGenerateExtras={generator.handleGenerateExtras}
             personaType={wizard.personaType}
             answers={wizard.answers}
             lang={lang}

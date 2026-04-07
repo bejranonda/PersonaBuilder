@@ -86,6 +86,8 @@ function buildFallbackPersona(personaType, answers, lang) {
 
 export default function usePersonaGenerator(personaType, answers, samples, lang, t) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingExtras, setIsGeneratingExtras] = useState(false);
+  const [extrasLoaded, setExtrasLoaded] = useState(false);
   const [generatedMarkdown, setGeneratedMarkdown] = useState('');
   const [fallbackMarkdown, setFallbackMarkdown] = useState('');
   const [personaSummary, setPersonaSummary] = useState('');
@@ -176,9 +178,31 @@ export default function usePersonaGenerator(personaType, answers, samples, lang,
 
       aiPersonaMd = stripMarkdownFences(aiPersonaMd);
       setGeneratedMarkdown(aiPersonaMd);
-      setGenerationPhase('extras');
+      setGenerationPhase('done');
+    } catch (err) {
+      clearTimeout(timeoutId);
+      console.error(err);
+      if (err.message === 'TIMEOUT') {
+        setGenerationPhase('timeout');
+        if (!aiPersonaMd.trim()) setGeneratedMarkdown(fallback);
+      } else {
+        setGenerationPhase('error');
+        setError(t.aiError);
+        if (!aiPersonaMd.trim()) setGeneratedMarkdown(fallback);
+      }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+  const handleGenerateExtras = async () => {
+    if (extrasLoaded || isGeneratingExtras) return;
+    const personaMd = generatedMarkdown || fallbackMarkdown;
+    if (!personaMd) return;
 
-      const extrasUserPrompt = `[PERSONA DEFINITION]\n${aiPersonaMd}\n\nGenerate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow the marker format exactly.`;
+    setIsGeneratingExtras(true);
+    let timeoutId;
+    try {
+      const extrasUserPrompt = `[PERSONA DEFINITION]\n${personaMd}\n\nGenerate supplementary materials for this persona in ${LANG_NAMES[lang]}. Follow the marker format exactly.`;
       let extrasRaw = '';
       const extrasPromise = generateContentStream(
         extrasUserPrompt, lang,
@@ -198,22 +222,14 @@ export default function usePersonaGenerator(personaType, answers, samples, lang,
       const extrasTimeoutPromise = new Promise((_, reject) => { timeoutId = setTimeout(() => reject(new Error('EXTRAS_TIMEOUT')), 60000); });
       await Promise.race([extrasPromise, extrasTimeoutPromise]);
       clearTimeout(timeoutId);
-      setGenerationPhase('done');
+      setExtrasLoaded(true);
     } catch (err) {
       clearTimeout(timeoutId);
-      console.error(err);
-      if (err.message === 'TIMEOUT') {
-        setGenerationPhase('timeout');
-        if (!aiPersonaMd.trim()) setGeneratedMarkdown(fallback);
-      } else if (err.message === 'EXTRAS_TIMEOUT') {
-        setGenerationPhase('done');
-      } else {
-        setGenerationPhase('error');
-        setError(t.aiError);
-        if (!aiPersonaMd.trim()) setGeneratedMarkdown(fallback);
-      }
+      console.error('Extras generation error:', err);
+      // Still mark as loaded so we don't retry infinitely
+      setExtrasLoaded(true);
     } finally {
-      setIsGenerating(false);
+      setIsGeneratingExtras(false);
     }
   };
 
@@ -242,12 +258,14 @@ export default function usePersonaGenerator(personaType, answers, samples, lang,
     setExampleBefore(''); setExampleAfter('');
     setActiveTab('persona'); setError('');
     setGenerationPhase('idle'); setElapsedSeconds(0);
+    setExtrasLoaded(false); setIsGeneratingExtras(false);
   };
 
   return {
-    isGenerating, generatedMarkdown, fallbackMarkdown,
+    isGenerating, isGeneratingExtras, extrasLoaded,
+    generatedMarkdown, fallbackMarkdown,
     personaSummary, examplePrompt, exampleBefore, exampleAfter,
     activeTab, setActiveTab, error, copied, generationPhase, elapsedSeconds,
-    handleGenerate, handleDownload, handleCopy, resetGenerator,
+    handleGenerate, handleGenerateExtras, handleDownload, handleCopy, resetGenerator,
   };
 }

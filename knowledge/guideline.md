@@ -32,7 +32,7 @@ The application follows a **Modular Component Architecture**, separating busines
 
 ### The Central Hooks (`src/hooks/`)
 1.  **`usePersonaWizard.js`**: Manages the branching questionnaire state, step navigation, and answer storage.
-2.  **`usePersonaGenerator.js`**: Orchestrates the AI streaming, system prompts, and format transformation (SOUL.md).
+2.  **`usePersonaGenerator.js`**: Orchestrates the AI streaming, lazy-loaded extras (token optimization), system prompts, and format transformation (SOUL.md).
 
 ### The UI Components (`src/components/`)
 - Avoid placing logic in components. They should receive state via props or hooks.

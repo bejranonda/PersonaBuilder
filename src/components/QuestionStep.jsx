@@ -12,7 +12,6 @@ export default function QuestionStep({ personaType, currentQId, answers, objecti
     setOpenScenarioIdx(openScenarioIdx === idx ? null : idx);
   };
 
-  // Check if option is recommended for the selected objective
   const isRecommended = (option) => {
     if (!objective) return false;
     const filter = QUESTION_FLOW.objectiveFilter?.[objective];
@@ -48,59 +47,62 @@ export default function QuestionStep({ personaType, currentQId, answers, objecti
           </h2>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {questionData.options.map((option, idx) => {
             const labelText = option.label[lang] || option.label.en;
             const tagText = option.tag ? (option.tag[lang] || option.tag.en) : null;
             const isSelected = answers[currentQId] === option.label;
             const recommended = isRecommended(option);
+            const scenarioOpen = openScenarioIdx === idx;
 
             const selectedStyle = isSelected
               ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] shadow-md shadow-[var(--color-accent)]/8'
               : 'border-[var(--color-border)] bg-white hover:border-[var(--color-accent)]/40 hover:shadow-md';
-            const textStyle = isSelected
-              ? 'text-[var(--color-accent)]'
-              : 'text-[var(--color-text-primary)]';
-            const radioStyle = isSelected
-              ? 'border-[var(--color-accent)]'
-              : 'border-[var(--color-border)]';
 
             return (
-              <div key={idx}>
+              <div
+                key={idx}
+                className={`rounded-2xl border-2 transition-all ${selectedStyle}`}
+              >
+                {/* Clickable selection area */}
                 <button
                   onClick={() => onAnswer(option.label)}
-                  className={'w-full text-left p-5 sm:p-6 rounded-2xl border-2 transition-all flex flex-col gap-2 group min-h-[56px] touch-manipulation ' + selectedStyle}
+                  className="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 min-h-[56px] touch-manipulation"
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex flex-col gap-1 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {tagText && (
-                          <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'}`}>
-                            {tagText}
-                          </span>
-                        )}
-                        {recommended && !isSelected && (
-                          <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-[var(--color-recommended)] bg-[var(--color-recommended-soft)] px-2 py-0.5 rounded-full recommend-pulse">
-                            <Award className="w-3 h-3" />
-                            {lang === 'th' ? 'แนะนำ' : lang === 'de' ? 'Empfohlen' : 'Recommended'}
-                          </span>
-                        )}
-                      </div>
-                      <span className={'text-base sm:text-lg font-medium leading-normal ' + textStyle}>
-                        {labelText}
-                      </span>
+                  <div className="flex flex-col gap-1 flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {tagText && (
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'}`}>
+                          {tagText}
+                        </span>
+                      )}
+                      {recommended && !isSelected && (
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-[var(--color-recommended)] bg-[var(--color-recommended-soft)] px-2 py-0.5 rounded-full recommend-pulse">
+                          <Award className="w-3 h-3" />
+                          {lang === 'th' ? 'แนะนำ' : lang === 'de' ? 'Empfohlen' : 'Recommended'}
+                        </span>
+                      )}
                     </div>
-                    <div className={'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shrink-0 ml-4 ' + radioStyle}>
-                      {isSelected && <div className="w-3 h-3 bg-[var(--color-accent)] rounded-full" />}
-                    </div>
+                    <span className={`text-base sm:text-lg font-medium leading-normal ${isSelected ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-primary)]'}`}>
+                      {labelText}
+                    </span>
+                  </div>
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shrink-0 ${isSelected ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'}`}>
+                    {isSelected && <div className="w-3 h-3 bg-[var(--color-accent)] rounded-full" />}
                   </div>
                 </button>
-                <ScenarioPanel
-                  helpExample={option.helpExample}
-                  isOpen={openScenarioIdx === idx}
-                  onToggle={() => handleScenarioToggle(idx)}
-                  lang={lang}
-                />
+
+                {/* Inline scenario panel — inside the card */}
+                {option.helpExample && (
+                  <div className="px-4 sm:px-5 pb-3">
+                    <ScenarioPanel
+                      helpExample={option.helpExample}
+                      isOpen={scenarioOpen}
+                      onToggle={() => handleScenarioToggle(idx)}
+                      lang={lang}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
