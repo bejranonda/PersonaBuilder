@@ -1,4 +1,4 @@
-# 🤖 Persona Builder v2.5
+# 🤖 Persona Builder v2.5.0
 
 > Create a premium AI Persona (`persona.md`) for Vibe-Coding using a natural-language 6-dimension deep personality analysis framework.
 

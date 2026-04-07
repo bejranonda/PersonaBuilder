@@ -15,14 +15,14 @@
 - **Mitigation**: The system prompt now strictly enforces the output language.
 
 ### 4. SOUL.md Transform Fallback
-- **Problem**: The new OpenClaw SOUL transform (v2.5) requires an active AI connection and has no 0ms deterministic fallback yet.
+- **Problem**: The new OpenClaw SOUL transform (v2.5.0) requires an active AI connection and has no 0ms deterministic fallback yet.
 - **Status**: Identified.
 
 ---
 
 ## Roadmap
 
-### Phase 4: Modern App Architecture (v2.5 - Completed)
+### Phase 4: Modern App Architecture (v2.5.0 - Completed)
 - [x] **Full UI Refactor**: Modular React 19 + Vite 6 + Component-based split.
 - [x] **New Light Theme**: Clean, creative writing-first aesthetic.
 - [x] **Objective-Driven Logic**: "Recommended" badges tailored to the user's goal.
