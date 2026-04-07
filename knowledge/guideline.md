@@ -26,36 +26,38 @@ CLOUDFLARE_ACCOUNT_ID=your_id
 
 ---
 
-## CI/CD Workflow
+## v2.5 Architecture: Hooks & Components
 
-The project uses GitHub Actions for automated deployment and releasing.
+The application follows a **Modular Component Architecture**, separating business logic from UI rendering:
 
-- **Deploy**: Every push to `master` builds and deploys to Cloudflare Pages.
-- **Release**: Pushing a tag starting with `v` (e.g., `v1.0.0`) creates a GitHub Release.
+### The Central Hooks (`src/hooks/`)
+1.  **`usePersonaWizard.js`**: Manages the branching questionnaire state, step navigation, and answer storage.
+2.  **`usePersonaGenerator.js`**: Orchestrates the AI streaming, system prompts, and format transformation (SOUL.md).
 
-**Required Repo Secrets**:
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
+### The UI Components (`src/components/`)
+- Avoid placing logic in components. They should receive state via props or hooks.
+- **`ScenarioPanel.jsx`**: A standalone accordion for help examples.
+- **`ApplicationGuide.jsx`**: A scrollable instruction set on the results page.
 
 ---
 
 ## Modifying the AI Engine
 
-### The Proxy Function & Streaming
-The core AI logic is in `functions/api/generate.js`. 
-- **Model**: Defaulting to `@cf/meta/llama-3.1-8b-instruct`.
-- **System Prompt**: Dynamically assembled per request via `custom_system_prompt`.
-- **Streaming**: Uses `stream: true` to forward Server-Sent Events natively to the React client (`src/lib/api.js`).
-- **2-Phase Architecture**: App generates the concise ruleset first, streaming extras later to bypass 4096-max token delays.
+### System Prompts
+The core AI logic is located in `src/hooks/usePersonaGenerator.js`.
+- **`PERSONA_SYSTEM_PROMPT`**: Guides the specific generation of `persona.md`.
+- **`EXTRAS_SYSTEM_PROMPT`**: Guides the generation of Summary and Before/After examples.
+- **`SOUL_TRANSFORM_PROMPT`**: Guides the reformatting to the OpenClaw SOUL template.
 
 ### Extending Languages
-1.  Update `src/data/questionFlow.js` helper `t()` and all question definitions.
-2.  Add the language to `LANG_MAP` in `functions/api/generate.js`.
-3.  Add UI translations to `src/lib/i18n.js`.
+1.  **I18n**: Add UI translations to `src/lib/i18n.js`.
+2.  **Flow**: Update `src/data/questionFlow.js` helper `t()` with the new language strings.
+3.  **Engine**: Ensure the selected language is passed to `usePersonaGenerator` to correctly localize the AI's output.
 
 ---
 
 ## Code Conventions
-- Use functional React components with hooks.
-- Prefer Tailwind utility classes for styling.
-- Keep business logic (question trees, i18n) separate from UI components.
+- Maintain the **Modular Component Architecture**.
+- Use **functional React components** with hooks.
+- Use **Tailwind CSS v4** utility classes for styling.
+- Keep the `questionFlow.js` as the single source of truth for the questionnaire branching and recommendation (objectiveFilter) logic.

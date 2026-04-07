@@ -1,4 +1,4 @@
-# 🤖 Persona Builder v2.1
+# 🤖 Persona Builder v2.5
 
 > Create a premium AI Persona (`persona.md`) for Vibe-Coding using a natural-language 6-dimension deep personality analysis framework.
 
@@ -6,18 +6,19 @@
 
 ---
 
-## ✨ Features v2.1
+## ✨ Features v2.5
 
 | Feature | Description |
 |---------|-------------|
+| **Light Creative Theme** | A clean, modern, and high-contrast "writing-friendly" theme with warm indigo and coral accents. |
+| **Objective-Based Logic** | Tailors recommendations ("Recommended" badges) across the flow based on your goal (e.g. Creative Writing, Customer Support). |
+| **Inline Scenario Panels** | Replaces abstract tooltips with touch-friendly inline accordion help providing real-world contextual examples. |
+| **OpenClaw SOUL.md Transform** | Automated secondary AI call to transform your `persona.md` into the specialized OpenClaw `SOUL.md` format. |
+| **Modular Architecture** | Fully refactored codebase using a component-based structure with custom hooks (`usePersonaWizard`, `usePersonaGenerator`). |
 | **2-Phase Streaming** | Generates `persona.md` instantly (2048 tokens), then processes Summary & Examples in the background. |
 | **Instant Fallback** | Creates a functional template from user answers in 0ms, gracefully handling AI timeouts/errors. |
 | **Tabbed Results UI** | Clean, organized display of persona.md, Summary, and Before/After Examples in isolated tabs. |
-| **Browser Language Detection** | Automatically boots in English, Thai, or German based on OS/Browser preferred languages (`navigator.language`). |
-| **Auto-Scroll Navigation** | Frictionless mobile experience; transitions automatically scroll to the top of the next question/step. |
-| **Natural Language UX** | Rephrased questions and options to sound like real-life scenarios rather than academic theory. |
 | **6-Dimension Analysis** | Deep mapping of Worldview, Perception, Agency, Taste, Persuasion, and Guardrails. |
-| **Clone & Agent Modes** | Two distinct flows tailored for either mirroring human traits or defining exact specialist boundaries. |
 | **Cloudflare AI Edge** | High-performance generation powered by **Llama 3.1 8B Instruct** via Cloudflare Workers AI. |
 
 ## 🛠️ Tech Stack
@@ -47,7 +48,7 @@
     ```
 
 3.  **Set up environment variables**:
-    Create a `.dev.vars` file for local proxy testing:
+    Create a `.dev.vars` file for local proxy testing (or use wrangler directly):
     ```bash
     CLOUDFLARE_ACCOUNT_ID=your_account_id
     CLOUDFLARE_API_TOKEN=your_api_token
@@ -64,36 +65,32 @@ npm run build
 npm run preview
 ```
 
-## ☁️ Deployment (CI/CD)
-
-The project includes pre-configured **GitHub Actions** for seamless deployment:
-
-### 1. Cloudflare Pages Deployment
-Pushing to the `master` branch triggers `.github/workflows/deploy.yml`. It builds the app and deploys it to Cloudflare Pages automatically.
-
-**Required Secrets:**
-- `CLOUDFLARE_API_TOKEN`: API token with "Cloudflare Pages Edit" permission.
-- `CLOUDFLARE_ACCOUNT_ID`: Your Cloudflare account ID.
-
-### 2. Automatic Releases
-Pushing a tag (e.g., `git push origin v1.0.1`) triggers `.github/workflows/release.yml`, which creates a new GitHub Release with automated notes.
-
 ## 📐 Architecture & Logic
 
 ```mermaid
-flowchart LR
+flowchart TD
     User([User]) --> UI[React Frontend]
-    UI -->|0ms| Fallback[Instant Fallback Persona]
-    UI --> Wiz[6-Dim Wizard]
-    Wiz --> Proxy[CF Pages Function]
-    Proxy -- Phase 1: Stream persona.md --> AI[Cloudflare Llama 3.1]
-    Proxy -- Phase 2: Stream extras --> AI
-    AI -- Chunked Tokens --> UI
+    subgraph "🧩 Modular UI"
+        UI --> Header[AppHeader]
+        UI --> Wizard[Wizard Components]
+        UI --> Results[ResultStep]
+    end
+    UI -->|0ms| Fallback[Instant Fallback]
+    subgraph "🧠 Hooks"
+        WizHook[usePersonaWizard]
+        GenHook[usePersonaGenerator]
+    end
+    Wizard --> WizHook
+    Results --> GenHook
+    GenHook -->|Phase 1: persona.md| Proxy[CF Pages Function]
+    GenHook -->|Phase 2: extras| Proxy
+    GenHook -->|Transform| Proxy
+    Proxy --> AI[Cloudflare Workers AI]
 ```
 
-- **Frontend**: A state-driven React app that manages the multi-step branching questionnaire.
-- **API Proxy**: A Cloudflare Pages Function (`/api/generate`) that securely handles authentication with the Cloudflare API.
+- **Frontend**: A modular React app using custom hooks to manage logic and state across 4 distinct steps.
 - **6 Dimensions**: A proprietary framework that defines an AI's behavior across Worldview, Perception, Agency, Taste, Persuasion, and Guardrails.
+- **Objective Filter**: Dynamically highlights answer paths based on the user's initial objective.
 
 ## 📚 Documentation
 

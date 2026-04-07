@@ -1,6 +1,6 @@
 # Approach & Methodology
 
-> This document explains the *why* behind key design decisions in PersonaBuilder.
+> This document explains the *why* behind key design decisions in PersonaBuilder v2.5.
 
 ---
 
@@ -21,42 +21,44 @@ The persona generation is structured around six psychological and behavioral dim
 
 ---
 
-## 2. Model Selection: Cloudflare Workers AI (Llama 3.1 8B)
+## 2. Objective-Based Recommendation Logic (v2.5)
 
-After testing multiple models, we selected **Llama 3.1 8B Instruct** via Cloudflare Workers AI for its excellent cost-to-performance ratio and privacy characteristics.
+In v2.5, we introduced the **Objective-Based Flow**. Before defining a persona, the user selects their goal (e.g., *Technical Documentation* or *Storytelling*).
 
-- **Privacy**: Keys stay server-side in Cloudflare environment variables.
-- **Latency**: Fast inference times for real-time persona updates.
-- **Capability**: Llama 3.1 handles the "persona injection" prompt pattern reliably in English, Thai, and German.
-
----
-
-## 3. Serverless Architecture (The Proxy Pattern)
-
-We use a **Cloudflare Pages Function** (`/api/generate`) as a secure bridge:
-- **Security**: Prevents leaking Cloudflare API tokens to the client.
-- **CORS**: Handles same-origin requests naturally within the Pages environment.
-- **Resilience**: Implements a model fallback (Llama 3.1 → Llama 3) to ensure high availability.
+- **Philosophy**: Preserve user freedom while providing expert guidance.
+- **Implementation**: Instead of hiding questions (which could be limiting), we use a `Recommended` badge.
+- **Mapping**: `src/data/questionFlow.js` includes an `objectiveFilter` that links goals to specific dimension tags (e.g., *Customer Support* recommends *Fact-Focus* and *User-centric*).
 
 ---
 
-## 4. The Validation Pattern: "Before vs After"
+## 3. Inline Scenario Panels (Touch-First UX)
 
-To give users immediate confidence, each generated `skill.md` includes a rewrite of a standard test sentence. This allows users to see exactly how the persona changes the tone, style, and structure of text before they even leave the app.
+To improve context-aware help on mobile and touchscreen devices, we moved away from tooltips and hover-states.
 
----
-
-## 5. Branching Question logic
-
-The wizard isn't linear. Dimension 2 (Perception) and Dimension 5 (Persuasion) change based on the user's previous answers. This ensures that follow-up questions are always contextually relevant to the specific type of persona being built.
+- **Solution**: The `ScenarioPanel.jsx` provides an inline, expandable accordion below each choice.
+- **Benefit**: Users see a real-world example (e.g., "If a server crashes, you would...") which makes abstract choices concrete without disrupting the vertical scrolling flow.
 
 ---
 
-## 6. Multi-Phase Generation & Instant Fallback
+## 4. Multi-Phase Generation & Transformer Edge
 
-In v2.2, we overhauled the pipeline to solve the "blank screen" timeout issue caused by generating 4000+ tokens at once:
+We utilize a tiered generation pipeline to maximize performance and utility:
 
-1. **Instant Fallback**: Before the AI even responds, we generate a highly structured `persona.md` directly from the user's 6-dimension answers using a deterministic template function. The user has a functional result in 0ms.
-2. **Phase 1 (Persona Enhancement)**: We prompt the AI to generate *only* the `persona.md` file (max 2048 tokens). This reduces payload size and takes ~20 seconds via SSE streaming.
-3. **Phase 2 (Background Extras)**: Once the core persona is complete, we make a secondary AI call to generate the Summary and Before/After examples, populating the remaining UI tabs without blocking the primary export.
-4. **Graceful Degradation**: If Cloudflare AI times out (90s) or fails, the interface silently catches the exception, ensures the Instant Fallback is in place, and unlocks the download button. The user never leaves empty-handed.
+1. **Phase 1 (Persona.md)**: Streams the core ruleset instantly.
+2. **Phase 2 (Extras)**: Streams the Summary and Examples in parallel tabs.
+3. **SOUL.md Transform**: A dedicated, secondary AI execution that reformats the current persona into the specific **OpenClaw SOUL.md** structure (Core Truths, Boundaries, Vibe, Continuity).
+
+---
+
+## 5. Instant Fallback (v2.2+)
+
+To solve the "AI latency" issue, we always build a highly structured `persona.md` directly from the user's 6-dimension answers using a deterministic template function. The user has a functional result in 0ms, which is then *enhanced* by the AI in Phase 1.
+
+---
+
+## 6. Modular Refactoring (The Component Split)
+
+As of v2.5, the application is no longer a monolith.
+- **Hooks**: Logic is centralized in `src/hooks/`, separating "how to navigate" from "how to generate".
+- **Components**: The UI is split into organized modules, ensuring that the results tab logic doesn't bloat the questionnaire logic.
+- **State Preservation**: The architecture ensures that navigating "Back" preserves answers, but "Reset" clears the hooks' states completely.

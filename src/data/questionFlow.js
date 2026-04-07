@@ -17,21 +17,25 @@ export const QUESTION_FLOW = {
         { 
           tag: t('Systems Thinker', 'Systems Thinker', 'Systemdenker'),
           label: t('มองภาพรวมเพื่อหาต้นตอที่แท้จริงว่าทำไมมันถึงเกิดขึ้น', 'See the big picture and find the root cause of why it happened.', 'Das große Ganze sehen und die Ursache finden.'), 
+          helpExample: t('เช่น เมื่อเว็บไซต์ล่ม คุณจะมองว่าต้นเหตุมาจากระบบ server ทั้งหมดก่อน แล้วค่อยดูรายละเอียด', 'E.g., When a website crashes, you\'d first examine the entire server architecture before diving into individual error logs.', 'Z.B., Wenn eine Webseite abstürzt, untersuchen Sie zuerst die gesamte Serverarchitektur.'),
           nextId: 'perception_system' 
         },
         { 
           tag: t('Pragmatist', 'Pragmatist', 'Pragmatiker'),
           label: t('เน้นแก้ปัญหาเฉพาะหน้าให้เร็วที่สุด อะไรเวิร์คทำเลย', 'Focus on fixing it as quickly as possible. Whatever works.', 'Fokussiert auf schnelle Lösung. Was auch immer funktioniert.'), 
+          helpExample: t('เช่น ลูกค้าร้องเรียนสินค้าเสีย คุณจะส่งของใหม่ทันทีก่อน แล้วค่อยหาสาเหตุที่แท้จริงทีหลัง', 'E.g., A customer complains about a broken product — you ship a replacement immediately, then investigate the root cause later.', 'Z.B., Ein Kunde beschwert sich — Sie senden sofort Ersatz und untersuchen die Ursache später.'),
           nextId: 'perception_pragmatic' 
         },
         { 
           tag: t('Critical/Skeptical', 'Critical/Skeptical', 'Kritiker/Skeptiker'),
           label: t('ตั้งคำถามและเช็กความโกรธ/ความเสี่ยงก่อนตัดสินใจ', 'Question everything and assess the risks before acting.', 'Alles hinterfragen und Risiken bewerten, bevor man handelt.'), 
+          helpExample: t('เช่น เมื่อทีมเสนอฟีเจอร์ใหม่ คุณถามก่อนว่า "ถ้าทำแล้วพัง จะกระทบอะไรบ้าง?"', 'E.g., When your team proposes a new feature, you first ask "What breaks if this fails? What\'s the worst case?"', 'Z.B., Wenn Ihr Team ein neues Feature vorschlägt, fragen Sie zuerst "Was passiert im schlimmsten Fall?"'),
           nextId: 'perception_critical' 
         },
         { 
           tag: t('Optimist/Creator', 'Optimist/Creator', 'Optimist/Schöpfer'),
           label: t('มองหาโอกาสและวิธีสร้างสรรค์สิ่งใหม่จากปัญหานั้น', 'Look for opportunities and creative ways to build something new from it.', 'Nach Chancen suchen, um etwas Neues daraus zu erschaffen.'), 
+          helpExample: t('เช่น บริษัทขาดทุน คุณมองว่านี่คือโอกาสปรับโมเดลธุรกิจใหม่ให้ดีขึ้นกว่าเดิม', 'E.g., When the company loses money, you see it as a chance to pivot to a better business model.', 'Z.B., Wenn das Unternehmen Verluste macht, sehen Sie die Chance für ein besseres Geschäftsmodell.'),
           nextId: 'perception_creative' 
         }
       ]
@@ -575,3 +579,32 @@ export const PLATFORMS = [
   { id: 'blog', name: 'Blog / Article', icon: FileText },
   { id: 'other', name: 'อื่นๆ / Other / Andere', icon: Sparkles }
 ];
+
+// Objective → recommended tag mapping for "Recommended" badges
+QUESTION_FLOW.objectiveFilter = {
+  // Creative Writing
+  blog_writing: { recommendedTags: ['Storytelling', 'Cross-disciplinary', 'Elegant', 'Full Spectrum', 'Originality'] },
+  storytelling: { recommendedTags: ['Optimist/Creator', 'Storytelling', 'Casual', 'Empathy', 'Originality'] },
+  copywriting: { recommendedTags: ['Pragmatist', '80/20 Rule', 'Bold', 'Pain Points', 'Efficiency'] },
+  social_media: { recommendedTags: ['Optimist/Creator', 'Casual', 'Humor/Wit', 'Originality', 'Emotional Peaks'] },
+  // Business & Communication
+  customer_support: { recommendedTags: ['Pragmatist', 'Fact-Focus', 'User-centric', 'Casual', 'Empathy', 'Accuracy'] },
+  sales: { recommendedTags: ['Pragmatist', '80/20 Rule', 'Bold', 'Pain Points', 'Efficiency'] },
+  corporate_comms: { recommendedTags: ['Systems Thinker', 'Categorize', 'Decision Support', 'Elegant', 'Authority', 'Neutrality'] },
+  email_writing: { recommendedTags: ['Pragmatist', '80/20 Rule', 'Elegant', 'Logical Sequence', 'Efficiency'] },
+  // Technical & Knowledge
+  tech_docs: { recommendedTags: ['Systems Thinker', 'Categorize', 'Decision Support', 'Technical', 'Flow & Structure', 'Accuracy'] },
+  research: { recommendedTags: ['Critical/Skeptical', 'Pattern Seeking', 'Decision Support', 'Elegant', 'Full Spectrum', 'Neutrality'] },
+  code_review: { recommendedTags: ['Critical/Skeptical', 'Logic Audit', 'Decision Support', 'Technical', 'References', 'Accuracy'] },
+  education: { recommendedTags: ['Optimist/Creator', 'Cross-disciplinary', 'Conversational', 'Socratic Method', 'Originality'] },
+  // Brand & Media
+  brand_voice: { recommendedTags: ['Optimist/Creator', 'Storytelling', 'Bold', 'Vivid Imagery', 'Originality'] },
+  media_production: { recommendedTags: ['Optimist/Creator', 'Cross-disciplinary', 'Creative', 'Vivid Imagery', 'Originality'] },
+  pr_crisis: { recommendedTags: ['Critical/Skeptical', 'Risk Assessment', 'Decision Support', 'Corporate', 'Compliance', 'Safety First'] },
+  community: { recommendedTags: ['Pragmatist', 'User-centric', 'Conversational', 'Deep Empathy', 'Empathy'] },
+  // Agent-specific
+  _agent_tech_docs: { recommendedTags: ['Analyst', 'Taxonomy', 'Executor', 'Technical', 'Flow & Structure', 'Source Only'] },
+  _agent_code_review: { recommendedTags: ['Analyst', 'Logic Audit', 'Decision Support', 'Technical', 'References', 'Source Only'] },
+  _agent_customer_support: { recommendedTags: ['Pragmatist', 'Actionable-Only', 'Decision Support', 'Conversational', 'Deep Empathy', 'Role Lock'] },
+};
+
