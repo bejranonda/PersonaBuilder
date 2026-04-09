@@ -1,109 +1,98 @@
-# 🤖 Persona Builder v2.5.0
+# 🤖 Persona Builder v2.6.0
 
-> Create a premium AI Persona (`persona.md`) for Vibe-Coding using a natural-language 6-dimension deep personality analysis framework.
+> **Empower your AI with a Soul.** Create premium, 6-dimension deep personality rulesets (`persona.md` / `SOUL.md`) designed specifically for **Vibe-Coding** in Cursor, Windsurf, and advanced AI Agents.
 
-**🌐 Live:** [persona.autobahn.bot](https://persona.autobahn.bot)
+**🌐 Live Site:** [persona.autobahn.bot](https://persona.autobahn.bot)
 
 ---
 
-## ✨ Features v2.5
+## 🚀 What is Persona Builder?
 
-| Feature | Description |
-|---------|-------------|
-| **Light Creative Theme** | A clean, modern, and high-contrast "writing-friendly" theme with warm indigo and coral accents. |
-| **Objective-Based Logic** | Tailors recommendations ("Recommended" badges) across the flow based on your goal (e.g. Creative Writing, Customer Support). |
-| **Expanded Answer Pool** | Broadened semantic coverage with enriched options for all dimensions, including 100+ context-aware help examples. |
-| **Inline Scenario Panels** | Replaces abstract tooltips with touch-friendly inline accordion help integrated directly inside choice cards. |
-| **OpenClaw SOUL.md Transform** | Automated secondary AI call to transform your `persona.md` into the specialized OpenClaw `SOUL.md` format. |
-| **Modular Architecture** | Fully refactored codebase using a component-based structure with custom hooks (`usePersonaWizard`, `usePersonaGenerator`). |
-| **Lazy-Load Generation** | Generates `persona.md` instantly, deferring Summary & Extras generation until viewed to save API tokens and bandwidth. |
-| **Smart Application Guide** | Generic tool categories with expandable panels showing step-by-step setup guides and code snippets for immediate integration. |
-| **Instant Fallback** | Creates a functional template from user answers in 0ms, gracefully handling AI timeouts/errors. |
-| **Tabbed Results UI** | Clean, organized display of persona.md, Summary, and Before/After Examples in isolated tabs. |
-| **6-Dimension Analysis** | Deep mapping of Worldview, Perception, Agency, Taste, Persuasion, and Guardrails. |
-| **Cloudflare AI Edge** | High-performance generation powered by **Llama 3.1 8B Instruct** via Cloudflare Workers AI. |
+Persona Builder is a specialized tool for developers and creators who want their AI assistants to do more than just "follow instructions." By using our **6-Dimension Deep Analysis Framework**, you can craft a personality that feels consistent, nuanced, and aligned with your specific goals.
 
-## 🛠️ Tech Stack
+### Why "Vibe-Coding"?
+"Vibe-Coding" is the practice of building software through high-level intent and collaboration with AI (like Cursor or Windsurf). For this to work best, your AI needs a clear "vibe" or persona that understands your taste, worldview, and technical guardrails.
 
-| Layer | Technology |
-|-------|-----------|
-| **Framework** | React 19 + Vite 6 |
-| **Styling** | Tailwind CSS v4 |
-| **Icons** | Lucide React |
-| **AI Generation** | Cloudflare Workers AI (`@cf/meta/llama-3.1-8b-instruct`) |
-| **Serverless** | Cloudflare Pages Functions (API Proxy) |
-| **CI/CD** | GitHub Actions |
+---
 
-## 🚀 Getting Started
+## ✨ Key Features v2.6
+
+- **🎯 Objective-Based Recommendations**: Automatically suggests the best personality traits based on your goal (e.g., *Technical Writing*, *Creative Storytelling*, or *Customer Support*).
+- **🧠 6-Dimension Psychology**: Define your AI's **Worldview, Perception, Agency, Taste, Persuasion, and Guardrails**.
+- **⚡ Instant Fallback Logic**: Get a functional `persona.md` in 0ms, enhanced by AI (Llama 3.1 8B) in the background.
+- **🌀 OpenClaw SOUL.md Support**: Transform your persona into the specialized `SOUL.md` format used by next-gen AI systems.
+- **📱 Touch-First UX**: Modern, high-contrast theme with inline scenario panels—perfect for mobile or desktop.
+- **☁️ Cloudflare AI Edge**: High-performance generation powered by **Llama 3.1 8B Instruct** via Cloudflare Workers AI.
+
+---
+
+## 🛠️ How to Use Your Generated Persona
+
+1.  **Generate**: Complete the 6-dimension questionnaire on our [Live Site](https://persona.autobahn.bot).
+2.  **Copy**: Grab the generated `persona.md` or `SOUL.md` content.
+3.  **Activate**:
+    - **Cursor/Windsurf**: Paste it into your `.cursorrules` or project configuration.
+    - **Custom GPTs**: Use it as the "Instructions" or "System Prompt".
+    - **AI Agents**: Save it as a ruleset for your agentic workflows.
+
+---
+
+## 💻 Tech Stack
+
+- **Frontend**: [React 19](https://react.dev/) + [Vite 6](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) (Ultra-fast, modern CSS)
+- **AI Backend**: [Cloudflare Workers AI](https://developers.cloudflare.com/workers-ai/) (`Llama 3.1 8B`)
+- **Serverless**: [Cloudflare Pages Functions](https://developers.cloudflare.com/pages/functions/)
+
+---
+
+## 🚀 Getting Started (Developers)
 
 ### Local Development
 
-1.  **Clone the repository**:
+1.  **Clone**:
     ```bash
     git clone https://github.com/bejranonda/PersonaBuilder.git
     cd PersonaBuilder
     ```
 
-2.  **Install dependencies**:
+2.  **Install**:
     ```bash
     npm install
     ```
 
-3.  **Set up environment variables**:
-    Create a `.dev.vars` file for local proxy testing (or use wrangler directly):
-    ```bash
+3.  **Configure**:
+    Create a `.dev.vars` file for local development:
+    ```env
     CLOUDFLARE_ACCOUNT_ID=your_account_id
     CLOUDFLARE_API_TOKEN=your_api_token
     ```
 
-4.  **Run the application**:
-    - **Frontend Only**: `npm run dev` (Vite dev server)
-    - **Full Stack (Recommended)**: `npm run pages:dev` (Wrangler proxy dev)
+4.  **Run**:
+    - **Frontend Only**: `npm run dev`
+    - **Full Stack (Wrangler Proxy)**: `npm run pages:dev`
 
-### Production Build
+### Deployment
 
+Deploy instantly to Cloudflare Pages:
 ```bash
-npm run build
-npm run preview
+npm run pages:deploy
 ```
 
-## 📐 Architecture & Logic
+---
 
-```mermaid
-flowchart TD
-    User([User]) --> UI[React Frontend]
-    subgraph "🧩 Modular UI"
-        UI --> Header[AppHeader]
-        UI --> Wizard[Wizard Components]
-        UI --> Results[ResultStep]
-    end
-    UI -->|0ms| Fallback[Instant Fallback]
-    subgraph "🧠 Hooks"
-        WizHook[usePersonaWizard]
-        GenHook[usePersonaGenerator]
-    end
-    Wizard --> WizHook
-    Results --> GenHook
-    GenHook -->|Phase 1: persona.md| Proxy[CF Pages Function]
-    GenHook -->|Phase 2: extras (Lazy)| Proxy
-    GenHook -->|Transform| Proxy
-    Proxy --> AI[Cloudflare Workers AI]
-```
+## 📚 Deep Dive Documentation
 
-- **Frontend**: A modular React app using custom hooks to manage logic and state across 4 distinct steps.
-- **6 Dimensions**: A proprietary framework that defines an AI's behavior across Worldview, Perception, Agency, Taste, Persuasion, and Guardrails.
-- **Objective Filter**: Dynamically highlights answer paths based on the user's initial objective.
+Learn more about our methodology in the `knowledge/` folder:
 
-## 📚 Documentation
+| Document | Description |
+|----------|-------------|
+| [**Approach & Method**](knowledge/approach_and_method.md) | The psychology behind the 6-dimension framework. |
+| [**Developer Guideline**](knowledge/guideline.md) | How to extend prompts, languages, and features. |
+| [**Known Issues**](knowledge/known-issues.md) | Current limitations and planned improvements. |
 
-Detailed documentation is available in the `knowledge/` directory:
-
-| Document | Purpose |
-|----------|---------|
-| [**Approach & Method**](knowledge/approach_and_method.md) | Deep dive into the 6-dimension framework and design philosophy. |
-| [**Developer Guideline**](knowledge/guideline.md) | Technical guide for extending languages, prompts, and local dev. |
-| [**Known Issues**](knowledge/known-issues.md) | Tracked limitations, model quirks, and planned improvements. |
+---
 
 ## 📄 License
 
-MIT
+MIT © [Werapol](https://github.com/bejranonda)
