@@ -4,6 +4,10 @@
 
 **🌐 Live Site:** [persona.autobahn.bot](https://persona.autobahn.bot)
 
+
+<img width="1194" height="453" alt="image" src="https://github.com/user-attachments/assets/12b0a8fb-fd7a-4709-b2b2-5f74efc1c90b" />
+
+
 ---
 
 ## 🚀 What is Persona Builder?
