@@ -49,10 +49,17 @@ The core AI logic is located in `src/hooks/usePersonaGenerator.js`.
 - **`EXTRAS_SYSTEM_PROMPT`**: Guides the generation of Summary and Before/After examples.
 - **`SOUL_TRANSFORM_PROMPT`**: Guides the reformatting to the OpenClaw SOUL template.
 
+### Deterministic Fallbacks (No AI Required)
+Both generation paths have a 0ms, locally-built fallback that never depends on network/AI availability:
+- **`buildFallbackPersona()`** (`usePersonaGenerator.js`): Builds `persona.md` directly from the user's answers. All copy comes from the `t` dictionary — never hardcode English strings here. Resolve dimension/tag/label text **language-first**: `field[lang] || field.en`, not `field.en || field[lang]` (the latter silently prefers English even when a translation exists).
+- **`buildFallbackSoul()`** (`usePersonaGenerator.js`): Used by `TransformModal.jsx` when the SOUL.md AI transform errors or times out with no partial output. It heuristically extracts bullet points from the existing `persona.md` markdown headings (matching on keywords like "personality dimension", "guardrail", "communication style") to populate Core Truths/Boundaries/Vibe. **Do not localize** the `Core Truths` / `Boundaries` / `Vibe` / `Continuity` headers — they are a fixed part of the external OpenClaw SOUL.md spec. Only the body content should be localized via `t.fallbackSoul*` keys.
+- If a partial AI stream arrives before a transform error, that partial output is preserved and shown instead of the fallback (see `t.transformPartialNotice` vs `t.transformFallbackNotice`).
+
 ### Extending Languages
-1.  **I18n**: Add UI translations to `src/lib/i18n.js`.
+1.  **I18n**: Add UI translations to `src/lib/i18n.js`, including any new `fallback*`/`fallbackSoul*` keys if you touch the deterministic fallback templates.
 2.  **Flow**: Update `src/data/questionFlow.js` helper `t()` with the new language strings.
 3.  **Engine**: Ensure the selected language is passed to `usePersonaGenerator` to correctly localize the AI's output.
+4.  **Fallbacks**: Pass the `t` dictionary into `buildFallbackPersona(personaType, answers, lang, t)` / `buildFallbackSoul(personaMd, lang, t)` rather than hardcoding strings — these run when there is no AI response at all, so they're the only thing some users ever see.
 
 ---
 

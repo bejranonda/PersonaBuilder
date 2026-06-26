@@ -51,9 +51,13 @@ We utilize a tiered generation pipeline to maximize performance and minimize tok
 
 ---
 
-## 5. Instant Fallback (v2.2+)
+## 5. Instant Fallback (v2.2+, Localized in v2.6.1)
 
 To solve the "AI latency" issue, we always build a highly structured `persona.md` directly from the user's 6-dimension answers using a deterministic template function. The user has a functional result in 0ms, which is then *enhanced* by the AI in Phase 1.
+
+**Why this has to be fully localized:** the fallback is not just a loading placeholder — for any user whose AI call fails or times out, it *is* the final result. As of v2.6.1, `buildFallbackPersona()` sources every string (headers, role description, dimension/tag/label text) from the `t` dictionary and resolves language-first (`field[lang] || field.en`), so the fallback matches the AI-generated output's language instead of silently reverting to English.
+
+The same philosophy now extends to the **SOUL.md Transform** (see §4): `buildFallbackSoul()` derives a usable SOUL.md from the existing `persona.md` headings whenever the transform's AI call fails outright, so that flow no longer dead-ends on a bare error message. Per the OpenClaw spec, the `Core Truths` / `Boundaries` / `Vibe` / `Continuity` section headers stay in English even in this fallback — only the body content is localized.
 
 ---
 

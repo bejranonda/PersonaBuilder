@@ -1,4 +1,4 @@
-# 🤖 Persona Builder v2.6.0
+# 🤖 Persona Builder v2.6.1
 
 > **Empower your AI with a Soul.** Create premium, 6-dimension deep personality rulesets (`persona.md` / `SOUL.md`) designed specifically for **Vibe-Coding** in Cursor, Windsurf, and advanced AI Agents.
 
