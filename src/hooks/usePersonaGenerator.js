@@ -57,31 +57,79 @@ export const SOUL_TRANSFORM_PROMPT = `You are an expert at converting AI persona
 
 Output ONLY raw Markdown. No code fences.`;
 
-function buildFallbackPersona(personaType, answers, lang) {
+function buildFallbackPersona(personaType, answers, lang, t) {
   const dimensions = [];
   let iterQId = QUESTION_FLOW[personaType].start;
   while (iterQId && iterQId !== 'END') {
     const qObj = QUESTION_FLOW[personaType][iterQId];
     const ans = answers[iterQId];
     if (!ans) break;
-    const dim = qObj.dimension.en || qObj.dimension[lang];
+    const dim = qObj.dimension[lang] || qObj.dimension.en;
     const opt = qObj.options.find(o => o.label === ans);
-    const tagEn = opt?.tag?.en || '';
-    const labelEn = opt?.label?.en || '';
-    dimensions.push({ dim, tagEn, labelEn });
+    const tag = opt?.tag?.[lang] || opt?.tag?.en || '';
+    const label = opt?.label?.[lang] || opt?.label?.en || '';
+    dimensions.push({ dim, tag, label });
     iterQId = opt ? opt.nextId : 'END';
   }
   const isClone = personaType === 'clone';
-  const title = isClone ? 'Personal Clone Persona' : 'Specialized AI Agent Persona';
-  const roleDesc = isClone
-    ? 'Act as a personalized AI clone that mirrors the user\'s thinking patterns, communication style, and decision-making approach.'
-    : 'Act as a specialized AI agent configured with precise behavioral protocols and strategic guardrails.';
-  const dimSections = dimensions.map(d => `### ${d.dim}\n**${d.tagEn}** — ${d.labelEn}`).join('\n\n');
-  const rules = dimensions.map(d => `- Apply **${d.tagEn}** approach consistently`).join('\n');
+  const title = isClone ? t.fallbackCloneTitle : t.fallbackAgentTitle;
+  const roleDesc = isClone ? t.fallbackCloneRole : t.fallbackAgentRole;
+  const dimSections = dimensions.map(d => `### ${d.dim}\n**${d.tag}** — ${d.label}`).join('\n\n');
+  const rules = dimensions.map(d => `- ${t.fallbackApplyApproach.replace('{tag}', d.tag)}`).join('\n');
   const guardrail = dimensions.length > 0
-    ? `- Primary constraint: **${dimensions[dimensions.length - 1].tagEn}** — ${dimensions[dimensions.length - 1].labelEn}`
-    : '- Follow standard safety and accuracy guidelines.';
-  return `# ${title}\n\n## Core Identity\n${roleDesc}\n\n## Personality Dimensions\n${dimSections}\n\n## Communication Rules\n${rules}\n\n## Guardrails\n${guardrail}\n- Stay in character at all times\n- Be consistent with the defined personality dimensions`;
+    ? `- ${t.fallbackPrimaryConstraint.replace('{tag}', dimensions[dimensions.length - 1].tag).replace('{label}', dimensions[dimensions.length - 1].label)}`
+    : `- ${t.fallbackStandardGuidelines}`;
+  return `# ${title}\n\n## ${t.fallbackCoreIdentity}\n${roleDesc}\n\n## ${t.fallbackPersonalityDimensions}\n${dimSections}\n\n## ${t.fallbackCommunicationRules}\n${rules}\n\n## ${t.fallbackGuardrailsHeader}\n${guardrail}\n- ${t.fallbackStayInCharacter}\n- ${t.fallbackBeConsistent}`;
+}
+
+function extractMarkdownSection(markdown, keywords) {
+  const lines = markdown.split('\n');
+  let collecting = false;
+  const collected = [];
+  for (const line of lines) {
+    const headerMatch = line.match(/^#{2,4}\s+(.*)/);
+    if (headerMatch) {
+      collecting = keywords.some((k) => headerMatch[1].toLowerCase().includes(k));
+      continue;
+    }
+    if (collecting && line.trim()) collected.push(line.replace(/^[-*]\s*/, '').trim());
+  }
+  return collected;
+}
+
+/**
+ * Deterministic, 0ms SOUL.md fallback built directly from persona.md when the
+ * AI transform call errors out or times out (no partial AI output to show).
+ */
+export function buildFallbackSoul(personaMd, lang, t) {
+  if (!personaMd) return '';
+
+  const dimensionLines = extractMarkdownSection(personaMd, ['personality dimension', 'decision framework', 'communication rules']);
+  const identityLines = extractMarkdownSection(personaMd, ['core identity', 'identity']);
+  const guardrailLines = extractMarkdownSection(personaMd, ['guardrail']);
+  const styleLines = extractMarkdownSection(personaMd, ['communication style', 'communication']);
+
+  const toBullets = (lines, max) => lines.filter(Boolean).slice(0, max).map((l) => `- ${l}`);
+
+  const coreTruths = toBullets(dimensionLines.length ? dimensionLines : identityLines, 5);
+  const boundaries = toBullets(guardrailLines, 5);
+  const vibe = styleLines.find((l) => l) || identityLines.find((l) => l) || t.fallbackSoulDefaultVibe;
+
+  return `# SOUL.md - Who You Are
+
+## Core Truths
+${coreTruths.length ? coreTruths.join('\n') : `- ${t.fallbackSoulDefaultTruth}`}
+
+## Boundaries
+- ${t.fallbackSoulPrivacyBoundary}
+- ${t.fallbackSoulAskFirstBoundary}
+${boundaries.length ? boundaries.join('\n') : `- ${t.fallbackSoulDefaultBoundary}`}
+
+## Vibe
+${vibe}
+
+## Continuity
+${t.fallbackSoulContinuity}`;
 }
 
 export default function usePersonaGenerator(personaType, answers, samples, lang, t) {
@@ -133,7 +181,7 @@ export default function usePersonaGenerator(personaType, answers, samples, lang,
     setStep(4);
     setGenerationPhase('building');
 
-    const fallback = buildFallbackPersona(personaType, answers, lang);
+    const fallback = buildFallbackPersona(personaType, answers, lang, t);
     setFallbackMarkdown(fallback);
     setGenerationPhase('enhancing');
     setTimeout(() => topRef?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Download, Copy, CheckCircle2, Loader2 } from 'lucide-react';
 import { generateContentStream, stripMarkdownFences } from '../lib/api';
-import { SOUL_TRANSFORM_PROMPT } from '../hooks/usePersonaGenerator';
+import { SOUL_TRANSFORM_PROMPT, buildFallbackSoul } from '../hooks/usePersonaGenerator';
 import ReactMarkdown from 'react-markdown';
 
 const LANG_NAMES = { en: 'English', th: 'Thai', de: 'German' };
@@ -27,7 +27,14 @@ export default function TransformModal({ isOpen, onClose, personaMd, lang, t }) 
       );
       setSoulMd(stripMarkdownFences(raw));
     } catch (err) {
-      setError(t.aiError);
+      console.error(err);
+      if (raw.trim()) {
+        setSoulMd(stripMarkdownFences(raw));
+        setError(t.transformPartialNotice);
+      } else {
+        setSoulMd(buildFallbackSoul(personaMd, lang, t));
+        setError(t.transformFallbackNotice);
+      }
     } finally {
       setIsTransforming(false);
     }
