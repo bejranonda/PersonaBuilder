@@ -4,9 +4,9 @@
 
 ---
 
-## 1. The 6-Dimension Framework
+## 1. The 7-Dimension Framework
 
-The persona generation is structured around six psychological and behavioral dimensions that define an AI's "soul":
+The persona generation is structured around seven psychological and behavioral dimensions that define an AI's "soul":
 
 | # | Dimension | Thai Name | Purpose |
 |---|-----------|-----------|---------|
@@ -15,9 +15,10 @@ The persona generation is structured around six psychological and behavioral dim
 | 3 | **Agency** | ตัวตน | Decision-making style — e.g., data-driven vs. intuitive. |
 | 4 | **Taste** | รสนิยม | Output aesthetic — e.g., minimalist vs. academic. |
 | 5 | **Persuasion** | การเชิญชวน | Rhetorical strategy — e.g., logic-based vs. empathy-driven. |
-| 6 | **Guardrails** | ขอบเขต | Hard constraints — e.g., strict accuracy vs. no-fluff policy. |
+| 6 | **Empathy (EQ)** | ความเห็นอกเห็นใจ | Emotional attunement — how the persona responds to the user's feelings, from warm companion to strictly neutral. |
+| 7 | **Guardrails** | ขอบเขต | Hard constraints — e.g., strict accuracy vs. no-fluff policy. |
 
-**Why 6 dimensions?** This specific set provides enough complexity to differentiate personas without overwhelming the underlying LLM with contradictory instructions.
+**Why these dimensions?** This specific set provides enough complexity to differentiate personas without overwhelming the underlying LLM with contradictory instructions. The Empathy dimension (added in v2.7) is deliberately separate from Persuasion: Persuasion covers *how the persona argues*, while Empathy covers *how it responds to the user's emotional state* — the trait users most often mean when they ask for a "more human" AI.
 
 ---
 
@@ -53,7 +54,7 @@ We utilize a tiered generation pipeline to maximize performance and minimize tok
 
 ## 5. Instant Fallback (v2.2+, Localized in v2.6.1)
 
-To solve the "AI latency" issue, we always build a highly structured `persona.md` directly from the user's 6-dimension answers using a deterministic template function. The user has a functional result in 0ms, which is then *enhanced* by the AI in Phase 1.
+To solve the "AI latency" issue, we always build a highly structured `persona.md` directly from the user's 7-dimension answers using a deterministic template function. The user has a functional result in 0ms, which is then *enhanced* by the AI in Phase 1.
 
 **Why this has to be fully localized:** the fallback is not just a loading placeholder — for any user whose AI call fails or times out, it *is* the final result. As of v2.6.1, `buildFallbackPersona()` sources every string (headers, role description, dimension/tag/label text) from the `t` dictionary and resolves language-first (`field[lang] || field.en`), so the fallback matches the AI-generated output's language instead of silently reverting to English.
 

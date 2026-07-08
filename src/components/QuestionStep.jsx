@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, Award } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Award, Heart } from 'lucide-react';
 import { QUESTION_FLOW } from '../data/questionFlow';
 import ScenarioPanel from './ScenarioPanel';
 
@@ -29,7 +29,20 @@ export default function QuestionStep({ personaType, currentQId, answers, objecti
         >
           <ArrowLeft className="w-4 h-4" /> {t.backButton}
         </button>
-        <div className="flex-1 h-px bg-[var(--color-border)]" />
+        <div
+          className="flex-1 h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden"
+          role="progressbar"
+          aria-valuemin={1}
+          aria-valuemax={questionProgress?.total || 7}
+          aria-valuenow={questionProgress?.current || 1}
+        >
+          {questionProgress && (
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-secondary)] transition-all duration-500 ease-out"
+              style={{ width: `${(questionProgress.current / questionProgress.total) * 100}%` }}
+            />
+          )}
+        </div>
         {questionProgress && (
           <span className="text-[var(--color-text-muted)] text-xs font-mono bg-[var(--color-surface-sunken)] px-2 py-1 rounded-lg">
             {questionProgress.current} / {questionProgress.total}
@@ -39,7 +52,8 @@ export default function QuestionStep({ personaType, currentQId, answers, objecti
 
       <div key={currentQId} className="flex-1 animate-in fade-in slide-in-from-right-8 duration-500">
         <div className="mb-10 text-left">
-          <div className="inline-block px-3 py-1 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)] text-[10px] font-bold uppercase tracking-widest mb-4 border border-[var(--color-accent)]/15">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)] text-[10px] font-bold uppercase tracking-widest mb-4 border border-[var(--color-accent)]/15">
+            {(currentQId === 'empathy' || currentQId === 'a_empathy') && <Heart className="w-3 h-3 fill-current" />}
             {questionData.dimension[lang] || questionData.dimension.en}
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-[var(--color-text-primary)] leading-snug">

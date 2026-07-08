@@ -4,12 +4,13 @@ import { generateContentStream, stripMarkdownFences } from '../lib/api';
 
 const LANG_NAMES = { en: 'English', th: 'Thai', de: 'German' };
 
-const PERSONA_SYSTEM_PROMPT = `You are an elite AI Persona Design expert. Create a complete, ready-to-use persona.md system prompt from a 6-dimension personality analysis.
+const PERSONA_SYSTEM_PROMPT = `You are an elite AI Persona Design expert. Create a complete, ready-to-use persona.md system prompt from a 7-dimension personality analysis.
 
 Rules:
 1. Output ONLY the persona.md content as clean Markdown. Do NOT wrap it in code blocks or fences.
 2. Use the "Act as [Role]" format at the beginning.
-3. Include sections for: Core Identity, Communication Style, Decision Framework, Guardrails.
+3. Include sections for: Core Identity, Communication Style, Empathy & Emotional Attunement, Decision Framework, Guardrails.
+   - In "Empathy & Emotional Attunement", translate the Empathy (EQ) dimension answer into concrete behavioral rules: how to respond when the user is stressed, frustrated, or emotional (e.g. validate feelings first, acknowledge briefly then solve, motivate, or stay neutral).
 4. Make instructions explicit enough for any LLM to follow exactly.
 5. Do NOT reference or create a "skill.md" file. The output IS a persona.md file.
 6. NEVER wrap the output in \`\`\`markdown or \`\`\` code fences. Output raw Markdown only.`;
@@ -213,7 +214,7 @@ export default function usePersonaGenerator(personaType, answers, samples, lang,
     let timeoutId;
 
     try {
-      const personaUserPrompt = `[INPUT CONTEXT]\n- Persona Type: ${personaType === 'clone' ? 'Personal Clone' : 'Specialized Agent'}\n- 6-Dimension Deep Analysis Results:\n${questionDataStr}\n\n[WRITING STYLE REFERENCES]\n${sampleData || 'No specific writing samples provided. Extrapolate tone from the selection logic.'}\n\nGenerate the persona.md system prompt in ${LANG_NAMES[lang]}. Output ONLY the raw Markdown content. Do NOT wrap in code fences.`;
+      const personaUserPrompt = `[INPUT CONTEXT]\n- Persona Type: ${personaType === 'clone' ? 'Personal Clone' : 'Specialized Agent'}\n- 7-Dimension Deep Analysis Results:\n${questionDataStr}\n\n[WRITING STYLE REFERENCES]\n${sampleData || 'No specific writing samples provided. Extrapolate tone from the selection logic.'}\n\nGenerate the persona.md system prompt in ${LANG_NAMES[lang]}. Output ONLY the raw Markdown content. Do NOT wrap in code fences.`;
 
       const personaPromise = generateContentStream(
         personaUserPrompt, lang,

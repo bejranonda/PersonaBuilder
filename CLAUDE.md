@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 ## Project Overview
-PersonaBuilder is a specialized tool for generating AI Personas (`persona.md`) using a deep 6-dimension behavioral framework. The application was recently refactored into a modern, modular React 19 architecture from its original monolithic codebase.
+PersonaBuilder is a specialized tool for generating AI Personas (`persona.md`) using a deep 7-dimension behavioral framework (Worldview, Perception, Agency, Taste, Persuasion, Empathy/EQ, Guardrails). The application was recently refactored into a modern, modular React 19 architecture from its original monolithic codebase.
 
 ## Tech Stack
 - **Frontend**: React 19, Vite 6, Tailwind CSS v4, Lucide Icons, React Markdown
