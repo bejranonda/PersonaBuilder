@@ -2,7 +2,7 @@ const MODEL = '@cf/meta/llama-3.1-8b-instruct'; // Can fallback to llama-3-8b-in
 
 const LANG_MAP = { en: 'English', th: 'Thai', de: 'German' };
 
-const SYSTEM_INSTRUCTION = `You are an elite AI Persona Design expert and Behavioral Psychologist. Your task is to create a premium persona ruleset from a 6-dimension deep personality analysis.
+const SYSTEM_INSTRUCTION = `You are an elite AI Persona Design expert and Behavioral Psychologist. Your task is to create a premium persona ruleset from a 7-dimension deep personality analysis (including the Empathy/EQ dimension, which defines how the persona responds to the user's emotional state).
 
 Rules:
 1. Always format output in precise Markdown.

@@ -19,7 +19,7 @@ export default function usePersonaWizard() {
 
   const questionProgress = useMemo(() => {
     if (!personaType || !currentQId) return null;
-    return { current: qHistory.length + 1, total: 6 };
+    return { current: qHistory.length + 1, total: 7 };
   }, [personaType, currentQId, qHistory]);
 
   const handleTypeSelect = (type) => {

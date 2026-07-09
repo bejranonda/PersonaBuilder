@@ -224,19 +224,19 @@ export const QUESTION_FLOW = {
           tag: t('Data Storytelling', 'Data Storytelling', 'Datenstorytelling'),
           label: t('ใช้ตัวเลขและข้อมูลที่ชัดเจนให้มันเล่าเรื่องด้วยตัวมันเอง', 'Let pure numbers and clear data tell the story.', 'Zahlen und klare Daten die Geschichte erzählen lassen.'), 
           helpExample: t('เช่น แทนที่จะบอกว่า "ยอดขายเพิ่มขึ้น" คุณจะพูดว่า "ยอดขายเพิ่ม 47% ใน Q3 เทียบกับ Q2"', 'E.g., Instead of saying "sales went up," you\'d say "sales grew 47% in Q3 vs Q2."', 'Z.B., Statt "Umsatz gestiegen" sagen Sie "Umsatz um 47% in Q3 vs Q2 gestiegen."'),
-          nextId: 'capability' 
+          nextId: 'empathy'
         },
         { 
           tag: t('Logical Sequence', 'Logical Sequence', 'Logische Abfolge'),
           label: t('ใช้ตรรกะที่คมชัดและลำดับขั้นที่เป็นเหตุเป็นผล', 'Use sharp logic and a clear step-by-step reasoning.', 'Scharfsinninge Logik und klare schrittweise Begründung.'), 
           helpExample: t('เช่น "ถ้า A เป็นจริง แล้ว B ก็ต้องตามมา ดังนั้นเราควรทำ C" — เรียบง่ายแต่ปฏิเสธไม่ได้', 'E.g., "If A is true, then B follows, therefore we should do C" — simple but undeniable.', 'Z.B., "Wenn A wahr ist, folgt B, also sollten wir C tun" — einfach, aber unwiderlegbar.'),
-          nextId: 'capability' 
+          nextId: 'empathy'
         },
         { 
           tag: t('Comparison Matrix', 'Comparison Matrix', 'Vergleichsmatrix'),
           label: t('เปรียบเทียบทางเลือกแบบเคียงข้างกันให้เห็นชัดด้วยตาราง', 'Compare alternatives side by side in a clear matrix format.', 'Alternativen in einer klaren Matrix nebeneinander vergleichen.'), 
           helpExample: t('เช่น สร้างตาราง Pros/Cons ของทุกทางเลือก แล้วให้คนอื่นเลือกจากข้อมูลที่จัดไว้ชัดเจน', 'E.g., Creating a Pros/Cons table for every option, letting others decide from clearly laid-out data.', 'Z.B., Eine Vor-/Nachteile-Tabelle für jede Option erstellen.'),
-          nextId: 'capability' 
+          nextId: 'empathy'
         }
       ]
     },
@@ -252,19 +252,19 @@ export const QUESTION_FLOW = {
           tag: t('Authority', 'Authority', 'Autorität'),
           label: t('อ้างอิงจากแหล่งที่มาหรือผู้เชี่ยวชาญระดับสากล', 'Citing reputable sources and global experts.', 'Seriöse Quellen und globale Experten zitieren.'), 
           helpExample: t('เช่น "ตาม McKinsey Report 2024 ระบุว่า..." หรือ "ศ.ดร. แห่ง MIT เสนอว่า..."', 'E.g., "According to McKinsey\'s 2024 Report..." or "Prof. X at MIT suggests..."', 'Z.B., "Laut McKinsey Report 2024..." oder "Prof. X am MIT schlägt vor..."'),
-          nextId: 'capability' 
+          nextId: 'empathy'
         },
         { 
           tag: t('Full Spectrum', 'Full Spectrum', 'Volles Spektrum'),
           label: t('วิเคราะห์ข้อดีข้อเสียให้เห็นครบทุกมุมอย่างเป็นกลาง', 'Analyzing both pros and cons neutrally from all angles.', 'Vor- und Nachteile neutral aus allen Blickwinkeln analysieren.'), 
           helpExample: t('เช่น "ทางเลือก A มีข้อดี 3 ข้อ แต่มีข้อเสีย 2 ข้อ ส่วนทางเลือก B..." — ให้ครบทุกมุม', 'E.g., "Option A has 3 pros but 2 cons, while Option B..." — covering every angle objectively.', 'Z.B., "Option A hat 3 Vorteile, aber 2 Nachteile, während Option B..."'),
-          nextId: 'capability' 
+          nextId: 'empathy'
         },
         { 
           tag: t('Case Studies', 'Case Studies', 'Fallstudien'),
           label: t('พิสูจน์ด้วยตัวอย่างจริงและกรณีศึกษาที่เกิดขึ้นแล้ว', 'Prove points through real-world case studies and concrete examples.', 'Punkte durch reale Fallstudien und konkrete Beispiele belegen.'), 
           helpExample: t('เช่น "Netflix เคยประสบปัญหาเดียวกัน แล้วแก้ด้วยวิธี X ซึ่งลด churn ลง 30%"', 'E.g., "Netflix faced the same issue and solved it with method X, reducing churn by 30%."', 'Z.B., "Netflix hatte dasselbe Problem und löste es mit Methode X, Churn um 30% reduziert."'),
-          nextId: 'capability' 
+          nextId: 'empathy'
         }
       ]
     },
@@ -280,19 +280,19 @@ export const QUESTION_FLOW = {
           tag: t('Humor/Wit', 'Humor/Wit', 'Humor/Witz'),
           label: t('ใช้อารมณ์ขันหรือมุกตลกเพื่อละลายพฤติกรรม', 'Use humor or jokes to break the ice and build rapport.', 'Humor oder Witze nutzen, um das Eis zu brechen.'), 
           helpExample: t('เช่น เปิดการนำเสนอด้วยมุกเกี่ยวกับปัญหาที่ทุกคนเจอ ทำให้บรรยากาศเบาลงก่อนเข้าเนื้อหาจริง', 'E.g., Opening a presentation with a joke about a common struggle, lightening the mood before diving in.', 'Z.B., Eine Präsentation mit einem Witz über ein gemeinsames Problem eröffnen.'),
-          nextId: 'capability' 
+          nextId: 'empathy'
         },
         { 
           tag: t('Empathy', 'Empathy', 'Empathie'),
           label: t('แสดงความเข้าใจในสถานการณ์ของเขาว่าเป็นพวกเดียวกัน', 'Showing empathy and making them feel understood.', 'Empathie zeigen und ihnen das Gefühl geben, verstanden zu werden.'), 
           helpExample: t('เช่น "ผมเข้าใจครับ ผมเคยเจอเหมือนกัน..." ทำให้คนรู้สึกว่าคุณเป็นพวกเดียวกัน', 'E.g., "I totally get it — I\'ve been there too..." making people feel you\'re on their side.', 'Z.B., "Ich verstehe das völlig — das kenne ich auch..."'),
-          nextId: 'capability' 
+          nextId: 'empathy'
         },
         { 
           tag: t('Relatability', 'Relatability', 'Nahbarkeit'),
           label: t('ใช้ประสบการณ์ร่วมและเรื่องราวที่ทุกคนเข้าใจได้', 'Use shared experiences and common ground to connect.', 'Gemeinsame Erfahrungen und Gemeinsamkeiten nutzen.'), 
           helpExample: t('เช่น แทนที่จะพูดเรื่องเทคนิค คุณเปรียบเทียบกับเรื่องในชีวิตจริงที่ทุกคนเคยเจอ', 'E.g., Instead of talking tech, you compare it to something everyone has experienced in daily life.', 'Z.B., Statt Technik zu sprechen, vergleichen Sie es mit Alltagserfahrungen.'),
-          nextId: 'capability' 
+          nextId: 'empathy'
         }
       ]
     },
@@ -308,24 +308,58 @@ export const QUESTION_FLOW = {
           tag: t('Pain Points', 'Pain Points', 'Schmerzpunkte'),
           label: t('ชี้ให้เห็นถึงความล้มเหลวที่จะเกิดขึ้นถ้าไม่ยอมเปลี่ยน', 'Highlighting the failure/pain that will occur without change.', 'Auf das Scheitern/den Schmerz hinweisen, der ohne Änderung eintritt.'), 
           helpExample: t('เช่น "ถ้าไม่อัพเดทระบบตอนนี้ ข้อมูลจะรั่วไหลภายใน 6 เดือน" — ทำให้คนเห็นภาพความเจ็บปวด', 'E.g., "If you don\'t update the system now, data will leak within 6 months" — making the pain vivid.', 'Z.B., "Wenn Sie das System jetzt nicht aktualisieren, werden Daten innerhalb von 6 Monaten lecken."'),
-          nextId: 'capability' 
+          nextId: 'empathy'
         },
         { 
           tag: t('Myth Busting', 'Myth Busting', 'Mythen entlarven'),
           label: t('หักล้างความเชื่อผิดๆ อย่างตรงไปตรงมาและรุนแรง', 'Brutally debunking common myths and false beliefs.', 'Allgemeine Mythen und falsche Überzeugungen entlarven.'), 
           helpExample: t('เช่น "ทุกคนคิดว่า MVP ต้องเร็ว — แต่ MVP ที่ไม่มีคุณค่ามันไม่ใช่ MVP มันคือ WASTE"', 'E.g., "Everyone thinks MVPs must be fast — but an MVP without value isn\'t an MVP, it\'s WASTE."', 'Z.B., "Alle denken, MVPs müssen schnell sein — aber ein MVP ohne Wert ist VERSCHWENDUNG."'),
-          nextId: 'capability' 
+          nextId: 'empathy'
         },
         { 
           tag: t('Provocative Questions', 'Provocative Questions', 'Provokative Fragen'),
           label: t('ตั้งคำถามที่ท้าทายและบังคับให้คนต้องคิดใหม่ทันที', 'Ask hard questions that force immediate reflection and rethinking.', 'Harte Fragen stellen, die sofortiges Umdenken erzwingen.'), 
           helpExample: t('เช่น "ถ้าธุรกิจของคุณถูก AI แทนที่ภายใน 2 ปี คุณจะทำอะไรตอนนี้?" — สะเทือนความเชื่อเดิม', 'E.g., "If AI replaced your entire business in 2 years, what would you do today?" — shaking old beliefs.', 'Z.B., "Wenn KI Ihr Unternehmen in 2 Jahren ersetzt, was würden Sie heute tun?"'),
-          nextId: 'capability' 
+          nextId: 'empathy'
+        }
+      ]
+    },
+    empathy: {
+      dimension: t('มิติที่ 6: ความเห็นอกเห็นใจ', 'Dimension 6: Empathy (EQ)', 'Dimension 6: Empathie (EQ)'),
+      question: t(
+        'เมื่อคนที่คุยด้วยกำลังเครียดหรือรู้สึกแย่ คุณตอบสนองต่อความรู้สึกนั้นอย่างไร?',
+        'When someone you\'re talking to is stressed or upset, how do you respond to their feelings?',
+        'Wenn Ihr Gegenüber gestresst oder aufgewühlt ist, wie reagieren Sie auf diese Gefühle?'
+      ),
+      options: [
+        {
+          tag: t('Warm Companion', 'Warm Companion', 'Warmherziger Begleiter'),
+          label: t('รับฟังและโอบรับความรู้สึกของอีกฝ่ายก่อนเสมอ ทางแก้ค่อยว่ากันทีหลัง', 'Acknowledge and validate their feelings first — solutions can wait.', 'Zuerst Gefühle anerkennen und bestätigen — Lösungen können warten.'),
+          helpExample: t('เช่น เพื่อนเล่าว่าโปรเจกต์ล้มเหลว คุณตอบว่า "ฟังดูหนักมากเลย ไม่แปลกที่จะรู้สึกแย่" ก่อนจะช่วยกันหาทางออก', 'E.g., A friend says their project failed — you reply "That sounds really tough, it makes sense to feel that way" before exploring next steps.', 'Z.B.: Ein Freund erzählt vom gescheiterten Projekt — Sie sagen "Das klingt wirklich hart, das Gefühl ist völlig verständlich", bevor Sie gemeinsam nach Lösungen suchen.'),
+          nextId: 'capability'
+        },
+        {
+          tag: t('Supportive Balance', 'Supportive Balance', 'Unterstützende Balance'),
+          label: t('รับรู้ความรู้สึกสั้นๆ อย่างจริงใจ แล้วค่อยๆ พากลับมาโฟกัสที่ทางแก้', 'Briefly and sincerely acknowledge the emotion, then gently steer toward a solution.', 'Das Gefühl kurz und aufrichtig anerkennen, dann sanft zur Lösung übergehen.'),
+          helpExample: t('เช่น "เข้าใจเลยว่าเรื่องนี้น่าหงุดหงิดแค่ไหน — เดี๋ยวเรามาดูกันว่าจะแก้ยังไงดี" แล้วเข้าสู่การแก้ปัญหา', 'E.g., "I get why that\'s frustrating — let\'s figure out how to fix it," then move into problem-solving mode.', 'Z.B.: "Ich verstehe den Frust total — lass uns schauen, wie wir das lösen," und dann in den Problemlösungsmodus wechseln.'),
+          nextId: 'capability'
+        },
+        {
+          tag: t('Coach/Motivator', 'Coach/Motivator', 'Coach/Motivator'),
+          label: t('ให้กำลังใจ ชี้ให้เห็นจุดแข็งของเขา และกระตุ้นให้ลุกขึ้นเดินหน้าต่อ', 'Encourage and energize — point out their strengths and push them forward.', 'Ermutigen und motivieren — Stärken aufzeigen und nach vorne bringen.'),
+          helpExample: t('เช่น "ครั้งก่อนคุณผ่านเรื่องที่ยากกว่านี้มาแล้ว รอบนี้ก็ทำได้แน่นอน เริ่มจากก้าวเล็กๆ กันเถอะ"', 'E.g., "You\'ve been through harder things than this — you\'ve got this. Let\'s start with one small step."', 'Z.B.: "Du hast schon Schwierigeres gemeistert — du schaffst das. Fangen wir mit einem kleinen Schritt an."'),
+          nextId: 'capability'
+        },
+        {
+          tag: t('Objective & Calm', 'Objective & Calm', 'Sachlich & Ruhig'),
+          label: t('อยู่เคียงข้างอย่างสงบ ให้ข้อเท็จจริงและมุมมองที่เป็นกลาง', 'Stay calm and grounded — offer facts and a balanced perspective.', 'Ruhig und geerdet bleiben — Fakten und eine ausgewogene Perspektive bieten.'),
+          helpExample: t('เช่น เมื่อคนรอบตัวตื่นตระหนก คุณคือคนที่พูดว่า "มาดูข้อเท็จจริงกันทีละข้อ แล้วค่อยตัดสินใจ"', 'E.g., When everyone panics, you\'re the one saying "Let\'s look at the facts one by one, then decide."', 'Z.B.: Wenn alle in Panik geraten, sind Sie derjenige, der sagt: "Schauen wir uns die Fakten einzeln an und entscheiden dann."'),
+          nextId: 'capability'
         }
       ]
     },
     capability: {
-      dimension: t('มิติที่ 6: ข้อปฏิบัติ', 'Dimension 6: Guardrails', 'Dimension 6: Einschränkungen'),
+      dimension: t('มิติที่ 7: ข้อปฏิบัติ', 'Dimension 7: Guardrails', 'Dimension 7: Einschränkungen'),
       question: t(
         'ถ้ามีสิ่งหนึ่งที่คุณ "ไม่มีทางทำ" ในการทำงาน สิ่งนั้นคืออะไร?',
         'If there is one thing you "never do" in your work, what is it?',
@@ -577,13 +611,13 @@ export const QUESTION_FLOW = {
           tag: t('Flow & Structure', 'Flow & Structure', 'Ablauf & Struktur'),
           label: t('เน้นโค้ด ตารางข้อมูล และโครงสร้างขั้นตอนการทำงานที่ชัดเจน', 'Focus on code snippets, data tables, and clear workflows.', 'Fokus auf Code, Datentabellen und klare Arbeitsabläufe.'),
           helpExample: t('เช่น ทุกคำอธิบายจะมีตัวอย่างโค้ดที่รันได้จริง พร้อมคำแนะนำในการนำไปใช้ทีละขั้นตอน', 'E.g., Every explanation includes a working code example and a step-by-step implementation guide.', 'Z.B.: Jede Erklärung enthält ein funktionierendes Code-Beispiel und eine Schritt-für-Schritt-Implementierungsanleitung.'), 
-          nextId: 'a_capability' 
+          nextId: 'a_empathy'
         },
         { 
           tag: t('References', 'References', 'Referenzen'),
           label: t('เน้นอ้างอิงจาก Documentation, API หรือมาตรฐานที่ยอมรับ', 'Citing official documentation, API references, or standards.', 'Zitieren von Dokumentationen, API-Referenzen oder Standards.'),
           helpExample: t('เช่น "ตามคู่มือของ React (v19.1) ตัว cleanup ของ useEffect จะทำงานก่อนการเรนเดอร์ใหม่ ดูเพิ่มเติม: [link]"', 'E.g., \'According to the React docs (v19.1), useEffect cleanup runs before re-render. See: [link]\'', 'Z.B.: "Laut React-Doku (v19.1) läuft das useEffect-Cleanup vor dem Re-Render. Siehe: [link]"'), 
-          nextId: 'a_capability' 
+          nextId: 'a_empathy'
         }
       ]
     },
@@ -599,13 +633,13 @@ export const QUESTION_FLOW = {
           tag: t('ROI / Value', 'ROI / Value', 'ROI / Nutzen'),
           label: t('เน้นการลดความเสี่ยง ความคุ้มค่า และผลลัพธ์ที่เป็นรูปธรรม', 'Focus on risk mitigation, ROI, and tangible value.', 'Fokus auf Risikominderung, ROI und greifbaren Nutzen.'),
           helpExample: t('เช่น "การย้ายระบบครั้งนี้ช่วยลดต้นทุนโครงสร้างพื้นฐาน 40% ($120K/ปี) และคุ้มทุนภายใน 2 สัปดาห์"', 'E.g., \'This migration reduces infra cost by 40% ($120K/yr) with 2-week payback period.\'', 'Z.B.: "Diese Migration senkt die Infrastrukturkosten um 40% ($120K/Jahr) mit einer Amortisationszeit von 2 Wochen."'), 
-          nextId: 'a_capability' 
+          nextId: 'a_empathy'
         },
         { 
           tag: t('Compliance', 'Compliance', 'Compliance'),
           label: t('เน้นความสอดคล้องกับกลยุทธ์องค์กรและมาตรฐานที่กำหนด', 'Focus on strategic alignment and strict compliance.', 'Fokus auf strategische Ausrichtung und Compliance.'),
           helpExample: t('เช่น "แนวทางนี้สอดคล้องกับมาตรฐาน ISO 27001 มาตรา 6.2 และเป้าหมาย OKR ไตรมาส 3 ด้านความปลอดภัยของคุณ"', 'E.g., \'This approach aligns with ISO 27001 Section 6.2 and your Q3 OKR on security posture.\'', 'Z.B.: "Dieser Ansatz entspricht der ISO 27001 Sektion 6.2 und Ihren Q3-OKRs zur Sicherheitslage."'), 
-          nextId: 'a_capability' 
+          nextId: 'a_empathy'
         }
       ]
     },
@@ -621,13 +655,13 @@ export const QUESTION_FLOW = {
           tag: t('Socratic Method', 'Socratic Method', 'Sokratische Methode'),
           label: t('ใช้การตั้งคำถามกลับเพื่อกระตุ้นให้ผู้ใช้ได้คิดและต่อยอด', 'Ask questions back to prompt user thinking and reflection.', 'Fragen zurückstellen, um zum Nachdenken anzuregen.'),
           helpExample: t('เช่น แทนที่จะให้คำตอบทันที Agent ถามกลับว่า: "แล้วถ้าเราลองใช้วิธี X ก่อนล่ะ จะเกิดอะไรขึ้น?"', 'E.g., Instead of giving the answer, the Agent asks: \'What would happen if we tried X first?\'', 'Z.B.: Anstatt die Antwort zu geben, fragt der Agent: "Was würde passieren, wenn wir zuerst X ausprobieren?"'), 
-          nextId: 'a_capability' 
+          nextId: 'a_empathy'
         },
         { 
           tag: t('Deep Empathy', 'Deep Empathy', 'Tiefe Empathie'),
           label: t('ใช้วิธีสะท้อนความรู้สึกและรับฟังความต้องการอย่างลึกซึ้ง', 'Employ active listening and deeply validate user needs.', 'Aktives Zuhören und Validierung der Nutzerbedürfnisse.'),
           helpExample: t('เช่น "ฉันเข้าใจคุณเลย — ดูเหมือนปัญหาจริงๆ จะอยู่ที่ความต้องการที่ไม่ชัดเจน เรามาแก้เรื่องนั้นก่อนเถอะ"', 'E.g., \'I hear you — it sounds like the real issue is unclear requirements. Let\'s fix that first.\'', 'Z.B.: "Ich verstehe dich — es klingt so, als ob das wahre Problem unklare Anforderungen sind. Lass uns das zuerst beheben."'), 
-          nextId: 'a_capability' 
+          nextId: 'a_empathy'
         }
       ]
     },
@@ -643,18 +677,52 @@ export const QUESTION_FLOW = {
           tag: t('Vivid Imagery', 'Vivid Imagery', 'Lebhafte Bilder'),
           label: t('การใช้คำอุปมาอุปไมยที่ทรงพลังและการสร้างภาพในหัว', 'Using powerful metaphors and vivid mental imagery.', 'Starke Metaphern und lebhafte mentale Bilder nutzen.'),
           helpExample: t('เช่น "ลองคิดว่า API gateway คือการ์ดคุมผับสิ — มันเป็นตัวตัดสินว่าใครเข้าได้หรือใครต้องโดนเด้งออกไป"', 'E.g., \'Think of your API gateway as a bouncer — it decides who gets in and who gets turned away.\'', 'Z.B.: "Stell dir dein API-Gateway wie einen Türsteher vor — er entscheidet, wer reinkommt und wer abgewiesen wird."'), 
-          nextId: 'a_capability' 
+          nextId: 'a_empathy'
         },
         { 
           tag: t('Emotional Peaks', 'Emotional Peaks', 'Emotionale Spitzen'),
           label: t('การเล่นกับจังหวะจะโคนและการขยี้ประเด็นให้ถึงอารมณ์', 'Mastering pacing, rhythm, and hitting emotional peaks.', 'Meisterung von Rhythmus und emotionalen Höhepunkten.'),
           helpExample: t('เช่น Agent สร้างอารมณ์ร่วม: "ระบบเคยเสถียรดี... จนกระทั่งวันอังคาร แล้วทุกอย่างก็เปลี่ยนไป"', 'E.g., The Agent builds tension: \'The system was stable... until Tuesday. Then everything changed.\'', 'Z.B.: Der Agent baut Spannung auf: "Das System war stabil... bis Dienstag. Dann änderte sich alles."'), 
-          nextId: 'a_capability' 
+          nextId: 'a_empathy'
+        }
+      ]
+    },
+    a_empathy: {
+      dimension: t('มิติที่ 6: ความเห็นอกเห็นใจ', 'Dimension 6: Empathy (EQ)', 'Dimension 6: Empathie (EQ)'),
+      question: t(
+        'Agent ตัวนี้ควรใส่ใจและตอบสนองต่ออารมณ์ของผู้ใช้ในระดับไหน?',
+        'How emotionally attuned (empathetic) should this Agent be with users?',
+        'Wie stark soll dieser Agent auf die Gefühle der Nutzer eingehen?'
+      ),
+      options: [
+        {
+          tag: t('Deeply Empathetic', 'Deeply Empathetic', 'Tief Empathisch'),
+          label: t('ใส่ใจความรู้สึกเสมอ — รับรู้ ปลอบโยน และเช็คอินก่อนเริ่มแก้ปัญหา', 'Always tune into emotions — acknowledge, reassure, and check in before solving.', 'Immer auf Emotionen eingehen — anerkennen, beruhigen und nachfragen, bevor gelöst wird.'),
+          helpExample: t('เช่น ผู้ใช้หงุดหงิดเรื่องบั๊กก่อนเดดไลน์ — Agent ตอบว่า "เข้าใจเลยว่ากดดันแค่ไหน เดี๋ยวเราค่อยๆ แก้ไปด้วยกันทีละขั้น"', 'E.g., A user is frustrated by a bug before a deadline — the Agent replies "I know how stressful this is. Let\'s fix it together, step by step."', 'Z.B.: Ein Nutzer ist vor einer Deadline über einen Bug frustriert — der Agent antwortet: "Ich weiß, wie stressig das ist. Lösen wir es gemeinsam, Schritt für Schritt."'),
+          nextId: 'a_capability'
+        },
+        {
+          tag: t('Supportive', 'Supportive', 'Unterstützend'),
+          label: t('รับรู้อารมณ์สั้นๆ อย่างจริงใจ แล้วโฟกัสที่การแก้ปัญหาให้เร็วที่สุด', 'Acknowledge feelings briefly and sincerely, then focus on fixing things fast.', 'Gefühle kurz und aufrichtig anerkennen, dann schnell auf die Lösung fokussieren.'),
+          helpExample: t('เช่น "โห เจอแบบนี้ก็เซ็งน่าดูเลย — โอเค นี่คือ 3 ขั้นตอนที่จะแก้ปัญหานี้ได้"', 'E.g., "Ugh, that\'s genuinely annoying — okay, here are the 3 steps that will fix it."', 'Z.B.: "Das ist wirklich ärgerlich — okay, hier sind die 3 Schritte zur Lösung."'),
+          nextId: 'a_capability'
+        },
+        {
+          tag: t('Adaptive Mirror', 'Adaptive Mirror', 'Adaptiver Spiegel'),
+          label: t('ปรับความอบอุ่นตามโทนของผู้ใช้ — อบอุ่นเมื่อเขาต้องการ ตรงประเด็นเมื่อเขารีบ', 'Mirror the user\'s tone — warm when they\'re emotional, direct when they\'re focused.', 'Den Ton des Nutzers spiegeln — warm bei Emotionen, direkt bei Fokus.'),
+          helpExample: t('เช่น ถ้าผู้ใช้พิมพ์สั้นห้วน Agent จะตอบกระชับ แต่ถ้าผู้ใช้ระบายความเครียด Agent จะเปลี่ยนเป็นโทนที่นุ่มนวลขึ้นทันที', 'E.g., If the user types terse commands, the Agent stays concise; if the user vents, it instantly softens its tone.', 'Z.B.: Bei knappen Befehlen bleibt der Agent präzise; wenn der Nutzer Dampf ablässt, wird sein Ton sofort weicher.'),
+          nextId: 'a_capability'
+        },
+        {
+          tag: t('Strictly Neutral', 'Strictly Neutral', 'Strikt Neutral'),
+          label: t('คงความเป็นกลางแบบมืออาชีพ ไม่ใช้ภาษาเชิงอารมณ์ เน้นเนื้อหาล้วนๆ', 'Stay professionally neutral — no emotional language, pure substance.', 'Professionell neutral bleiben — keine emotionale Sprache, nur Substanz.'),
+          helpExample: t('เช่น ไม่ว่าผู้ใช้จะอารมณ์แบบไหน Agent จะตอบด้วยข้อเท็จจริงและขั้นตอนที่ชัดเจนเหมือนเดิมทุกครั้ง', 'E.g., Whatever the user\'s mood, the Agent responds with the same clear facts and steps every time.', 'Z.B.: Unabhängig von der Stimmung des Nutzers antwortet der Agent stets mit denselben klaren Fakten und Schritten.'),
+          nextId: 'a_capability'
         }
       ]
     },
     a_capability: {
-      dimension: t('มิติที่ 6: โปรโตคอล', 'Dimension 6: Guardrails', 'Dimension 6: Einschränkungen'),
+      dimension: t('มิติที่ 7: โปรโตคอล', 'Dimension 7: Guardrails', 'Dimension 7: Einschränkungen'),
       question: t(
         'กฎข้อใดคือสิ่งที่ Agent ตัวนี้ "ห้ามละเมิด" อย่างเด็ดขาด?',
         'What is the ultimate rule that the Agent must never break?',
@@ -702,27 +770,27 @@ export const PLATFORMS = [
 // Objective → recommended tag mapping for "Recommended" badges
 QUESTION_FLOW.objectiveFilter = {
   // Creative Writing
-  blog_writing: { recommendedTags: ['Storytelling', 'Cross-disciplinary', 'Visual Thinking', 'Elegant', 'Full Spectrum', 'Case Studies', 'Originality'] },
-  storytelling: { recommendedTags: ['Optimist/Creator', 'Storytelling', 'Casual', 'Empathy', 'Originality'] },
-  copywriting: { recommendedTags: ['Pragmatist', '80/20 Rule', 'Time-boxing', 'Bold', 'Pain Points', 'Provocative Questions', 'Efficiency'] },
-  social_media: { recommendedTags: ['Optimist/Creator', 'Casual', 'Humor/Wit', 'Originality', 'Emotional Peaks'] },
+  blog_writing: { recommendedTags: ['Storytelling', 'Cross-disciplinary', 'Visual Thinking', 'Elegant', 'Full Spectrum', 'Case Studies', 'Supportive Balance', 'Originality'] },
+  storytelling: { recommendedTags: ['Optimist/Creator', 'Storytelling', 'Casual', 'Empathy', 'Warm Companion', 'Originality'] },
+  copywriting: { recommendedTags: ['Pragmatist', '80/20 Rule', 'Time-boxing', 'Bold', 'Pain Points', 'Provocative Questions', 'Adaptive Mirror', 'Efficiency'] },
+  social_media: { recommendedTags: ['Optimist/Creator', 'Casual', 'Humor/Wit', 'Adaptive Mirror', 'Originality', 'Emotional Peaks'] },
   // Business & Communication
-  customer_support: { recommendedTags: ['Pragmatist', 'Fact-Focus', 'User-centric', 'Casual', 'Empathy', 'Accuracy'] },
-  sales: { recommendedTags: ['Pragmatist', '80/20 Rule', 'Bold', 'Pain Points', 'Efficiency'] },
-  corporate_comms: { recommendedTags: ['Systems Thinker', 'Categorize', 'Decision Support', 'Elegant', 'Authority', 'Neutrality'] },
-  email_writing: { recommendedTags: ['Pragmatist', '80/20 Rule', 'Elegant', 'Logical Sequence', 'Efficiency'] },
+  customer_support: { recommendedTags: ['Pragmatist', 'Fact-Focus', 'User-centric', 'Casual', 'Empathy', 'Warm Companion', 'Deeply Empathetic', 'Accuracy'] },
+  sales: { recommendedTags: ['Pragmatist', '80/20 Rule', 'Bold', 'Pain Points', 'Supportive Balance', 'Supportive', 'Efficiency'] },
+  corporate_comms: { recommendedTags: ['Systems Thinker', 'Categorize', 'Decision Support', 'Elegant', 'Authority', 'Objective & Calm', 'Strictly Neutral', 'Neutrality'] },
+  email_writing: { recommendedTags: ['Pragmatist', '80/20 Rule', 'Elegant', 'Logical Sequence', 'Supportive Balance', 'Efficiency'] },
   // Technical & Knowledge
-  tech_docs: { recommendedTags: ['Systems Thinker', 'Categorize', 'Decision Support', 'Technical', 'Flow & Structure', 'Accuracy'] },
-  research: { recommendedTags: ['Critical/Skeptical', 'Pattern Seeking', 'Decision Support', 'Elegant', 'Full Spectrum', 'Neutrality'] },
-  code_review: { recommendedTags: ['Critical/Skeptical', 'Logic Audit', 'Decision Support', 'Technical', 'References', 'Accuracy'] },
-  education: { recommendedTags: ['Optimist/Creator', 'Cross-disciplinary', 'Conversational', 'Socratic Method', 'Originality'] },
+  tech_docs: { recommendedTags: ['Systems Thinker', 'Categorize', 'Decision Support', 'Technical', 'Flow & Structure', 'Objective & Calm', 'Accuracy'] },
+  research: { recommendedTags: ['Critical/Skeptical', 'Pattern Seeking', 'Decision Support', 'Elegant', 'Full Spectrum', 'Objective & Calm', 'Strictly Neutral', 'Neutrality'] },
+  code_review: { recommendedTags: ['Critical/Skeptical', 'Logic Audit', 'Decision Support', 'Technical', 'References', 'Objective & Calm', 'Supportive', 'Accuracy'] },
+  education: { recommendedTags: ['Optimist/Creator', 'Cross-disciplinary', 'Conversational', 'Socratic Method', 'Coach/Motivator', 'Deeply Empathetic', 'Originality'] },
   // Brand & Media
-  brand_voice: { recommendedTags: ['Optimist/Creator', 'Storytelling', 'Bold', 'Vivid Imagery', 'Originality'] },
-  media_production: { recommendedTags: ['Optimist/Creator', 'Cross-disciplinary', 'Creative', 'Vivid Imagery', 'Originality'] },
-  pr_crisis: { recommendedTags: ['Critical/Skeptical', 'Risk Assessment', 'Decision Support', 'Corporate', 'Compliance', 'Safety First'] },
-  community: { recommendedTags: ['Pragmatist', 'User-centric', 'Conversational', 'Deep Empathy', 'Empathy', 'Relatability'] },
+  brand_voice: { recommendedTags: ['Optimist/Creator', 'Storytelling', 'Bold', 'Vivid Imagery', 'Adaptive Mirror', 'Originality'] },
+  media_production: { recommendedTags: ['Optimist/Creator', 'Cross-disciplinary', 'Creative', 'Vivid Imagery', 'Adaptive Mirror', 'Originality'] },
+  pr_crisis: { recommendedTags: ['Critical/Skeptical', 'Risk Assessment', 'Decision Support', 'Corporate', 'Compliance', 'Objective & Calm', 'Strictly Neutral', 'Safety First'] },
+  community: { recommendedTags: ['Pragmatist', 'User-centric', 'Conversational', 'Deep Empathy', 'Empathy', 'Warm Companion', 'Deeply Empathetic', 'Relatability'] },
   // Agent-specific
-  _agent_tech_docs: { recommendedTags: ['Analyst', 'Taxonomy', 'Executor', 'Technical', 'Flow & Structure', 'Source Only'] },
-  _agent_code_review: { recommendedTags: ['Analyst', 'Logic Audit', 'Decision Support', 'Technical', 'References', 'Source Only'] },
-  _agent_customer_support: { recommendedTags: ['Pragmatist', 'Actionable-Only', 'Decision Support', 'Conversational', 'Deep Empathy', 'Role Lock'] },
+  _agent_tech_docs: { recommendedTags: ['Analyst', 'Taxonomy', 'Executor', 'Technical', 'Flow & Structure', 'Strictly Neutral', 'Source Only'] },
+  _agent_code_review: { recommendedTags: ['Analyst', 'Logic Audit', 'Decision Support', 'Technical', 'References', 'Strictly Neutral', 'Source Only'] },
+  _agent_customer_support: { recommendedTags: ['Pragmatist', 'Actionable-Only', 'Decision Support', 'Conversational', 'Deep Empathy', 'Deeply Empathetic', 'Role Lock'] },
 };

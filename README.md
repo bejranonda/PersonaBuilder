@@ -1,6 +1,6 @@
-# 🤖 Persona Builder v2.6.1
+# 🤖 Persona Builder v2.7.0
 
-> **Empower your AI with a Soul.** Create premium, 6-dimension deep personality rulesets (`persona.md` / `SOUL.md`) designed specifically for **Vibe-Coding** in Cursor, Windsurf, and advanced AI Agents.
+> **Empower your AI with a Soul.** Create premium, 7-dimension deep personality rulesets (`persona.md` / `SOUL.md`) designed specifically for **Vibe-Coding** in Cursor, Windsurf, and advanced AI Agents.
 
 **🌐 Live Site:** [persona.autobahn.bot](https://persona.autobahn.bot)
 
@@ -12,19 +12,20 @@
 
 ## 🚀 What is Persona Builder?
 
-Persona Builder is a specialized tool for developers and creators who want their AI assistants to do more than just "follow instructions." By using our **6-Dimension Deep Analysis Framework**, you can craft a personality that feels consistent, nuanced, and aligned with your specific goals.
+Persona Builder is a specialized tool for developers and creators who want their AI assistants to do more than just "follow instructions." By using our **7-Dimension Deep Analysis Framework**, you can craft a personality that feels consistent, nuanced, and aligned with your specific goals.
 
 ### Why "Vibe-Coding"?
 "Vibe-Coding" is the practice of building software through high-level intent and collaboration with AI (like Cursor or Windsurf). For this to work best, your AI needs a clear "vibe" or persona that understands your taste, worldview, and technical guardrails.
 
 ---
 
-## ✨ Features v2.6
+## ✨ Features v2.7
 
 | Feature | Description |
 |---------|-------------|
 | **🎯 Objective-Based Logic** | Tailors recommendations ("Recommended" badges) across the flow based on your goal (e.g. Creative Writing, Customer Support). |
-| **🧠 6-Dimension Analysis** | Deep mapping of Worldview, Perception, Agency, Taste, Persuasion, and Guardrails. |
+| **🧠 7-Dimension Analysis** | Deep mapping of Worldview, Perception, Agency, Taste, Persuasion, Empathy (EQ), and Guardrails. |
+| **💗 Empathy Dimension** | Choose how emotionally attuned your persona is — from a warm, validating companion to a strictly neutral professional. |
 | **🌀 OpenClaw SOUL.md Transform** | Automated secondary AI call to transform your `persona.md` into the specialized OpenClaw `SOUL.md` format. |
 | **⚡ Instant Fallback Logic** | Creates a functional template from user answers in 0ms, gracefully handling AI timeouts/errors. |
 | **🎨 Light Creative Theme** | A clean, modern, and high-contrast "writing-friendly" theme with warm indigo and coral accents. |
@@ -41,7 +42,7 @@ Persona Builder uses a multi-stage logic flow to ensure high-quality outputs wit
 
 ### The Wizard Flow
 1.  **Objective Selection**: Define the goal (e.g., *Technical Doc*, *Storytelling*). This activates the `objectiveFilter`.
-2.  **6-Dimension Questionnaire**: 18+ targeted questions across Worldview, Perception, Agency, Taste, Persuasion, and Guardrails.
+2.  **7-Dimension Questionnaire**: 20+ targeted questions across Worldview, Perception, Agency, Taste, Persuasion, Empathy (EQ), and Guardrails.
 3.  **Result Generation**:
     - **Phase 1**: Instant local template generation (0ms).
     - **Phase 2**: Background AI streaming for the core `persona.md`.
@@ -132,7 +133,7 @@ Detailed documentation is available in the `knowledge/` directory:
 
 | Document | Purpose |
 |----------|---------|
-| [**Approach & Method**](knowledge/approach_and_method.md) | Deep dive into the 6-dimension framework and design philosophy. |
+| [**Approach & Method**](knowledge/approach_and_method.md) | Deep dive into the 7-dimension framework and design philosophy. |
 | [**Developer Guideline**](knowledge/guideline.md) | Technical guide for extending languages, prompts, and local dev. |
 | [**Known Issues**](knowledge/known-issues.md) | Tracked limitations, model quirks, and planned improvements. |
 
