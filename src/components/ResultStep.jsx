@@ -102,7 +102,15 @@ export default function ResultStep({
 
       {/* Tab Content */}
       {activeTab === 'persona' && (
-        <PersonaViewer generatedMarkdown={generatedMarkdown} fallbackMarkdown={fallbackMarkdown} isGenerating={isGenerating} t={t} />
+        <PersonaViewer
+          generatedMarkdown={generatedMarkdown}
+          fallbackMarkdown={fallbackMarkdown}
+          isGenerating={isGenerating}
+          onCopy={onCopy}
+          onDownload={onDownload}
+          copied={copied}
+          t={t}
+        />
       )}
 
       {activeTab === 'summary' && (
