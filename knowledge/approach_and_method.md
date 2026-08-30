@@ -1,6 +1,6 @@
 # Approach & Methodology
 
-> This document explains the *why* behind key design decisions in PersonaBuilder v2.5.
+> This document explains the *why* behind key design decisions in PersonaBuilder (current: v2.7.0).
 
 ---
 
@@ -22,6 +22,23 @@ The persona generation is structured around seven psychological and behavioral d
 
 ---
 
+### 1.1 Why Empathy is its own dimension (v2.7)
+
+Empathy already appeared inside the framework as *tactics* — `Empathy` as a persuasion move in the Clone flow, `Deep Empathy` as a conversational technique in the Agent flow. Both answer "how does this persona win someone over?", which is a rhetorical question, not an emotional one.
+
+The Empathy (EQ) dimension answers a different question: **how does the persona react when the user is stressed, frustrated, or upset?** That behaviour is orthogonal to rhetoric — a blunt, data-driven persona can still lead with "that sounds genuinely frustrating", and a warm storyteller can still be emotionally tone-deaf. Collapsing the two into one question forced users to trade away one to get the other.
+
+Design constraints we held to:
+
+- **A spectrum, not a toggle.** Empathy is not on/off. Each flow offers four points along a spectrum, and *both* ends are legitimate: `Strictly Neutral` / `Objective & Calm` is the right answer for compliance, research, and code-review personas, and is recommended as such by the `objectiveFilter`.
+- **Behavioural, not adjectival.** Options describe an observable action ("acknowledge and validate their feelings first — solutions can wait"), not a trait label ("is kind"). LLMs follow the former and ignore the latter.
+- **Different framing per flow.** The Clone flow asks how *you* respond to someone upset (self-description); the Agent flow asks how the agent *should* treat users (specification). Same dimension, different grammatical subject.
+- **It must survive into the output.** `PERSONA_SYSTEM_PROMPT` requires a dedicated `Empathy & Emotional Attunement` section, so the answer becomes explicit behavioural rules in `persona.md` rather than being averaged away into a generic tone description.
+
+The `Adaptive Mirror` option (Agent flow) deserves a note: it instructs the agent to *match* the user's register rather than hold a fixed warmth level. It is the most useful default for general-purpose assistants and the hardest to express through any of the other six dimensions.
+
+---
+
 ## 2. Objective-Based Recommendation Logic (v2.5)
 
 In v2.5, we introduced the **Objective-Based Flow**. Before defining a persona, the user selects their goal (e.g., *Technical Documentation* or *Storytelling*).
@@ -39,6 +56,19 @@ To improve context-aware help on mobile and touchscreen devices, we moved away f
 - **Solution**: The `ScenarioPanel.jsx` provides an inline, expandable accordion directly *inside* the option card.
 - **Visual Connection**: By keeping the help text inside the card's border, the user never loses track of which choice the help corresponds to.
 - **Expansion**: Every single option in the flow (over 100 choices across both Clone and Agent paths) now includes a dedicated `helpExample` string.
+
+### 3.1 Progress legibility at 7 steps (v2.7)
+
+Adding a seventh question made the bare `n / 7` counter too weak a signal — at question 5 of 7 there was no visual sense of "nearly there". The question header now pairs that counter with a gradient progress bar (`role="progressbar"` with the matching `aria-value*` attributes), so progress is legible at a glance and to screen readers. The Empathy step additionally carries a heart glyph on its dimension chip, marking it as the one dimension about the *user's* feelings rather than the persona's mechanics.
+
+---
+
+## 3.2 Reading and Exporting the Result (v2.7)
+
+The result page originally exposed Copy/Download **only** in the top status bar. Once a user scrolled down to actually read the generated persona — the natural thing to do on a page whose whole purpose is a generated document — both actions were off-screen, and there was no way to view the raw Markdown source at all.
+
+- **Actions live with the artifact**: Copy and `Download .md` now sit in the `persona.md` card's title bar, which stays adjacent to the content the user is reading. The status-bar buttons remain for users who act immediately without scrolling.
+- **Preview ⇄ Markdown toggle**: The rendered preview is better for *evaluating* a persona; the raw source is what actually gets pasted into Cursor, a system prompt, or an API call. Both are one click apart, defaulting to the preview.
 
 ---
 

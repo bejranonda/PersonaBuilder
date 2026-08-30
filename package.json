@@ -3,7 +3,7 @@
   "version": "2.7.0",
   "private": true,
   "type": "module",
-  "description": "AI-powered Persona Builder for Vibe-Coding — deep 6-dimension personality analysis",
+  "description": "AI-powered Persona Builder for Vibe-Coding — deep 7-dimension personality analysis",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
