@@ -63,7 +63,7 @@ Adding a seventh question made the bare `n / 7` counter too weak a signal — at
 
 ---
 
-## 3.2 Reading and Exporting the Result (v2.7)
+## 4. Reading and Exporting the Result (v2.7)
 
 The result page originally exposed Copy/Download **only** in the top status bar. Once a user scrolled down to actually read the generated persona — the natural thing to do on a page whose whole purpose is a generated document — both actions were off-screen, and there was no way to view the raw Markdown source at all.
 
@@ -72,7 +72,7 @@ The result page originally exposed Copy/Download **only** in the top status bar.
 
 ---
 
-## 4. Multi-Phase Generation & Lazy Loading
+## 5. Multi-Phase Generation & Lazy Loading
 
 We utilize a tiered generation pipeline to maximize performance and minimize token waste:
 
@@ -82,17 +82,17 @@ We utilize a tiered generation pipeline to maximize performance and minimize tok
 
 ---
 
-## 5. Instant Fallback (v2.2+, Localized in v2.6.1)
+## 6. Instant Fallback (v2.2+, Localized in v2.6.1)
 
 To solve the "AI latency" issue, we always build a highly structured `persona.md` directly from the user's 7-dimension answers using a deterministic template function. The user has a functional result in 0ms, which is then *enhanced* by the AI in Phase 1.
 
 **Why this has to be fully localized:** the fallback is not just a loading placeholder — for any user whose AI call fails or times out, it *is* the final result. As of v2.6.1, `buildFallbackPersona()` sources every string (headers, role description, dimension/tag/label text) from the `t` dictionary and resolves language-first (`field[lang] || field.en`), so the fallback matches the AI-generated output's language instead of silently reverting to English.
 
-The same philosophy now extends to the **SOUL.md Transform** (see §4): `buildFallbackSoul()` derives a usable SOUL.md from the existing `persona.md` headings whenever the transform's AI call fails outright, so that flow no longer dead-ends on a bare error message. Per the OpenClaw spec, the `Core Truths` / `Boundaries` / `Vibe` / `Continuity` section headers stay in English even in this fallback — only the body content is localized.
+The same philosophy now extends to the **SOUL.md Transform** (see §5): `buildFallbackSoul()` derives a usable SOUL.md from the existing `persona.md` headings whenever the transform's AI call fails outright, so that flow no longer dead-ends on a bare error message. Per the OpenClaw spec, the `Core Truths` / `Boundaries` / `Vibe` / `Continuity` section headers stay in English even in this fallback — only the body content is localized.
 
 ---
 
-## 6. Modular Refactoring (The Component Split)
+## 7. Modular Refactoring (The Component Split)
 
 As of v2.5, the application is no longer a monolith.
 - **Hooks**: Logic is centralized in `src/hooks/`, separating "how to navigate" from "how to generate".
