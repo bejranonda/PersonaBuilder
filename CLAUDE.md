@@ -18,7 +18,7 @@ PersonaBuilder is a specialized tool for generating AI Personas (`persona.md`) u
 - `npm run build`: Production build.
 - `npm run pages:deploy`: Manual deployment to Cloudflare Pages (requires auth).
 
-## Architectural Conventions (v2.5 Modular)
+## Architectural Conventions (v2.7 Modular)
 - **Hooks**: All logical state and AI orchestration are in custom hooks:
   - `src/hooks/usePersonaWizard.js`: Navigation, step progression, and answer storage.
   - `src/hooks/usePersonaGenerator.js`: AI streaming logic, fallback creation, and result parsing.
@@ -26,11 +26,15 @@ PersonaBuilder is a specialized tool for generating AI Personas (`persona.md`) u
   - `TypeSelector.jsx` (includes `ObjectiveSelector.jsx`)
   - `QuestionStep.jsx` (includes `ScenarioPanel.jsx`)
   - `ResultStep.jsx` (includes `PersonaViewer.jsx`, `ApplicationGuide.jsx`, `TransformModal.jsx`)
-- **Questionnaire**: Data structure in `src/data/questionFlow.js`. Includes an `objectiveFilter` mapping for the Recommendation system.
+- **Questionnaire**: Data structure in `src/data/questionFlow.js`. A linked list — each option's `nextId` names the next question, terminating at `'END'`. Includes an `objectiveFilter` mapping for the Recommendation system. Inserting a dimension means re-pointing every converging branch and updating `questionProgress.total` in `usePersonaWizard.js`; see `knowledge/guideline.md`.
 - **Output Models**: Enforces a strict multi-section marker format (`===SUMMARY_START===`, etc.) for real-time parsing into Tabbed interfaces.
 
 ## Code Style
 - Component-based architecture with clean props passing.
-- Descriptive Tailwind classes.
-- Explicit language handling (`t()` helper) across all dimensions, objectives, and help panels.
+- Descriptive Tailwind classes; colors come from the CSS variables in `src/index.css`, not literal hex values.
+- Explicit language handling (`t()` helper) across all dimensions, objectives, and help panels. Every user-visible string needs th/en/de.
 - Separation of AI framing (prompts) inside the generator hooks.
+- Accessibility baseline: visible `:focus-visible` rings, ARIA state on progress/toggles, `prefers-reduced-motion` honored, 44px minimum tap targets.
+
+## Verification
+No unit tests. Verify with `npm run build`, then drive the real app (both Clone and Agent flows, all three languages) and check the result page renders, toggles, and downloads. Chromium for Playwright is at `/opt/pw-browsers/chromium`. See "Verifying a Change" in `knowledge/guideline.md`.

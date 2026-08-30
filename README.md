@@ -26,10 +26,12 @@ Persona Builder is a specialized tool for developers and creators who want their
 | **🎯 Objective-Based Logic** | Tailors recommendations ("Recommended" badges) across the flow based on your goal (e.g. Creative Writing, Customer Support). |
 | **🧠 7-Dimension Analysis** | Deep mapping of Worldview, Perception, Agency, Taste, Persuasion, Empathy (EQ), and Guardrails. |
 | **💗 Empathy Dimension** | Choose how emotionally attuned your persona is — from a warm, validating companion to a strictly neutral professional. |
+| **📄 Preview / Raw Markdown** | Toggle the result between a rendered preview and the raw `persona.md` source, with Copy and Download `.md` always in reach on the file card. |
 | **🌀 OpenClaw SOUL.md Transform** | Automated secondary AI call to transform your `persona.md` into the specialized OpenClaw `SOUL.md` format. |
 | **⚡ Instant Fallback Logic** | Creates a functional template from user answers in 0ms, gracefully handling AI timeouts/errors. |
 | **🎨 Light Creative Theme** | A clean, modern, and high-contrast "writing-friendly" theme with warm indigo and coral accents. |
 | **📱 Inline Scenario Panels** | Replaces abstract tooltips with touch-friendly inline accordion help integrated directly inside choice cards. |
+| **♿ Accessible by Default** | Visible keyboard focus rings, an ARIA progress bar through the questionnaire, and full `prefers-reduced-motion` support. |
 | **📦 Modular Architecture** | Fully refactored codebase using a component-based structure with custom hooks (`usePersonaWizard`, `usePersonaGenerator`). |
 | **💤 Lazy-Load Generation** | Generates `persona.md` instantly, deferring Summary & Extras generation until viewed to save API tokens and bandwidth. |
 | **☁️ Cloudflare AI Edge** | High-performance generation powered by **Llama 3.1 8B Instruct** via Cloudflare Workers AI. |
@@ -40,14 +42,27 @@ Persona Builder is a specialized tool for developers and creators who want their
 
 Persona Builder uses a multi-stage logic flow to ensure high-quality outputs with zero perceived latency.
 
+### The 7 Dimensions
+
+| # | Dimension | What it decides |
+|---|-----------|-----------------|
+| 1 | **Worldview** | The fundamental lens on a problem — systems thinker, pragmatist, skeptic, or creator. |
+| 2 | **Perception** | How raw information is filtered — categorising, pattern-seeking, or prioritising by impact. |
+| 3 | **Agency** | Decision-making style and how much autonomy the persona takes. |
+| 4 | **Taste** | The aesthetic of the output — minimalist, elegant, casual, or bold. |
+| 5 | **Persuasion** | The rhetorical strategy used to convince. |
+| 6 | **Empathy (EQ)** | How the persona responds to *your* emotional state — from a warm, validating companion to a strictly neutral professional. |
+| 7 | **Guardrails** | The hard constraints the persona must never break. |
+
 ### The Wizard Flow
 1.  **Objective Selection**: Define the goal (e.g., *Technical Doc*, *Storytelling*). This activates the `objectiveFilter`.
-2.  **7-Dimension Questionnaire**: 20+ targeted questions across Worldview, Perception, Agency, Taste, Persuasion, Empathy (EQ), and Guardrails.
+2.  **7-Dimension Questionnaire**: 20+ targeted questions across the seven dimensions above, each with an inline real-world example.
 3.  **Result Generation**:
     - **Phase 1**: Instant local template generation (0ms).
     - **Phase 2**: Background AI streaming for the core `persona.md`.
     - **Phase 3 (Lazy)**: On-demand generation of Summaries and Before/After examples.
     - **Phase 4 (Transform)**: Optional conversion to OpenClaw `SOUL.md`.
+4.  **Export**: Read the result as a rendered preview or raw Markdown, then Copy or Download `persona.md`.
 
 ### System Diagram
 ```mermaid
